@@ -80,10 +80,10 @@
     },
     {
       "name": "Irvine",
-      "permit_page": null,
-      "adu_checklist": null,
-      "fee_schedule": null,
-      "checked": null
+      "permit_page": "https://cityofirvine.gov/building-permits-and-inspections",
+      "adu_checklist": "https://cityofirvine.gov/sites/default/files/legacy-documents/civica-35890-67-01.pdf",
+      "fee_schedule": "https://cityofirvine.gov/node/4706",
+      "checked": "2026-11-07"
     },
     {
       "name": "La Habra",
