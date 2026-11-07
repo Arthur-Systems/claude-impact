@@ -18,7 +18,7 @@ from clearpath.permits.dev_server import (
     DevServerConfigError,
     build_from_env,
     create_dev_app,
-    load_real_draft_provider,
+    load_real_provider,
     load_synthetic_provider,
 )
 from clearpath.permits.release import InMemoryReleaseProvider
@@ -328,20 +328,95 @@ def test_dev_server_no_cors_by_default():
     assert "access-control-allow-origin" not in resp.headers
 
 
-def test_dev_server_real_draft_is_flagged_test_only():
-    real = REPO / "backend" / "data" / "irvine_adu" / "manifest.json"
-    if not real.exists():
-        pytest.skip("real draft manifest not present")
-    before = real.read_bytes()
-    app, banner = build_from_env(["--real-draft"], {"CLEARPATH_API_KEY": KEY})
-    assert "UNREVIEWED DRAFT" in banner and KEY not in banner
+REAL_MANIFEST = REPO / "backend" / "data" / "irvine_adu" / "manifest.json"
+
+
+def test_dev_server_real_serves_reviewed_public_irvine():
+    if not REAL_MANIFEST.exists():
+        pytest.skip("real Irvine manifest not present")
+    before = REAL_MANIFEST.read_bytes()
+    app, banner = build_from_env(["--real"], {"CLEARPATH_API_KEY": KEY})
+    assert "REVIEWED PUBLIC" in banner and KEY not in banner
+    assert "SYNTHETIC" not in banner
     c = TestClient(app)
     body = c.post("/api/v1/permit-lookups", json=C01, headers=HEADERS).json()
-    assert "test_only_unreviewed_release" in [w["code"] for w in body["warnings"]]
-    assert body["pathways"][0]["key"] == "irvine_adu_standard"
-    assert real.read_bytes() == before
-    provider = load_real_draft_provider(real)
-    assert provider.get_active("irvine-ca", "adu", None).test_only_unreviewed is True
+    codes = [w["code"] for w in body["warnings"]]
+    assert "test_only_unreviewed_release" not in codes and "synthetic_dataset" not in codes
+    assert body["dataset_mode"] == "reviewed_public"
+    # C01 on real data. The pathway's rule is met (its requirements apply), but it has
+    # source conflicts attached, so its status is needs_information / source_conflict.
+    pw = {p["key"]: p for p in body["pathways"]}["irvine_adu_standard"]
+    assert (pw["status"], pw["status_reason"], pw["missing_fact_keys"]) == ("needs_information", "source_conflict", [])
+    assert any("irvine_adu_standard" in c["rule_keys"] for c in body["conflicts"])
+    reqs = {r["key"]: r for r in body["requirements"]}
+    assert all(r["status"] == "applies" for k, r in reqs.items() if k != "development-standards-checklist")
+    assert all(r["citations"] for r in body["requirements"])
+    assert reqs["development-standards-checklist"]["status_reason"] == "source_conflict"
+    assert REAL_MANIFEST.read_bytes() == before
+    release = load_real_provider(REAL_MANIFEST).get_active("irvine-ca", "adu", PROFILE)
+    assert release.test_only_unreviewed is False
+
+
+def _broken_copy(tmp_path, mutate):
+    """A copy of the real manifest (in a temp dir) with one public check broken."""
+    data = json.loads(REAL_MANIFEST.read_text())
+    mutate(data)
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(data))
+    return path
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda d: d["passages"][0].__setitem__("review_status", "needs_review"),
+        lambda d: d["passages"][0].pop("review_status"),
+        lambda d: d.__setitem__("kind", "synthetic"),
+        lambda d: d.pop("kind"),
+        lambda d: d.pop("profile_key"),
+        lambda d: d.pop("fact_schema"),
+    ],
+    ids=["passage-needs-review", "passage-no-status", "kind-synthetic", "no-kind", "no-profile-key", "no-fact-schema"],
+)
+def test_dev_server_real_refuses_to_start_if_public_checks_fail(tmp_path, mutate):
+    if not REAL_MANIFEST.exists():
+        pytest.skip("real Irvine manifest not present")
+    bad = _broken_copy(tmp_path, mutate)
+    with pytest.raises(DevServerConfigError) as excinfo:
+        build_from_env(["--real"], {"CLEARPATH_API_KEY": KEY}, real_manifest=bad)
+    assert KEY not in str(excinfo.value)
+    assert "reviewed_public" in str(excinfo.value)
+
+
+def test_dev_server_real_refuses_missing_or_broken_file(tmp_path):
+    with pytest.raises(DevServerConfigError):
+        build_from_env(["--real"], {"CLEARPATH_API_KEY": KEY}, real_manifest=tmp_path / "missing.json")
+    garbage = tmp_path / "garbage.json"
+    garbage.write_text("{not json")
+    with pytest.raises(DevServerConfigError):
+        build_from_env(["--real"], {"CLEARPATH_API_KEY": KEY}, real_manifest=garbage)
+
+
+def test_dev_server_main_exits_2_when_real_checks_fail(tmp_path, monkeypatch, capsys):
+    import clearpath.permits.dev_server as dev
+
+    if not REAL_MANIFEST.exists():
+        pytest.skip("real Irvine manifest not present")
+    bad = _broken_copy(tmp_path, lambda d: d["passages"][0].__setitem__("review_status", "failed"))
+    monkeypatch.setattr(dev, "REAL_MANIFEST", bad)
+    monkeypatch.setenv("CLEARPATH_API_KEY", KEY)
+    monkeypatch.setattr("uvicorn.run", lambda *a, **k: pytest.fail("server must not start"))
+    assert dev.main(["--real"]) == 2
+    err = capsys.readouterr().err
+    assert "refusing to start" in err and KEY not in err
+
+
+def test_dev_server_has_no_test_only_override():
+    import clearpath.permits.dev_server as dev
+
+    assert "test_only_allow_unreviewed=True" not in Path(dev.__file__).read_text()
+    with pytest.raises(SystemExit):
+        build_from_env(["--real-draft"], {"CLEARPATH_API_KEY": KEY})
 
 
 def test_create_dev_app_requires_key():

@@ -8,15 +8,18 @@ Run from the repo root::
 
     export CLEARPATH_API_KEY='<any throwaway dev key>'
     export CLEARPATH_CORS_ORIGINS='http://localhost:5173'   # optional, comma-separated
-    PYTHONPATH=backend/src .venv/bin/python -m clearpath.permits.dev_server [--port 8000] [--real-draft]
+    PYTHONPATH=backend/src .venv/bin/python -m clearpath.permits.dev_server [--port 8000] [--real]
 
 Data:
 * default: the SYNTHETIC manifest at backend/tests/fixtures/lookup_synthetic/manifest.json
-* ``--real-draft``: Person 2's UNREVIEWED draft at backend/data/irvine_adu/manifest.json,
-  read-only, through the TEST-ONLY ``test_only_allow_unreviewed`` override. Every
-  response then carries the ``test_only_unreviewed_release`` warning.
+  (demo mode; every response carries ``synthetic_dataset``).
+* ``--real``: Person 2's reviewed Irvine ADU manifest at
+  backend/data/irvine_adu/manifest.json, read-only, as ``reviewed_public`` through the
+  normal loader. There is no override: if the file fails any public check (kind,
+  profile_key, fact_schema, every passage reviewed), the server refuses to start.
 
 The server refuses to start without CLEARPATH_API_KEY and never prints the key.
+Results are still a prototype, not legal advice; every lookup carries the notice.
 """
 
 from __future__ import annotations
@@ -37,12 +40,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from clearpath.locations.service import load_registry
-from clearpath.permits.release import InMemoryReleaseProvider, ReleaseData
+from clearpath.permits.release import InMemoryReleaseProvider, ReleaseData, ReleaseLoadError
 from clearpath.permits.routes import ApiError, build_lookup_router, error_response, request_id_for
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 SYNTHETIC_MANIFEST = BACKEND_DIR / "tests" / "fixtures" / "lookup_synthetic" / "manifest.json"
-REAL_DRAFT_MANIFEST = BACKEND_DIR / "data" / "irvine_adu" / "manifest.json"
+REAL_MANIFEST = BACKEND_DIR / "data" / "irvine_adu" / "manifest.json"
 HOST = "127.0.0.1"
 _RELEASE_NAMESPACE = uuid.UUID("0b9c6a52-3c1d-4e5f-8a7b-9c0d1e2f3a4b")
 
@@ -56,12 +59,12 @@ class DevServerConfigError(RuntimeError):
 # --------------------------------------------------------------------------------------
 
 
-def _release_from_file(path: Path, dataset_mode: str, **kwargs) -> ReleaseData:
+def _release_from_file(path: Path, dataset_mode: str) -> ReleaseData:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     canonical = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     content_hash = sha256(canonical.encode("utf-8")).hexdigest()
     release_id = str(uuid.uuid5(_RELEASE_NAMESPACE, content_hash))
-    return ReleaseData.from_manifest(data, release_id, content_hash, dataset_mode, **kwargs)
+    return ReleaseData.from_manifest(data, release_id, content_hash, dataset_mode)
 
 
 def load_synthetic_provider(path: Path = SYNTHETIC_MANIFEST) -> InMemoryReleaseProvider:
@@ -69,9 +72,20 @@ def load_synthetic_provider(path: Path = SYNTHETIC_MANIFEST) -> InMemoryReleaseP
     return InMemoryReleaseProvider([_release_from_file(path, "synthetic")], demo_mode=True)
 
 
-def load_real_draft_provider(path: Path = REAL_DRAFT_MANIFEST) -> InMemoryReleaseProvider:
-    """Person 2's UNREVIEWED draft, read-only, through the TEST-ONLY override (flagged in every response)."""
-    release = _release_from_file(path, "reviewed_public", test_only_allow_unreviewed=True)
+def load_real_provider(path: Path | None = None) -> InMemoryReleaseProvider:
+    """Person 2's reviewed Irvine data as reviewed_public, read-only. No override.
+
+    Raises DevServerConfigError if the file is missing, unreadable, or fails any
+    reviewed_public check.
+    """
+    path = Path(path or REAL_MANIFEST)
+    try:
+        release = _release_from_file(path, "reviewed_public")
+    except OSError:
+        raise DevServerConfigError("the Irvine manifest file could not be read") from None
+    except ValueError as error:  # ReleaseLoadError, or invalid JSON
+        reason = str(error) if isinstance(error, ReleaseLoadError) else "the file is not valid JSON"
+        raise DevServerConfigError(f"the Irvine manifest is not loadable as reviewed_public: {reason}") from None
     return InMemoryReleaseProvider([release], demo_mode=False)
 
 
@@ -134,13 +148,15 @@ def _parse_origins(value: str | None) -> list[str]:
     return [o.strip() for o in (value or "").split(",") if o.strip()]
 
 
-def build_from_env(argv: Sequence[str], environ: Mapping[str, str]) -> tuple[FastAPI, str]:
+def build_from_env(
+    argv: Sequence[str], environ: Mapping[str, str], *, real_manifest: Path | None = None
+) -> tuple[FastAPI, str]:
     """Build the app and a startup banner from CLI args and environment. Never includes the key."""
     parser = argparse.ArgumentParser(prog="python -m clearpath.permits.dev_server",
                                      description="ClearPath lookup DEV server (dev only).")
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--real-draft", action="store_true",
-                        help="serve Person 2's UNREVIEWED draft Irvine data (flagged TEST ONLY in every response)")
+    parser.add_argument("--real", action="store_true",
+                        help="serve Person 2's reviewed Irvine ADU data (refuses to start if it fails public checks)")
     args = parser.parse_args(list(argv))
 
     api_key = environ.get("CLEARPATH_API_KEY", "")
@@ -148,14 +164,11 @@ def build_from_env(argv: Sequence[str], environ: Mapping[str, str]) -> tuple[Fas
         raise DevServerConfigError("CLEARPATH_API_KEY is not set. Set a throwaway dev key and try again.")
     origins = _parse_origins(environ.get("CLEARPATH_CORS_ORIGINS"))
 
-    if args.real_draft:
-        provider = load_real_draft_provider()
+    if args.real:
+        provider = load_real_provider(real_manifest)
         data_lines = [
-            "!" * 72,
-            "!! DATA: UNREVIEWED DRAFT Irvine ADU data (Person 2), read-only.",
-            "!! Loaded through the TEST-ONLY override. It is NOT reviewed public data.",
-            "!! Every response carries the test_only_unreviewed_release warning.",
-            "!" * 72,
+            "DATA: REVIEWED PUBLIC Irvine ADU data (Person 2), read-only. Passed every public check.",
+            "      Still a prototype, not legal advice: confirm with the City of Irvine or a professional.",
         ]
     else:
         provider = load_synthetic_provider()
@@ -177,7 +190,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         app, banner = build_from_env(sys.argv[1:] if argv is None else argv, os.environ)
     except DevServerConfigError as error:
-        print(f"error: {error}", file=sys.stderr)
+        print(f"error: refusing to start: {error}", file=sys.stderr)
         return 2
     print(banner, flush=True)
     import uvicorn
