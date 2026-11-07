@@ -9,7 +9,14 @@ focused on this lane. Some teammates have never used a terminal.
 ## ClearPath backend scope
 
 The product is **ClearPath**, an AI-powered permit navigator. The user confirmed
-**Irvine + ADU** as the initial demo. Start with the backend: curated dataset
+**Irvine + ADU** as the initial demo dataset. The product must support multiple
+housing projects, including affordable-housing projects, with independent
+checklists, revisions, and timelines and a portfolio list/filter API. The first
+data profile is not a global restriction to ADUs. Save other housing types as
+explicitly unconfigured drafts until sourced rules exist; do not substitute ADU
+rules or equate an affordability goal with verified qualification.
+
+Start with the backend: curated dataset
 ingestion, source-backed permit lookup, and project timelines. The selected stack
 is Python/FastAPI and PostgreSQL with pgvector; frontend work comes later.
 

@@ -2,8 +2,9 @@
 
 Lane 2 team workspace for Claude Impact Lab: UCI × SoCal Affordable Housing.
 
-Help an Irvine ADU applicant understand permit requirements, prepare documents,
-and track the steps toward approval.
+Help housing teams manage multiple development projects, understand permit
+requirements, prepare documents, and track the steps toward approval. Affordable
+housing is the goal; Irvine ADU is the first populated rule dataset.
 
 **Team:** To be confirmed
 **Members:** To be confirmed
@@ -15,12 +16,15 @@ and track the steps toward approval.
 This repository contains the official **Lane 2: Clear it** starter materials:
 the lane guide, source list, Orange County city list, timeline, and sample
 scenarios. Shared event guides and the license are included. The specific
-backend design is being specified for **Irvine + ADU**, using Python/FastAPI and
-PostgreSQL with pgvector. Application implementation awaits design approval.
+backend design supports a **portfolio of housing projects**, using Python/FastAPI
+and PostgreSQL with pgvector. **Irvine + ADU** is the first curated rule profile;
+other housing types can be saved as drafts while their requirements are sourced.
+Application implementation awaits design approval.
 
 ## Backend design
 
-The first slice covers dataset ingestion, permit lookup, and project timelines.
+The first slice covers dataset ingestion, permit lookup, and separate project
+checklists/timelines, with a portfolio API for listing and filtering projects.
 Frontend development, Claude chat, user document uploads/OCR, and vector search
 follow later.
 
@@ -52,12 +56,17 @@ Fill in the project sections below as the team builds.
 
 ## The real user
 
-A first-time applicant preparing an ADU project in Irvine needs to know which
-forms and steps apply, what is missing, and what happens next.
+A nonprofit housing project manager or small builder managing several housing
+projects needs to know which forms and steps apply to each, what is missing,
+and what happens next. A first-time Irvine ADU applicant is the initial demo case.
 
-**Before:** piece together municipal pages, forms, and state guidance.
-**After:** follow a sourced checklist and track project milestones, with unknown
-requirements and timeline assumptions shown explicitly.
+**Before:** piece together municipal pages, forms, and state guidance across
+several projects.
+**After:** follow each project's sourced checklist and milestones, with unknown
+requirements, unsupported rule coverage, and timeline assumptions shown explicitly.
+
+An affordability goal is a declared project intention. The prototype does not
+certify affordability, funding eligibility, or homes built.
 
 ## What we built
 
