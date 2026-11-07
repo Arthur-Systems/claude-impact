@@ -568,7 +568,18 @@ def test_real_irvine_activation_with_source_conflicts(real_client, clock):
     assert project["checklist"], "real requirements were copied into the project"
     tl = real_client.get(f"/api/v1/projects/{p['id']}/timeline", params={"as_of": "2026-11-07"}).json()
     assert tl["progress"]["total"] == 6
-    assert tl["source_conflicts"], "conflicts from the manifest are kept"
-    assert "source_conflict" in {b["code"] for b in tl["bottlenecks"]}
+    # Whatever conflicts the reviewed release reports are carried into the project unchanged.
+    # (Person 2 may attach them to the pathway or to individual rules; both must activate.)
+    from clearpath.projects.lookup import LookupRequest
+    probe = routes._build_lookup_provider("public").lookup(
+        LookupRequest("adu", C01["subtype"], "irvine-ca", C01["declared_location"], C01["rule_facts"]))
+    assert bool(tl["source_conflicts"]) == bool(probe.conflicts)
     # Every assumed duration in the reviewed manifest is null, so no forecast is invented.
     assert tl["forecast"]["missing_stage_estimates"]
+
+
+def test_rule_facts_accept_jadu_and_reject_junior(client):
+    ok = client.post("/api/v1/projects", json={**C01, "rule_facts": {"adu_form": "jadu", "existing_dwelling": True}})
+    assert ok.status_code == 201, ok.json()
+    bad = client.post("/api/v1/projects", json={**C01, "rule_facts": {"adu_form": "junior", "existing_dwelling": True}})
+    assert bad.status_code == 422

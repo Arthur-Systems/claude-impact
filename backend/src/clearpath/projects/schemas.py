@@ -40,7 +40,7 @@ class LocationInput(Strict):
 class RuleFacts(Strict):
     """Rule facts accepted by the first ADU profile (spec §7). All optional; absent = unknown."""
 
-    adu_form: Literal["detached", "attached", "conversion", "junior"] | None = None
+    adu_form: Literal["detached", "attached", "conversion", "jadu"] | None = None
     existing_dwelling: StrictBool | None = None
     floor_area_sqft: float | None = Field(default=None, gt=0)
 
