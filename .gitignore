@@ -29,3 +29,11 @@ Desktop.ini
 *.swo
 *~
 *.tmp
+
+# backend runtime and test output
+.runtime/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/

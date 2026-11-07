@@ -1,0 +1,36 @@
+services:
+  db:
+    image: pgvector/pgvector:0.8.7-pg17-trixie@sha256:01215e09bd4bd582d20230e025b6c971deeeffee49ceef1aae167e839cb62a7e
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Use make backend-up to generate local credentials}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Use make backend-up to generate local credentials}
+      POSTGRES_DB: ${POSTGRES_DB:?Use make backend-up to generate local credentials}
+    ports:
+      - "127.0.0.1:${BACKEND_DB_PORT:-55432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  api:
+    image: clearpath-api:0.1.0
+    build:
+      context: ./backend
+    environment:
+      CLEARPATH_DATABASE_URL: ${CLEARPATH_DATABASE_URL:?Use make backend-up to generate local credentials}
+      CLEARPATH_API_KEY: ${CLEARPATH_API_KEY:?Use make backend-up to generate local credentials}
+      CLEARPATH_DATA_MODE: ${CLEARPATH_DATA_MODE:-public}
+    ports:
+      - "127.0.0.1:${BACKEND_API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  db-data:
