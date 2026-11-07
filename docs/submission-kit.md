@@ -180,7 +180,7 @@ values against the screen before recording.
 - Seed the C01 demo project fresh so the checklist starts at "not started".
 - Browser zoom at 125 to 150% so text is readable in a phone-sized video. Hide bookmarks,
   other tabs, notifications and any terminal with keys or env vars.
-- Leave floor area blank on purpose so "needs information" shows up.
+- Use the C01 facts (detached ADU, existing house). The "needs information" items come from recorded source conflicts (for example the Hold Harmless Affidavit), not from floor area: no reviewed rule uses floor area yet.
 - Screen recorder: macOS `Cmd+Shift+5`, record selected portion, 1080p. Mic: a phone held
   close in a quiet hallway gives cleaner audio than a laptop mic in the room.
 - Do 1 rehearsal, then 2 takes. Keep the better one. No editing beyond trimming the ends.
@@ -190,10 +190,10 @@ values against the screen before recording.
 | Time | Screen | Narration |
 |---|---|---|
 | 0:00 to 0:07 | Irvine ADU page, application PDF and HCD handbook open in three tabs | "Adding an ADU in Irvine means piecing together a city web page, a long PDF package, separate checklists and the state handbook." |
-| 0:07 to 0:15 | ClearPath start screen; choose Irvine, detached ADU, existing house yes, floor area left blank | "ClearPath asks four questions. We'll leave floor area blank, because a lot of people don't know it yet." |
+| 0:07 to 0:15 | ClearPath Documents tab with the live-data banner; Irvine, detached ADU, existing house | "For a detached ADU next to an existing house in Irvine, ClearPath pulls the city's own requirements." |
 | 0:15 to 0:28 | Checklist appears. Click one citation chip; show URL, page, excerpt, date checked | "Every item is the city's own requirement, linked to the exact page and passage, with the date we checked it." |
-| 0:28 to 0:36 | Scroll to the "needs information" group | "Items that depend on floor area say needs information. It does not guess." |
-| 0:36 to 0:44 | Warnings bar: stale citation or source conflict, plus "property not verified" | "It flags when a source cites old law. ADU law moved from section 65852.2 to 66310 and up, and some documents still use the old numbers." [Use only if the app shows a real flagged item. Otherwise say: "It tells you what it hasn't verified."] |
+| 0:28 to 0:36 | Point at an item marked needs information | "Where the city's own sources disagree, it says needs information and shows both sources. It does not guess." |
+| 0:36 to 0:44 | The development standards checklist item and its conflict note | "It also flags stale law: Irvine's checklist still cites Gov Code 65852.2, which the state renumbered to 66310 and up." [Show only if the conflict note is visible on screen.] |
 | 0:44 to 0:54 | Save project; mark two documents ready; try to complete plan review early and show the "complete the earlier step first" message; timeline shows progress and next action | "Save it as a project, track each document, and it keeps the steps in order and tells you what's next." |
 | 0:54 to 1:00 | Portfolio view with the ADU project and a draft project, plus repo URL on screen | "Each new city or project type is a reviewed data file. ClearPath, Lane 2." |
 
@@ -218,8 +218,8 @@ stage. Say "here's the recording of the same flow" and play it.
    them a backyard ADU in Irvine. The fast, ministerial path exists, but the forms that
    describe it are spread over a web page, a PDF package, separate checklists and the state
    handbook."
-2. **Lookup (25 s).** Enter the C01 facts and leave floor area blank. "Four facts. We left
-   floor area blank on purpose."
+2. **Lookup (25 s).** Open Documents with the C01 facts (detached ADU, existing house). "Two facts,
+   and it pulls Irvine's own list."
 3. **Checklist and sources (40 s).** Open a citation chip. Read the excerpt aloud. "Every item
    shows where it came from and when we checked it. If we can't cite it, it doesn't appear."
    Point at "needs information".
