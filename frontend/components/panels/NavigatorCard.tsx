@@ -64,9 +64,6 @@ export default function NavigatorCard() {
                 ))}
               </div>
             )}
-            {m.role === "ai" && i > 0 && (
-              <div className={s.note}>{m.mock ? "Demo answer, backend not connected. " : ""}AI can make mistakes. Check the source.</div>
-            )}
           </div>
         ))}
         {busy && (
