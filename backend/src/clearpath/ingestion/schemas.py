@@ -182,6 +182,7 @@ class PublishedClock(StrictModel):
 class Milestone(StrictModel):
     key: Slug
     title: str
+    actor: str | None = None
     predecessors: list[Slug]
     requirements: list[Slug]
     published_clock: PublishedClock | None

@@ -90,12 +90,16 @@ def import_bundle(session: Session, bundle: ValidatedBundle) -> ImportResult:
         counts = dict.fromkeys(counts, 0)
     else:
         payload = manifest.model_dump(mode="json", round_trip=True)
+        # Curated clock shapes are stored as submitted, like milestone_templates.
+        for stored, milestone in zip(payload["milestones"], manifest.milestones, strict=True):
+            stored["published_clock"] = (milestone.published_clock.model_dump(mode="json", exclude_unset=True)
+                                         if milestone.published_clock is not None else None)
         release = DatasetRelease(
             jurisdiction_id=jurisdiction.id, project_type=manifest.project_type,
             profile_key=manifest.profile_key, kind=manifest.kind, status="draft",
             schema_version=manifest.schema_version, content_hash=bundle.content_hash,
             fact_schema=payload["fact_schema"], conflicts=payload["conflicts"],
-            curator_label=manifest.curator_label,
+            curator_label=manifest.curator_label, manifest=payload,
         )
         session.add(release)
         session.flush()
