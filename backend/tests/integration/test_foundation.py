@@ -40,10 +40,9 @@ def test_extra_fields_rejected(client):
 
 def test_health_ready_reports_no_dataset(client, settings):
     response = client.get("/health/ready")
-    # Task 2 flips schema/status after applying migration 0001.
-    assert response.status_code == 503
+    assert response.status_code == 200
     assert response.json() == {
-        "status": "unavailable", "database": True, "schema": False,
+        "status": "ready", "database": True, "schema": True,
         "dataset_available": False, "mode": "synthetic",
     }
     assert settings.database_url not in response.text
