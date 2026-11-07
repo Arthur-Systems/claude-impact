@@ -144,8 +144,8 @@
       ],
       "published_clock": null,
       "assumed_days": {
-        "min": 0,
-        "max": 1,
+        "min": 7,
+        "max": 21,
         "label": "ASSUMPTION",
         "rationale": "synthetic test value"
       },
@@ -162,8 +162,8 @@
       "requirements": [],
       "published_clock": null,
       "assumed_days": {
-        "min": 0,
-        "max": 1,
+        "min": 1,
+        "max": 3,
         "label": "ASSUMPTION",
         "rationale": "synthetic test value"
       },
@@ -180,8 +180,8 @@
       "requirements": [],
       "published_clock": null,
       "assumed_days": {
-        "min": 0,
-        "max": 1,
+        "min": 10,
+        "max": 30,
         "label": "ASSUMPTION",
         "rationale": "synthetic test value"
       },
@@ -198,8 +198,8 @@
       "requirements": [],
       "published_clock": null,
       "assumed_days": {
-        "min": 0,
-        "max": 1,
+        "min": 20,
+        "max": 60,
         "label": "ASSUMPTION",
         "rationale": "synthetic test value"
       },
@@ -216,8 +216,8 @@
       "requirements": [],
       "published_clock": null,
       "assumed_days": {
-        "min": 0,
-        "max": 1,
+        "min": 3,
+        "max": 10,
         "label": "ASSUMPTION",
         "rationale": "synthetic test value"
       },
@@ -235,8 +235,8 @@
       "requirements": [],
       "published_clock": null,
       "assumed_days": {
-        "min": 0,
-        "max": 1,
+        "min": 1,
+        "max": 5,
         "label": "ASSUMPTION",
         "rationale": "synthetic test value"
       },
