@@ -82,6 +82,7 @@ a { color: var(--teal-dark); text-underline-offset: 2px; }
 .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-5); }
 .col-12 { grid-column: span 12; } .col-8 { grid-column: span 8; } .col-7 { grid-column: span 7; }
 .col-6 { grid-column: span 6; } .col-5 { grid-column: span 5; } .col-4 { grid-column: span 4; }
+.grid-top { align-items: start; }
 .stack { display: grid; gap: var(--space-5); }
 
 /* Buttons */
@@ -176,7 +177,9 @@ a { color: var(--teal-dark); text-underline-offset: 2px; }
 .dropzone { display: grid; place-items: center; align-content: center; gap: var(--space-2); min-height: 120px; padding: var(--space-5); text-align: center; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-lg); background: var(--surface); transition: background-color var(--dur-feedback) var(--ease-out), border-color var(--dur-feedback) var(--ease-out), transform var(--dur-layout) var(--ease-out); margin-bottom: var(--space-5); }
 .dropzone[data-drag=true] { background: var(--mint-soft); border-color: var(--teal); transform: scale(1.01); }
 .dropzone p { margin: 0; }
-.file-tag { display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.file-tag { display: inline-flex; align-items: center; gap: var(--space-1); flex-wrap: wrap; }
+.select-ghost { width: auto; min-height: 36px; padding: 0 var(--space-2); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--teal-dark); font: 600 var(--text-sm)/1.2 var(--font); cursor: pointer; transition: background-color var(--dur-feedback) var(--ease-out), border-color var(--dur-feedback) var(--ease-out); }
+.select-ghost:hover { background: var(--surface-muted); border-color: var(--line); }
 
 /* Timeline */
 .tl { display: flex; gap: 2px; height: 12px; border-radius: var(--radius-pill); overflow: hidden; background: var(--surface-muted); margin: var(--space-2) 0 var(--space-3); }

@@ -42,7 +42,7 @@ export default function Sidebar() {
           <Link key={item.href} href={item.href} className="nav-item" aria-current={pathname === item.href ? "page" : undefined}>
             {item.label}
             {item.href === "/documents" && missing > 0 && (
-              <span key={missing} className="nav-count num" aria-label={`${missing} documents missing`}>
+              <span key={missing} className="nav-count num" aria-label={`${missing} ${missing === 1 ? "document" : "documents"} missing`}>
                 {missing}
               </span>
             )}

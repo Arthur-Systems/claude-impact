@@ -117,11 +117,11 @@ export default function Documents() {
                   <span>{d.label}</span>
                   {matched.map((f) => (
                     <span className="row-sub file-tag enter" key={f.id}>
-                      {f.name}
+                      {f.name}, matched as
                       <label className="sr-only" htmlFor={`m-${f.id}`}>
                         Change match for {f.name}
                       </label>
-                      <select id={`m-${f.id}`} className="select select-compact" value={f.matchedTo ?? ""} onChange={(e) => reassign(f.id, (e.target.value || null) as DocId | null)}>
+                      <select id={`m-${f.id}`} className="select-ghost" value={f.matchedTo ?? ""} onChange={(e) => reassign(f.id, (e.target.value || null) as DocId | null)}>
                         {REQUIRED_DOCS.map((o) => (
                           <option key={o.id} value={o.id}>
                             {o.label}

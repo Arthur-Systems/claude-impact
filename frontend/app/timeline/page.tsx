@@ -63,7 +63,7 @@ export default function Timeline() {
     <>
       <PageHeader
         title="Timeline"
-        subtitle={hasMissing ? `You are on the slower path because ${missing} required documents are missing.` : "You have every required document, so you are on the faster path."}
+        subtitle={hasMissing ? `You are on the slower path because ${missing} required ${missing === 1 ? "document is" : "documents are"} missing.` : "You have every required document, so you are on the faster path."}
       >
         <div className={`notice${hasMissing ? " notice-warn" : ""}`} style={{ marginTop: "var(--space-5)", marginBottom: 0 }}>
           <p>{hasMissing ? "Upload the missing documents to move to the faster path." : "Review your documents and submit to the city."}</p>
@@ -85,7 +85,7 @@ export default function Timeline() {
         </span>
       </div>
 
-      <div className="grid">
+      <div className="grid grid-top">
         <Path title="All documents submitted" e={estimate(0)} current={!hasMissing} />
         <Path
           title="With missing documents"
@@ -107,7 +107,7 @@ export default function Timeline() {
           footer={
             hasMissing ? (
               <p className="blocked">
-                Blocked by {missing} missing documents. <Link href="/documents">View</Link>
+                Blocked by {missing} missing {missing === 1 ? "document" : "documents"}. <Link href="/documents">View</Link>
               </p>
             ) : null
           }

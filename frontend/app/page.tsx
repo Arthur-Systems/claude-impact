@@ -19,7 +19,7 @@ export default function Overview() {
         {blocking > 0 ? (
           <div className="notice notice-warn" role="status" style={{ marginTop: "var(--space-5)", marginBottom: 0 }}>
             <p>
-              <b className="num">{blocking}</b> documents block submission.
+              <b className="num">{blocking}</b> {blocking === 1 ? "document blocks" : "documents block"} submission.
             </p>
             <Link className="btn btn-primary" href="/documents">
               Add documents

@@ -93,7 +93,7 @@ export default function Search() {
       )}
 
       {asked && !nothing && (
-        <div className="grid" role="region" aria-label="Search results" aria-live="polite">
+        <div className="grid grid-top" role="region" aria-label="Search results" aria-live="polite">
           {showRules && top && (
             <section className="card col-12 enter">
               <h2>Best match</h2>
