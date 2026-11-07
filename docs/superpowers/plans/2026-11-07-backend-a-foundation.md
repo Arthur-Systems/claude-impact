@@ -74,13 +74,24 @@ to describe implemented Backend A and deferred lookup/projects.
 
 **Interfaces:** Consume Task 1's dataset models/session/config.
 Provide `validate_bundle(path: Path) -> ValidatedBundle`,
-`import_bundle(session: Session, bundle: ValidatedBundle) -> ImportResult`, and
-`publish_release(session: Session, release_id: UUID, reviewed: bool) -> DatasetRelease`.
+`import_bundle(session: Session, bundle: ValidatedBundle, *, data_mode: Literal["public", "synthetic"]) -> ImportResult`, and
+`publish_release(session: Session, release_id: UUID, reviewed: bool, *, data_mode: Literal["public", "synthetic"]) -> DatasetRelease`.
 The caller owns transactions. No network access in import/dry-run/publish.
+Mode is an explicit required keyword, not implicit session state or a fallback.
+The CLI passes its selected Settings.data_mode only for DB operations; pure
+bundle validation and dry-run require neither settings nor credentials.
 Freeze and document the canonical Pydantic manifest contract, derived from the
 team-role draft and SPEC.md. Keep stable source/passage/rule keys and a complete
 scope key. Optional profile key may default from subtype for draft-contract
 compatibility; the stored active-release key must remain unambiguous.
+Passages use typed UUID `id` values and citation arrays contain those UUIDs,
+matching SPEC.md and the team draft; source/rule keys use canonical slugs.
+
+Person 4 has now merged `clearpath.permits.predicates` into main. After preserving
+that upstream work, reuse `validate_predicate(predicate, fact_schema)` and
+`validate_facts(facts, fact_schema)` rather than duplicating their validator or
+evaluator. Its fact-schema values are `string`, `boolean`, and `number`, and it
+raises sanitized `PredicateValidationError` with a machine-readable code/path.
 
 - [ ] Write failing tests for invalid hashes/paths/citations/types/operators,
   unknown fields, graph cycles, unreviewed derived requirements, idempotent
