@@ -22,6 +22,14 @@ Both `predev` and `prebuild` run `scripts/copy-map-worker.mjs`. It copies the in
 
 ## Demo behavior and sources
 
+The document picker accepts ZIPs as well as PDF/JPG/PNG files. ZIP central-directory names are read locally without extraction, uploads, OCR or backend wiring. Names arrive sequentially about 300ms apart, updating the shared dashboard. Contents are not validated and matches do not imply city acceptance. This is a prototype; consult a professional for decisions.
+
+Sample ZIPs under `public/demo/` target the six dashboard categories. Starting empty, load plans for 2 of 6, supporting for 4 of 6 plus unmatched Holiday_Photo.pdf, then final for 6 of 6. The all pack contains all seven filenames. These are fictional watermarked samples, not city forms or a city checklist. Generate them with `python3 scripts/make_demo_docs.py` from this directory.
+
+Duplicate filenames are skipped case-insensitively, including inside the shared provider. Manual reassignment and removal remain available. Reset demo documents clears file metadata using the existing removal action and is disabled while processing. In-memory demo state also resets on reload. Malformed ZIPs display an error and release the busy guard.
+
+Run focused regression checks with `node --test scripts/dashboard-zip.test.cjs` after `npm ci` and sample generation.
+
 - Document selection records filenames in memory and guesses checklist matches from those names. It does not upload file contents or perform OCR. Matches can be reassigned; readiness and estimates update together.
 - Project state, selected address and question tracking are in memory and reset on reload. There is no production persistence.
 - Search uses local entries in `lib/knowledge.ts`, displays their sources and also searches selected filenames. It is not a live regulatory search.

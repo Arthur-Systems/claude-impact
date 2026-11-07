@@ -4,6 +4,7 @@ import { FileQuestion, FileText, Upload, X } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { DocId, REQUIRED_DOCS, useProject } from "@/lib/project-context";
 import { useNewlyReady } from "@/lib/use-newly-ready";
+import { expandUpload, guessMatch, uniqueNames } from "@/lib/document-files";
 
 const SHORT: Record<DocId, string> = {
   site: "Site plan",
@@ -15,17 +16,40 @@ const SHORT: Record<DocId, string> = {
 };
 
 export default function DocumentsCard() {
-  const { files, addFiles, reassign, removeFile, isReady, unmatched } = useProject();
+  const { files, addFiles, reassign, removeFile, isReady, unmatched, readyCount } = useProject();
   const inputRef = useRef<HTMLInputElement>(null);
+  const busyRef = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [drag, setDrag] = useState(false);
   const fresh = useNewlyReady(REQUIRED_DOCS.filter((d) => isReady(d.id)).map((d) => d.id));
 
-  function handleFiles(list: FileList | null) {
-    if (!list || list.length === 0) return;
-    const names = Array.from(list).map((f) => f.name);
-    addFiles(names);
-    setMessage(`${names.length} file${names.length > 1 ? "s" : ""} added.`);
+  async function handleFiles(list: FileList | null) {
+    if (busyRef.current || !list || list.length === 0) return;
+    busyRef.current = true;
+    setBusy(true);
+    setError("");
+    const selected = Array.from(list);
+    try {
+      setMessage("Reading filenames locally...");
+      const expanded: string[] = [];
+      for (const file of selected) expanded.push(...await expandUpload(file));
+      const names = uniqueNames(files.map(f => f.name), expanded);
+      if (!names.length) setMessage("No new filenames. Duplicates skipped.");
+      for (const name of names) {
+        addFiles([name]);
+        const match = guessMatch(name).matchedTo;
+        setMessage(`${name}: ${match ? SHORT[match] : "unmatched"}`);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to read ZIP filenames.");
+      setMessage("Processing stopped. Choose a valid ZIP or PDF/image files.");
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
   }
 
   return (
@@ -34,7 +58,8 @@ export default function DocumentsCard() {
         ref={inputRef}
         type="file"
         multiple
-        accept=".pdf,.jpg,.jpeg,.png"
+        accept=".pdf,.jpg,.jpeg,.png,.zip"
+        disabled={busy}
         className="sr-only"
         tabIndex={-1}
         aria-hidden="true"
@@ -46,11 +71,12 @@ export default function DocumentsCard() {
       <button
         type="button"
         className="dz"
+        disabled={busy}
         data-drag={drag ? "true" : undefined}
         onClick={() => inputRef.current?.click()}
         onDragEnter={(e) => {
           e.preventDefault();
-          setDrag(true);
+          if (!busyRef.current) setDrag(true);
         }}
         onDragOver={(e) => e.preventDefault()}
         onDragLeave={(e) => {
@@ -59,13 +85,25 @@ export default function DocumentsCard() {
         onDrop={(e) => {
           e.preventDefault();
           setDrag(false);
-          handleFiles(e.dataTransfer.files);
+          if (!busyRef.current) void handleFiles(e.dataTransfer.files);
         }}
       >
         <Upload size={18} strokeWidth={1.75} aria-hidden="true" />
         <span>{drag ? "Drop to upload" : <>Drop files or <u>browse</u></>}</span>
       </button>
-      <p role="status" className="sr-only">{message}</p>
+      <p role="status" aria-live="polite">{readyCount} of 6 documents received. {message}</p>
+      {error && <p role="alert">{error}</p>}
+      <p>Filename-only demo. No contents uploaded or validated. Matches do not mean city acceptance. Prototype, not legal advice. Consult a professional for decisions.</p>
+      <p>Dashboard samples: <a href="/demo/clearpath-dashboard-1-plans.zip" download>First pack: 2 of 6</a>{" · "}
+        <a href="/demo/clearpath-dashboard-2-supporting.zip" download>Second pack: 4 of 6 after first</a>{" · "}
+        <a href="/demo/clearpath-dashboard-3-final.zip" download>Final pack: 6 of 6 after second</a>{" · "}
+        <a href="/demo/clearpath-dashboard-all.zip" download>All six categories + one unmatched</a></p>
+      <button type="button" className="select" disabled={busy} onClick={() => {
+        if (busyRef.current) return;
+        files.forEach(file => removeFile(file.id));
+        setMessage("Demo documents reset.");
+        setError("");
+      }}>Reset demo documents</button>
 
       {unmatched.length > 0 && (
         <div className="docs-attn" role="status">

@@ -3,6 +3,7 @@
 // the Documents page instantly updates the Overview and the nav badge.
 import { createContext, useContext, useMemo, useState, ReactNode } from "react";
 import type { Place } from "./geocode";
+import { guessMatch, uniqueNames } from "./document-files";
 
 export type DocId = "site" | "floor" | "ownership" | "structural" | "energy" | "elevations";
 
@@ -32,22 +33,6 @@ export type Thread = {
   status: "emailed" | "answered";
   sentAt: string;
 };
-
-// MOCK MATCHER: guesses from the file name only.
-// Replace this function with a call to the FastAPI backend (OCR + Claude).
-function guessMatch(name: string): Pick<UploadedFile, "matchedTo" | "confidence"> {
-  const n = name.toLowerCase();
-  const rules: [RegExp, DocId][] = [
-    [/site/, "site"],
-    [/floor/, "floor"],
-    [/deed|owner|title/, "ownership"],
-    [/struct/, "structural"],
-    [/energy|t24|title24/, "energy"],
-    [/elev/, "elevations"],
-  ];
-  for (const [re, id] of rules) if (re.test(n)) return { matchedTo: id, confidence: "high" };
-  return { matchedTo: null, confidence: "none" };
-}
 
 type Ctx = {
   files: UploadedFile[];
@@ -82,7 +67,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       addFiles: (names) =>
         setFiles((prev) => [
           ...prev,
-          ...names.map((name) => ({ id: crypto.randomUUID(), name, ...guessMatch(name) })),
+          ...uniqueNames(prev.map(f => f.name), names).map((name) => ({ id: crypto.randomUUID(), name, ...guessMatch(name) })),
         ]),
       reassign: (fileId, docId) =>
         setFiles((prev) =>
