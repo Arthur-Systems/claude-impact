@@ -290,7 +290,12 @@ def activate_project(session: Session, project_id: uuid.UUID, request: ProjectAc
     if pathway is None:
         raise fail("pathway_not_available", "That pathway isn't available for this project.",
                    available_pathway_keys=[p["key"] for p in result.pathways if p["status"] == "applies"])
-    if pathway["status"] != "applies":
+    # A pathway whose rule is met but whose sources disagree (status needs_information,
+    # status_reason source_conflict) can still be activated: the conflicts are saved in
+    # source_conflicts and the timeline shows them as a source_conflict bottleneck.
+    pathway_ok = pathway["status"] == "applies" or (
+        pathway.get("status_reason") == "source_conflict" and pathway.get("rule_status") == "applies")
+    if not pathway_ok:
         raise fail("missing_information", "More project facts are needed before this pathway applies.",
                    missing_fact_keys=pathway.get("missing_fact_keys", []))
     defs = [MilestoneDef(m["key"], m["title"], i, tuple(m["predecessor_keys"])) for i, m in enumerate(result.milestones)]

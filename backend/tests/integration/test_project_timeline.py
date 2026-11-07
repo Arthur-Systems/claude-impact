@@ -24,6 +24,7 @@ pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient  # noqa: E402
 
 from clearpath.projects import routes, service  # noqa: E402
+from clearpath.projects.lookup import FixtureLookupStub  # noqa: E402
 from clearpath.projects.schemas import RequirementUpdateInput  # noqa: E402
 from clearpath.projects.standalone import create_standalone_app  # noqa: E402
 from clearpath.timelines.model import DomainConflict  # noqa: E402
@@ -119,6 +120,9 @@ def client(engine, clock):
         c.execute(sa.text("TRUNCATE " + ", ".join(TABLES)))
     app = create_standalone_app(DB_URL)
     app.dependency_overrides[routes.get_now] = lambda: clock.now
+    # These tests pin the synthetic stub so output matches the api_examples fixtures.
+    app.dependency_overrides[routes.get_lookup_provider] = lambda: FixtureLookupStub()
+    app.dependency_overrides[routes.get_dataset_mode] = lambda: "synthetic"
     with TestClient(app) as tc:
         yield tc
     app.state.engine.dispose()
@@ -527,3 +531,44 @@ def test_portfolio_list_filters_and_cursor(client, clock):
     unconf = client.get("/api/v1/projects", params={"coverage_status": "unconfigured", "project_type": "multifamily"}).json()
     assert [x["id"] for x in unconf["items"]] == [mf["id"]] and unconf["items"][0]["progress"] is None
     assert client.get("/api/v1/projects", params={"limit": 101}).status_code == 422
+
+
+# --- Real Irvine data through Person 4's ReleaseLookupProvider -------------------------
+
+
+@pytest.fixture
+def real_client(engine, clock):
+    """The app with its default lookup: Person 2's reviewed Irvine manifest (CLEARPATH_MODE=public)."""
+    provider = routes._build_lookup_provider("public")
+    from clearpath.projects.lookup import LookupRequest
+    probe = provider.lookup(LookupRequest("adu", C01["subtype"], "irvine-ca", C01["declared_location"], C01["rule_facts"]))
+    with engine.begin() as c:
+        c.execute(sa.text("TRUNCATE " + ", ".join(TABLES)))
+        # Person 3's importer publishes this release; the test stands in for it (projects.release_id FK).
+        c.execute(sa.text(
+            "INSERT INTO dataset_releases (id, jurisdiction_id, project_type, profile_key, kind, status, schema_version,"
+            " content_hash, fact_schema, conflicts, curator_label) SELECT :id, id, 'adu', :pk, 'reviewed_public',"
+            " 'active', 1, :h, '{}', '[]', 'p5 real-data test' FROM jurisdictions WHERE slug = 'irvine-ca'"
+            " ON CONFLICT (id) DO NOTHING"),
+            {"id": probe.release["id"], "pk": probe.release["profile_key"], "h": probe.release["content_hash"]})
+    app = create_standalone_app(DB_URL)
+    app.dependency_overrides[routes.get_now] = lambda: clock.now
+    with TestClient(app) as tc:
+        yield tc
+    app.state.engine.dispose()
+
+
+def test_real_irvine_activation_with_source_conflicts(real_client, clock):
+    p = create(real_client)
+    r = real_client.post(f"/api/v1/projects/{p['id']}/activate", json={"pathway_key": PATHWAY, "expected_revision": 1})
+    assert r.status_code == 200, r.json()
+    project = r.json()
+    assert project["state"] == "active"
+    assert project["release"]["dataset_mode"] == "reviewed_public"
+    assert project["checklist"], "real requirements were copied into the project"
+    tl = real_client.get(f"/api/v1/projects/{p['id']}/timeline", params={"as_of": "2026-11-07"}).json()
+    assert tl["progress"]["total"] == 6
+    assert tl["source_conflicts"], "conflicts from the manifest are kept"
+    assert "source_conflict" in {b["code"] for b in tl["bottlenecks"]}
+    # Every assumed duration in the reviewed manifest is null, so no forecast is invented.
+    assert tl["forecast"]["missing_stage_estimates"]

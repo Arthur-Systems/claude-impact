@@ -103,7 +103,7 @@ It does not mean the city accepted the document.
 
 **Project / timeline warning `code`s**:
 - `synthetic_dataset`: the result comes from synthetic demo data.
-- `property_not_verified`: area-level project; no specific property was checked.
+- `selected_area_property_not_verified`: same code as the lookup (see above).
 - `self_reported_status`: "ready" means the applicant marked it prepared, not that the
   city accepted it.
 
