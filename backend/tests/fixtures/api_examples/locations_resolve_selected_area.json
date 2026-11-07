@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/locations/resolve",
+    "headers": { "X-API-Key": "<CLEARPATH_API_KEY from env>" },
+    "body": {
+      "selected_area": { "jurisdiction": "irvine-ca" }
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "request_id": "00000000-0000-4000-8000-000000000902",
+    "location": {
+      "mode": "selected_area",
+      "status": "selected_area",
+      "status_reason": null,
+      "property_verified": false,
+      "jurisdiction": { "slug": "irvine-ca", "name": "Irvine" },
+      "candidates": [],
+      "boundary_evidence": null
+    },
+    "warnings": [
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      },
+      {
+        "code": "selected_area_property_not_verified",
+        "message": "You chose the Irvine area. No specific property was checked, so results are area-level only."
+      }
+    ]
+  }
+}

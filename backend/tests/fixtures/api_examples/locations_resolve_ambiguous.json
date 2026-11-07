@@ -1,0 +1,73 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/locations/resolve",
+    "headers": { "X-API-Key": "<CLEARPATH_API_KEY from env>" },
+    "body": {
+      "address": {
+        "number": "<house number>",
+        "prefix": null,
+        "street_name": "<street name>",
+        "street_type": "<street type>",
+        "suffix": null,
+        "unit": null
+      }
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "request_id": "00000000-0000-4000-8000-000000000903",
+    "location": {
+      "mode": "address",
+      "status": "ambiguous",
+      "status_reason": "multiple_candidates",
+      "property_verified": false,
+      "jurisdiction": null,
+      "candidates": [
+        {
+          "candidate_id": "00000000-0000-4000-8000-000000000201",
+          "address": {
+            "number": "<house number>",
+            "prefix": null,
+            "street_name": "<street name>",
+            "street_type": "<street type>",
+            "suffix": null,
+            "unit": "<unit A>"
+          },
+          "building_id": "<BIN from city GIS>",
+          "boundary_relation": "inside"
+        },
+        {
+          "candidate_id": "00000000-0000-4000-8000-000000000202",
+          "address": {
+            "number": "<house number>",
+            "prefix": null,
+            "street_name": "<street name>",
+            "street_type": "<street type>",
+            "suffix": null,
+            "unit": "<unit B>"
+          },
+          "building_id": "<different BIN from city GIS>",
+          "boundary_relation": "crosses_boundary"
+        }
+      ],
+      "boundary_evidence": {
+        "source_key": "IRV-BOUNDARY",
+        "source_snapshot_id": "00000000-0000-4000-8000-000000000103",
+        "checked_at": "2026-11-07"
+      }
+    },
+    "warnings": [
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      },
+      {
+        "code": "location_ambiguous",
+        "message": "More than one building matched, and one crosses the city boundary. No city rules were chosen. Pick a candidate or use the Irvine area instead."
+      }
+    ]
+  }
+}
