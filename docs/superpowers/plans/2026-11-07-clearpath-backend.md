@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12; FastAPI; Pydantic 2; SQLAlchemy 2; Alembic; psycopg 3; HTTPX; Shapely; PostgreSQL 17 with pgvector; pytest; Docker Compose.
 
-**Spec:** [ClearPath backend design](../specs/2026-11-07-clearpath-backend-design.md).
+**Spec:** [ClearPath backend design](../../../SPEC.md).
 
 **Status:** Ready for user review before implementation. Confirmed sequence: Irvine ADU first; affordable multifamily rule coverage next; multiple projects from the start.
 
@@ -37,6 +37,13 @@
 5. Synthetic releases, packet `required` flags, and personally identifying form fields must not leak into public guidance — Tasks 2 and 6 mode/privacy contract tests.
 
 ## Repository and file ownership
+
+Follow the existing [team-role split](../../team-roles.md): Person 3 owns platform,
+database, and import infrastructure (Tasks 1–2); Person 2 owns curated source
+content for Task 2; Person 4 owns lookup (Task 3); Person 5 owns projects and
+timelines (Tasks 4–5). Backend roles jointly own Task 6. Do not overwrite another
+role's in-progress data or migrations. Person 3 coordinates the initial schema;
+merge any separately owned project migration before declaring that schema ready.
 
 Current inputs are `lanes/2-clear-it/data/oc-cities.json`, `timeline.json`,
 `scenarios.json`, and `DATA-SOURCES.md`; their limitations are in spec section 3.
@@ -149,6 +156,10 @@ and `activate_release(session: Session, release_id: UUID) -> DatasetRelease`.
 `ValidatedBundle` contains normalized scope/fact schema, source snapshots/passages,
 pathways/requirements, acyclic milestones, and content hash. `ImportResult`
 includes release ID, created/reused counts, and whether this was a no-op.
+Person 3 freezes the manifest schema with Person 2 before source content entry;
+Person 2 authors reviewed-public content while Person 3 supplies importer/synthetic
+fixtures. The manifest example in team roles remains a draft until it passes
+this schema, including the full jurisdiction/type/profile key.
 
 - [ ] **Write failing validation/fetch tests.** Assert rejection of hash mismatch,
   malformed/unknown predicates, untyped facts, missing cited passages, dangling
@@ -221,6 +232,9 @@ applicability, citations, coverage gaps, missing keys, and warnings.
   Assert registry membership does not imply coverage, every sourced requirement
   resolves to a passage, synthetic mode is explicit, and ambiguity produces no
   property-specific checklist. Complete the source-provenance endpoint.
+  Commit validated lookup/catalog JSON examples in
+  `backend/tests/fixtures/api_examples/` for the frontend teammate, following the
+  existing team contract. The examples must pass the same response schemas.
 - [ ] **Commit named task files** as `feat: resolve Irvine locations and return sourced permit guidance`.
 
 ### Task 4: Project portfolio, editable drafts, and explicit guidance activation
@@ -261,6 +275,8 @@ successful mutation increments by one with one event. Read operations never do.
   `uv run --project backend pytest backend/tests/integration/test_projects.py backend/tests/integration/test_project_isolation.py -q`.
   Expect two isolated supported projects, one retained unsupported draft, and
   no cross-project state/revision/event changes.
+  Add draft/activation/list response examples to `backend/tests/fixtures/api_examples/`;
+  examples must show that creating a draft does not activate guidance implicitly.
 - [ ] **Commit named task files** as `feat: manage multiple housing projects and activate sourced guidance`.
 
 ### Task 5: Checklist state, correction cycles, and timeline calculation
@@ -304,6 +320,8 @@ counts/readiness, next actions, bottlenecks, evidence, and nullable finish range
   `uv run --project backend pytest backend/tests/unit/test_timeline_forecasts.py backend/tests/integration/test_project_timeline.py backend/tests/integration/test_project_isolation.py -q`.
   Update project A's checklist/milestones and assert B's progress, forecast,
   revision, and events remain unchanged. Supply event cursor pagination.
+  Add timeline, requirement-update, and conflict response examples to the same
+  API-example fixture directory for Person 1.
 - [ ] **Commit named task files** as `feat: track checklist progress and project review timelines`.
 
 ### Task 6: Reproducible backend demonstration and contract verification

@@ -52,7 +52,7 @@ ADU as the first dataset; multiple housing projects and affordable-housing focus
 frontend later; begin with ingestion, lookup, and timelines.
 
 Confirmed dataset sequence: **keep Irvine ADU first; add affordable multifamily
-rules next**. The [implementation plan](../plans/2026-11-07-clearpath-backend.md)
+rules next**. The [implementation plan](docs/superpowers/plans/2026-11-07-clearpath-backend.md)
 preserves this order and multi-project support from the first release.
 
 **Proposed engineering defaults:** a single FastAPI application with separate
