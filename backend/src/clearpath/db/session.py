@@ -11,7 +11,9 @@ from clearpath.core.config import Settings, get_settings
 
 @lru_cache
 def _engine_for_url(database_url: str) -> Engine:
-    return create_engine(database_url, pool_pre_ping=True)
+    return create_engine(
+        database_url, pool_pre_ping=True, hide_parameters=True, connect_args={"connect_timeout": 2},
+    )
 
 
 def get_engine(database_url: str | None = None) -> Engine:

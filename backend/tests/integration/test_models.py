@@ -12,9 +12,9 @@ from clearpath.db.models import (
 
 
 @pytest.fixture
-def session(settings):
-    assert settings.database_url.endswith("/clearpath_test")
+def session(settings, test_database_name):
     engine = create_engine(settings.database_url)
+    assert engine.url.database == test_database_name
     with engine.connect() as connection:
         transaction = connection.begin()
         with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
