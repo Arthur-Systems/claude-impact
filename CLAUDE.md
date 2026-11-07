@@ -2,8 +2,9 @@
 
 You are working with a team at a one-day hackathon, the Claude Impact Lab: UCI × SoCal Affordable
 Housing. The team is building a prototype that helps get more affordable homes built in Southern
-California. Teams mix engineers, designers, and people from real estate, nonprofits, city
-government and finance. Some have never used a terminal.
+California. This repository is dedicated to **Lane 2: Clear it**. The team is
+working on reducing delays in housing approvals and delivery. Keep the work
+focused on this lane. Some teammates have never used a terminal.
 
 ## The context
 
@@ -11,15 +12,13 @@ Every affordable ownership home has to balance one equation:
 
 > What the family can afford to pay + public subsidies + fundraising − the cost to create the home = $0
 
-In Orange County the cost side usually wins by six figures per home, and a home takes about four
-years from finding land to handing over keys. The family's share is fixed by income. Lanes 1 and 2
-shrink the cost; Lane 3 closes the gap that's left:
+The event's Lane 2 brief asks: **How do we turn four years into two?** Time is
+cost. The team should identify one user and one approval or delivery bottleneck,
+then build a prototype grounded in the lane's cited sources.
 
-1. **Find it** (the cost of land). Where can the next affordable home go?
-2. **Clear it** (the cost of time). How do we turn four years into two?
-3. **Fund it** (subsidies and fundraising). Does it pencil, and who closes the gap?
-
-See `docs/background.md` and each lane's README under `lanes/`.
+See `lanes/2-clear-it/README.md` for the problem and ideas, and
+`docs/background.md` for the shared event context. Other lanes are outside this
+repository's scope.
 
 ## Rules that do not bend
 
@@ -47,14 +46,12 @@ See `docs/background.md` and each lane's README under `lanes/`.
 
 - `docs/ground-rules.md`: the event rules in full.
 - `docs/background.md`, `docs/glossary.md`: the equation, the laws and the terms.
-- `lanes/1-find-it/`, `lanes/2-clear-it/`, `lanes/3-fund-it/`: the problem, ideas and a sourced
-  data list (`data/DATA-SOURCES.md`) for each lane. Entries marked UNVERIFIED have not been
+- `lanes/2-clear-it/README.md`: the Lane 2 problem and starter ideas.
+- `lanes/2-clear-it/data/DATA-SOURCES.md`: the sourced data list. Entries marked UNVERIFIED have not been
   confirmed: treat them as leads, not facts.
-- `lanes/3-fund-it/data/synthetic-example-deal.json`: a made-up deal for testing. Every number is
-  an assumption. Never present it as real.
-- `lanes/*/scenarios.json`: made-up users for each lane to design and test against. Not real people.
-- `lanes/1-find-it/data/pathways.json`, `lanes/2-clear-it/data/oc-cities.json` and
-  `timeline.json`: starter lists. A summary is not the rule: read the linked source. Empty fields
+- `lanes/2-clear-it/scenarios.json`: made-up users to design and test against. Not real people.
+- `lanes/2-clear-it/data/oc-cities.json` and `lanes/2-clear-it/data/timeline.json`:
+  starter lists. A summary is not the rule: read the linked source. Empty fields
   are for the team to fill, with a source and date.
 - `docs/challenge-brief.pdf`: the 3-page brief.
 - `templates/TEAM-README.md`: what the team's README must cover before they submit.

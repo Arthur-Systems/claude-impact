@@ -16,7 +16,7 @@ update it with their own email. Judges see the latest version.
 | Field | What to put |
 |---|---|
 | Your email | The one on your team registration. It brings up your team |
-| Lane | 1 Find it, 2 Clear it or 3 Fund it (pick the closest if you bent the brief) |
+| Lane | 2 Clear it |
 | One-liner | One sentence: who it is for and what it does |
 | The real user, before and after | Who they are. What is hard today. What changes with your tool |
 | What it does | A short description |

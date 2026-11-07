@@ -18,8 +18,8 @@ Check the source before you rely on a law.
 | **Capital stack** | The layers of money that pay for a project, such as a first mortgage, city and state loans, grants and donations (general) |
 | **Silent second** | A second loan behind the first mortgage with no required payments until a later event, such as a sale or refinance (general). Terms vary by program |
 | **Shared appreciation loan** | A loan repaid with a share of the home's later increase in value. [CalHFA Dream For All](https://calhfa.ca.gov/dream/) is a program of this kind. Check whether it has funds |
-| **Down-payment assistance (DPA)** | Money that helps a buyer cover the down payment. City, state and bank programs exist. See Lane 3 data |
-| **CalHome, CalHFA, HOME, CDBG** | Public funding programs. See [Lane 3 data](../lanes/3-fund-it/data/DATA-SOURCES.md) |
+| **Down-payment assistance (DPA)** | Money that helps a buyer cover the down payment. City, state and bank programs exist. See the upstream funding data sources below |
+| **CalHome, CalHFA, HOME, CDBG** | Public funding programs. See [upstream funding data sources](https://github.com/travcjohnson/claude-impact-lab-uci/blob/45a05a5c65ba5e3ae7b15e991c8fedf3a29d3ebf/lanes/3-fund-it/data/DATA-SOURCES.md) |
 | **Community land trust (CLT)** | A nonprofit that owns land and sells the home on it to a buyer, with resale limits that keep it affordable. See [Grounded Solutions Network](https://groundedsolutions.org/strengthening-neighborhoods/community-land-trusts) |
 | **Shared equity** | Resale rules that split a home's value gain between the owner and the program (general). See Grounded Solutions |
 | **CRA** | Community Reinvestment Act. Federal law pushing banks to lend in the communities they serve. [OCC page](https://www.occ.treas.gov/topics/consumers-and-communities/cra/index-cra.html) |

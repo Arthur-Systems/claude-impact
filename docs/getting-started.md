@@ -1,34 +1,35 @@
-# Getting started
+# Getting started with Lane 2: Clear it
 
-From sitting down to building.
+This team is working on **Lane 2: Clear it** in
+[`Arthur-Systems/claude-impact`](https://github.com/Arthur-Systems/claude-impact).
+Start with the [Lane 2 brief](../lanes/2-clear-it/README.md) and its
+[data sources](../lanes/2-clear-it/data/DATA-SOURCES.md).
 
 ## 1. Get the files
 
-Pick whichever fits your team. You can switch later.
+Accept your GitHub collaborator invitation while the repository is private. Ask the repository
+owner for access if you have not received one, then clone the team's existing repository:
 
-**Option A: a team repo on GitHub.** Best if anyone on the team will write code. One person does
-this:
+```sh
+git clone https://github.com/Arthur-Systems/claude-impact.git
+cd claude-impact
+```
 
-1. On this repo's GitHub page, choose **Use this template**, then **Create a new repository**.
-2. Name it for your team, set it to **Public**, and create it. Judges need to see it.
-3. Add your teammates under Settings, then Collaborators.
-4. Everyone gets a copy: `git clone https://github.com/YOUR-NAME/YOUR-REPO.git`, or
-   **Code**, then **Open with GitHub Desktop**.
+You can also open this repository on GitHub and choose **Code**, then **Open with GitHub Desktop**.
+Keep the license file and update the team's [README](../README.md) as the project takes shape.
+The [team README template](../templates/TEAM-README.md) lists what the submission needs to cover.
+See [Contributing](../CONTRIBUTING.md) for branches, commits and pull requests.
 
-Keep the license file. When you start writing about your project, replace the top-level
-`README.md` with [`templates/TEAM-README.md`](../templates/TEAM-README.md).
-
-**Option B: download a ZIP.** Fastest if nobody on the team uses GitHub. On this repo's page,
-choose **Code**, then **Download ZIP**, and unzip it. You still need one public GitHub repo by
-2:30 PM to submit; an organizer can help you make it in five minutes.
+The event requires the repository to be public by submission time so judges can see it. Coordinate
+that visibility change with the repository owner.
 
 ## 2. Pick how you work with Claude
 
-All three work for every lane.
+All three work for Lane 2: Clear it.
 
 | | How | Good for |
 |---|---|---|
-| **In the browser** | Open [claude.ai](https://claude.ai), start a project, and add the files for your lane | Teams that do not code |
+| **In the browser** | Open [claude.ai](https://claude.ai), start a project, and add the files from `lanes/2-clear-it/` | Teams that do not code |
 | **Claude Code in the desktop app** | Install the [Claude app](https://claude.ai/download), open Claude Code and choose your folder | Building without a terminal |
 | **Claude Code in a terminal** | Install from [claude.com/claude-code](https://claude.com/claude-code), then run `claude` in your folder | Developers |
 
@@ -52,9 +53,8 @@ By 10:00 AM, on the hub: <https://claudesocal.com/uci-impact-lab> (`#teams`). On
 registers everyone: each teammate's name, email and role. The four roles are builder/engineer,
 creative/designer, communicator/presenter and organizer/facilitator; the best teams cover all
 four. Still short a role? Mark what you are looking for and the team shows on the board for
-people in the room to find. Picking a lane is optional at this point; decide together and update
-the team later. Pick a room for the team on the hub (rooms fill up, so register early), then go
-there together.
+people in the room to find. Select **Lane 2: Clear it** for this team's lane. Pick a room for the
+team on the hub (rooms fill up, so register early), then go there together.
 
 ## If you do not write code
 

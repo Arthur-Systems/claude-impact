@@ -4,7 +4,7 @@
 
 **Team:** [team name]
 **Members:** [names]
-**Lane:** [1 Find it | 2 Clear it | 3 Fund it | your own direction]
+**Lane:** 2 — Clear it
 **Built at:** Claude Impact Lab: UCI × SoCal Affordable Housing, November 7, 2026
 
 ## The real user

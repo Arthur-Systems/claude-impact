@@ -36,7 +36,7 @@ Mock numbers, rounded, based on a typical project. Not a real deal.
 
 Paid by − cost to create = $0. When this project's schedule slipped 10 months, the fundraising it
 needed grew about 7 times. Time is money on both sides of the equation. The same example is in
-[`lanes/3-fund-it/data/synthetic-example-deal.json`](../lanes/3-fund-it/data/synthetic-example-deal.json).
+the [upstream synthetic deal example](https://github.com/travcjohnson/claude-impact-lab-uci/blob/45a05a5c65ba5e3ae7b15e991c8fedf3a29d3ebf/lanes/3-fund-it/data/synthetic-example-deal.json).
 
 ## Why there is a gap
 

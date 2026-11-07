@@ -1,17 +1,20 @@
-# Claude Impact
+# Claude Impact — Clear it
 
-Team workspace for Claude Impact Lab: UCI × SoCal Affordable Housing.
+Lane 2 team workspace for Claude Impact Lab: UCI × SoCal Affordable Housing.
+
+> How do we turn four years into two?
 
 **Team:** To be confirmed
 **Members:** To be confirmed
-**Lane:** To be confirmed: 1 Find it, 2 Clear it, 3 Fund it, or your own direction
+**Lane:** 2 — Clear it
 **Built at:** Claude Impact Lab: UCI × SoCal Affordable Housing, November 7, 2026
 
 ## Repository setup
 
-This repository contains the [official event starter](STARTER.md), including
-the challenge brief, lane guides, source lists, sample scenarios, and submission
-requirements. The project idea and application stack have not been recorded yet.
+This repository contains the official **Lane 2: Clear it** starter materials:
+the lane guide, source list, Orange County city list, timeline, and sample
+scenarios. Shared event guides and the license are included. The specific
+prototype and application stack have not been recorded yet.
 
 ```sh
 git clone https://github.com/Arthur-Systems/claude-impact.git
@@ -21,11 +24,12 @@ cd claude-impact
 Accept your collaborator invitation before cloning while the repository is
 private. See [CONTRIBUTING.md](CONTRIBUTING.md) for the team workflow.
 
+- [Lane 2: Clear it](lanes/2-clear-it/README.md)
+- [Lane 2 data sources](lanes/2-clear-it/data/DATA-SOURCES.md)
+- [Orange County cities](lanes/2-clear-it/data/oc-cities.json)
+- [Timeline](lanes/2-clear-it/data/timeline.json) and [sample scenarios](lanes/2-clear-it/scenarios.json)
 - [Getting started](docs/getting-started.md)
 - [Challenge background](docs/background.md)
-- [Lane 1: Find it](lanes/1-find-it/README.md)
-- [Lane 2: Clear it](lanes/2-clear-it/README.md)
-- [Lane 3: Fund it](lanes/3-fund-it/README.md)
 - [Judging](docs/judging.md) and [submission checklist](docs/submission.md)
 
 The repository is currently private. The event requires it to be public by
@@ -95,9 +99,9 @@ own terms. See [LICENSE](LICENSE).
 
 ## Starter provenance
 
-Initialized from [travcjohnson/claude-impact-lab-uci](https://github.com/travcjohnson/claude-impact-lab-uci)
+Lane 2 and shared event materials were copied from
+[travcjohnson/claude-impact-lab-uci](https://github.com/travcjohnson/claude-impact-lab-uci)
 at commit [`45a05a5`](https://github.com/travcjohnson/claude-impact-lab-uci/commit/45a05a5c65ba5e3ae7b15e991c8fedf3a29d3ebf).
-The original starter overview is preserved in [STARTER.md](STARTER.md), and the
-unmodified team README template is in [templates/TEAM-README.md](templates/TEAM-README.md).
+The team README outline is in [templates/TEAM-README.md](templates/TEAM-README.md).
 These are imported event materials; check the [live event hub](https://claudesocal.com/uci-impact-lab)
 for current schedules and announcements.
