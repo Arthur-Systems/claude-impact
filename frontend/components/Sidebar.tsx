@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useProject } from "@/lib/project-context";
@@ -19,6 +20,15 @@ export default function Sidebar() {
   const { missingPriority, place } = useProject();
   const active = NAV.findIndex((n) => n.href === pathname);
   const missing = missingPriority.length;
+  const navRef = useRef<HTMLElement>(null);
+
+  // On the narrow layout the nav is a horizontal pill row: keep the active pill in view.
+  useEffect(() => {
+    const nav = navRef.current;
+    const el = nav?.querySelector<HTMLElement>("[aria-current=page]");
+    if (!nav || !el || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollTo({ left: el.offsetLeft - (nav.clientWidth - el.offsetWidth) / 2, behavior: "auto" });
+  }, [pathname]);
 
   return (
     <aside className="sidebar">
@@ -26,7 +36,7 @@ export default function Sidebar() {
         <Mark size={28} />
         ClearPath
       </Link>
-      <nav aria-label="Main" className={`nav${active >= 0 ? " has-pill" : ""}`}>
+      <nav ref={navRef} aria-label="Main" className={`nav${active >= 0 ? " has-pill" : ""}`}>
         {active >= 0 && <span className="nav-pill" aria-hidden="true" style={{ transform: `translateY(${active * ITEM_STEP}px)` }} />}
         {NAV.map((item) => (
           <Link key={item.href} href={item.href} className="nav-item" aria-current={pathname === item.href ? "page" : undefined}>
