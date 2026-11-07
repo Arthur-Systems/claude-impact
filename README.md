@@ -70,8 +70,10 @@ certify affordability, funding eligibility, or homes built.
 
 ## What we built
 
-The repository currently contains Lane 2 source materials and the proposed
-backend specification. No application code has been added yet.
+The repository currently contains Lane 2 source materials, the proposed backend
+specification, and an [ADU demo packet builder](clear_path_checklist_build/README.md).
+The packet is an abbreviated software-testing sample, not an official city form.
+The FastAPI backend and application database have not been implemented yet.
 
 **Demo video:** Not recorded yet.
 **Live demo:** Not deployed yet.
@@ -85,7 +87,7 @@ team builds.
 
 ## Try it
 
-There is no runnable application yet. The clone commands above provide the event
+There is no runnable backend API yet. The clone commands above provide the event
 materials. Add exact install and run commands, prerequisites, and environment
 variable names here when application code is added. Keep keys out of the repo.
 

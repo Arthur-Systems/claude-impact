@@ -80,8 +80,16 @@ dataset, with a visible gap until its sources are curated.
 
 ## 3. Existing evidence and source limitations
 
-The current repository contains event materials, without application code or a
-database. Three starter files need distinct handling:
+The current repository contains event materials and a separate
+[demo ADU packet builder](../../../clear_path_checklist_build/README.md), but no
+FastAPI permit service or application database. The packet includes a blank PDF
+and a document/field schema and labels itself as an abbreviated testing sample,
+not an official city form. Preserve its stable document/field IDs as possible
+future integration keys, without treating sample `required` flags as verified
+regulatory rules or ingesting filled applicant/owner fields. Packet upload/OCR
+integration remains outside this first backend slice.
+
+Three starter files need distinct handling:
 
 | File | Actual contents | Import behavior |
 |---|---|---|
@@ -526,5 +534,6 @@ priority over a large data volume.
 5. Contract/integration verification, OpenAPI examples, and reproducible demo.
 
 The next artifact after this design is approved is a Superpowers implementation
-plan with exact files, task interfaces, and meaningful verification. Product code,
-dependency installation, and application scaffolding have not started.
+plan with exact files, task interfaces, and meaningful verification. Implementation,
+dependency installation, and scaffolding for this backend design have not started;
+the independently added packet builder is an existing separate component.
