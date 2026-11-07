@@ -12,12 +12,16 @@ Integration seams (Person 3 overrides these with ``app.dependency_overrides``):
 
 from __future__ import annotations
 
+import os
 import uuid
+from functools import lru_cache
 from datetime import date, datetime, timezone
 from typing import Iterator
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+
+from clearpath.timelines.model import DomainConflict
 
 from . import service
 from .lookup import FixtureLookupStub, PermitLookupProvider
@@ -41,8 +45,37 @@ def require_api_key() -> None:
     """Placeholder. Person 3 overrides with the shared X-API-Key check."""
 
 
+def _configured_mode() -> str:
+    """Same switch as Person 3's settings: CLEARPATH_MODE = public (default) | synthetic."""
+    return "synthetic" if os.environ.get("CLEARPATH_MODE", "public") == "synthetic" else "public"
+
+
+@lru_cache(maxsize=2)
+def _build_lookup_provider(mode: str) -> PermitLookupProvider:
+    """Person 4's lookup over a release, built once per mode and reused for every request.
+
+    public: Person 2's reviewed Irvine data (fails loudly if it doesn't pass the reviewed checks).
+    synthetic: the labeled demo dataset. Failures are not cached, so a fixed file is picked up.
+    """
+    from clearpath.locations.service import load_registry
+    from clearpath.permits.dev_server import load_real_provider, load_synthetic_provider
+    from clearpath.permits.project_adapter import ReleaseLookupProvider
+
+    releases = load_synthetic_provider() if mode == "synthetic" else load_real_provider()
+    return ReleaseLookupProvider(releases, load_registry())
+
+
+def warm_lookup_provider() -> None:
+    """Call once at app startup so the dataset loads before the first request."""
+    _build_lookup_provider(_configured_mode())
+
+
 def get_lookup_provider() -> PermitLookupProvider:
-    return FixtureLookupStub()
+    try:
+        return _build_lookup_provider(_configured_mode())
+    except Exception as exc:  # the dataset file is missing or fails its checks
+        raise DomainConflict("dataset_unavailable", "The rule dataset is unavailable right now.",
+                             {"reason": str(exc)[:300]}, 503) from exc
 
 
 def get_now() -> datetime:
@@ -50,7 +83,7 @@ def get_now() -> datetime:
 
 
 def get_dataset_mode() -> str:
-    return "synthetic"
+    return _configured_mode()
 
 
 def _out(body: dict, mode: str) -> dict:
