@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import make_url
 
@@ -30,7 +31,8 @@ def test_migration_creates_schema(settings, monkeypatch, test_database_name):
         with engine.connect() as connection:
             assert TABLES <= set(inspect(connection).get_table_names())
             assert connection.execute(text("SELECT extname FROM pg_extension WHERE extname='vector'")).scalar_one() == "vector"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0001_initial"
+            head = ScriptDirectory.from_config(config).get_current_head()
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == head
         command.upgrade(config, "head")
         command.check(config)
         command.downgrade(config, "base")
