@@ -7,7 +7,7 @@ from typing import Annotated
 from uuid import UUID
 
 from pydantic import SecretStr, ValidationError
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 import typer
 
@@ -119,21 +119,30 @@ def publish_command(
         except ValueError:
             raise BundleValidationError([ValidationIssue("schema_invalid", "release")]) from None
         already_active = False
-        with _transaction() as (session, settings):
-            try:
-                publish_release(session, release_id, reviewed=reviewed, mode=settings.mode)
-            except IngestionError as error:
-                # Seed convenience only: the service remains strictly draft-only.
-                # Its jurisdiction lock is still held, and it already checked review.
-                current = session.get(DatasetRelease, release_id)
-                if error.code != "release_not_draft" or current is None or current.status != "active":
-                    raise
-                expected_kind = {"public": "reviewed_public", "synthetic": "synthetic"}[settings.mode]
-                if current.kind != expected_kind:
-                    raise IngestionError(
-                        "release_kind_mismatch", "Release kind does not match the operating mode.", {"path": "kind"},
-                    ) from None
-                already_active = True
+        try:
+            with _transaction() as (session, settings):
+                try:
+                    publish_release(session, release_id, reviewed=reviewed, mode=settings.mode)
+                except IngestionError as error:
+                    # Seed convenience only: the service remains strictly draft-only.
+                    # Its jurisdiction lock is still held, and it already checked review.
+                    current = session.get(DatasetRelease, release_id)
+                    if error.code != "release_not_draft" or current is None or current.status != "active":
+                        raise
+                    expected_kind = {"public": "reviewed_public", "synthetic": "synthetic"}[settings.mode]
+                    if current.kind != expected_kind:
+                        raise IngestionError(
+                            "release_kind_mismatch", "Release kind does not match the operating mode.", {"path": "kind"},
+                        ) from None
+                    already_active = True
+        except IntegrityError as error:
+            # Includes commit-time violations. _transaction has already rolled back.
+            if getattr(error.orig, "sqlstate", None) == "23505":
+                raise IngestionError(
+                    "publish_conflict", "Another publication conflicted with this release.",
+                    {"path": "release"}, http_status=409,
+                ) from None
+            raise
         typer.echo(f"release_id={release_id}")
         typer.echo("already active" if already_active else "status=active")
 

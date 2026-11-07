@@ -74,10 +74,22 @@ certify affordability, funding eligibility, or homes built.
 
 ## What we built
 
-The repository currently contains Lane 2 source materials, the proposed backend
-specification, and an [ADU demo packet builder](clear_path_checklist_build/README.md).
-The packet is an abbreviated software-testing sample, not an official city form.
-The FastAPI backend and application database have not been implemented yet.
+Backend A now runs locally with FastAPI, PostgreSQL 17 + pgvector, Alembic
+migrations, API-key protection, request IDs, and sanitized error responses. It
+imports a city registry and versioned manifests, stores sources and citations,
+and publishes reviewed drafts while retiring the previous release in the same
+scope. Synthetic seeding is repeatable. Two real PostgreSQL publishing connections
+are tested for serialization and a single active release.
+
+The database includes project, checklist, event, and milestone tables for teammate
+work. This Backend A slice does not expose project, portfolio, permit lookup,
+location, or timeline APIs. The [backend teammate guide](backend/README.md) lists
+commands and extension interfaces. Today's approved scope is the
+[Backend A design](docs/superpowers/specs/2026-11-07-backend-a-platform-ingestion-design.md).
+
+Lane 2 source materials and the [ADU demo packet builder](clear_path_checklist_build/README.md)
+remain in the repository. That packet is a software-testing sample, not an
+official city form or an imported rule dataset.
 
 **Demo video:** Not recorded yet.
 **Live demo:** Not deployed yet.
@@ -91,9 +103,36 @@ team builds.
 
 ## Try it
 
-There is no runnable backend API yet. The clone commands above provide the event
-materials. Add exact install and run commands, prerequisites, and environment
-variable names here when application code is added. Keep keys out of the repo.
+Install Docker with Compose and [uv](https://docs.astral.sh/uv/), then start Docker.
+From the repository root:
+
+```sh
+cp .env.example .env
+# Edit .env: choose a local CLEARPATH_API_KEY and keep CLEARPATH_MODE=synthetic.
+export COMPOSE_PROJECT_NAME=claude-impact
+make backend-up
+make backend-migrate
+make seed-demo
+make run
+```
+
+Open `http://127.0.0.1:8000/docs`. Health endpoints need no key;
+`/api/v1/_ping` needs the `X-API-Key` header. Keep the key and `.env` out of git.
+The synthetic dataset demonstrates ingestion and publication, not city guidance.
+
+```sh
+make test-backend TEST_DB=clearpath_test_myname
+make smoke
+# After reviewing curated source passages, attempt public import/publication:
+make seed-irvine
+```
+
+`make smoke` uses a throwaway key and temporary API on `127.0.0.1:8765`, verifies
+live/ready and ping authentication, then stops only its own API process. It leaves
+PostgreSQL running and is safe to repeat. If that port is occupied, select a free
+port with `make smoke SMOKE_PORT=18765`. `seed-irvine` stops on validation errors
+or cited passages that still need review. See [backend/README.md](backend/README.md)
+for environment variables, CLI commands, and teammate ownership rules.
 
 ## Sources and assumptions
 
@@ -119,7 +158,22 @@ Label any assumed numbers as ASSUMPTION here and in the tool.
 
 | Part | Status |
 |---|---|
-| | working / partly working / mocked |
+| FastAPI foundation, migrations, PostgreSQL storage | Working locally. Health/readiness, protected probes, stable errors, and request IDs are tested. |
+| Manifest validation, registry import, release publication | Working locally with real PostgreSQL. Imports are immutable and repeat imports reuse releases; publication checks cited-passage review status. |
+| Synthetic demo | Working. Test sources and timing ranges are synthetic; timing values are labeled ASSUMPTION. They are not permitting facts. |
+| Curated Irvine source bundle | Present for curation. Import and public publication depend on schema validity and review of every cited passage. No claim of verified approval eligibility. |
+| Project, checklist, timeline, and portfolio functionality | Tables exist. Backend A does not implement these HTTP APIs or claim a complete user workflow. |
+| Location, permit lookup, source and jurisdiction HTTP routes | Not built in Backend A. These routes belong to Person 4's workstream. |
+| `data fetch` with allowlist, rate limiting, and IP checks | Not built. Backend A imports local curated manifests and makes no source-network requests. |
+| `data activate` rollback | Not built. Retired releases cannot be republished through the draft-only service; changed content requires a new import. |
+| Concurrent publish verification | Implemented beyond the original deferral: two real publishing connections serialize behind the jurisdiction lock and leave one active release. |
+| Separate Compose database profiles | Not built. Replaced by release `kind` and `CLEARPATH_MODE` filtering in one database. |
+| Source-file hash verification | Not built. Source SHA-256 metadata is optional; excerpt hashes are computed during import. |
+| Fully relational associations for every reference | Not built. Passage citations use `citation_links`; other references remain import-validated JSONB. |
+| Immutable Compose image digest and backend CI workflow | Not built. The DB uses the `pgvector/pgvector:pg17` tag. |
+| Automatic personal-data detection in imports | Not built. Content review is manual, and real personal information must not be entered. |
+| Configurable manifest roots | Test-only `allowed_roots` hook exists. The CLI always uses the fixed `backend/data/` and `backend/tests/fixtures/` roots. |
+| Chat, embeddings/vector search, and user uploads/OCR | Not built. Installing pgvector does not implement vector search. |
 
 ## Where it gets things wrong
 

@@ -1,7 +1,9 @@
 -include .env
 export
 
-.PHONY: backend-up backend-down backend-migrate run test-backend seed-cities seed-demo seed-irvine
+TEST_DB ?= clearpath_test
+
+.PHONY: backend-up backend-down backend-migrate run test-backend seed-cities seed-demo seed-irvine smoke
 
 backend-up:
 	docker compose up -d --wait db
@@ -16,9 +18,13 @@ run:
 	cd backend && uv run uvicorn --factory clearpath.api.app:create_app --host 127.0.0.1 --port 8000
 
 test-backend:
-	docker compose exec -T db psql -U clearpath -tc "SELECT 1 FROM pg_database WHERE datname='clearpath_test'" | grep -q 1 || docker compose exec -T db createdb -U clearpath clearpath_test
-	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/clearpath_test CLEARPATH_API_KEY=test-key uv run alembic upgrade head
-	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/clearpath_test CLEARPATH_API_KEY=test-key uv run pytest -q
+	@uv run --project backend python -c 'import re, sys; name = sys.argv[1]; sys.exit(0 if re.fullmatch(r"clearpath_test[a-z0-9_]{0,49}", name) else "TEST_DB must start with clearpath_test and contain only lowercase letters, digits or underscores")' "$(TEST_DB)"
+	docker compose exec -T db psql -U clearpath -tc "SELECT 1 FROM pg_database WHERE datname='$(TEST_DB)'" | grep -q 1 || docker compose exec -T db createdb -U clearpath $(TEST_DB)
+	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/$(TEST_DB) CLEARPATH_API_KEY=test-key uv run alembic upgrade head
+	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/$(TEST_DB) CLEARPATH_API_KEY=test-key uv run pytest -q
+
+smoke:
+	bash backend/scripts/smoke.sh
 
 seed-cities:
 	@cd backend && uv run clearpath data import-cities
@@ -37,5 +43,5 @@ seed-demo: seed-cities
 	$(call seed-dataset,synthetic,tests/fixtures/irvine_adu_synthetic/manifest.json)
 
 seed-irvine: seed-cities
-	@printf '%s\n' 'seed-irvine: public publication requires reviewed pathways and requirements; the empty stub is rejected with empty_release until content is curated.'
+	@printf '%s\n' 'seed-irvine: publication requires every cited passage to be reviewed; check curated evidence before publishing.'
 	$(call seed-dataset,public,data/irvine_adu/manifest.json)
