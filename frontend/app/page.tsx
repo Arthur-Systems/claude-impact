@@ -1,83 +1,129 @@
 "use client";
-import Link from "next/link";
-import PageHeader from "@/components/PageHeader";
-import AddressMap from "@/components/AddressMap";
-import StatusBadge from "@/components/StatusBadge";
+import { ArrowRight, CalendarClock, CircleCheck, Compass, FileText, FileWarning, Files, MapPin, MessageCircle, Send, Upload, Route } from "lucide-react";
+import type { ReactNode } from "react";
+import ReadinessRing from "@/components/charts/ReadinessRing";
+import JourneyTracker from "@/components/charts/JourneyTracker";
+import PathTimeline from "@/components/charts/PathTimeline";
+import MapCard from "@/components/map/MapCard";
+import NavigatorCard from "@/components/panels/NavigatorCard";
+import DocumentsCard from "@/components/DocumentsCard";
 import { REQUIRED_DOCS, useProject } from "@/lib/project-context";
 import { estimate, toWeeks } from "@/lib/timeline";
+import { IRVINE_PORTAL } from "@/lib/knowledge";
 
-export default function Overview() {
-  const { missingPriority, readyCount, isReady, prepDays } = useProject();
+const I = { size: 18, strokeWidth: 1.75, "aria-hidden": true } as const;
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function CardHead({ icon, title, children }: { icon: ReactNode; title: string; children?: ReactNode }) {
+  return (
+    <div className="dash-head">
+      <span className="dash-icon">{icon}</span>
+      <h2>{title}</h2>
+      {children && <span className="dash-head-end">{children}</span>}
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  const { missingPriority, readyCount, prepDays, place } = useProject();
   const total = REQUIRED_DOCS.length;
-  const blocking = missingPriority.length;
-  const best = estimate(0);
-  const withMissing = estimate(prepDays);
+  const missing = missingPriority.length;
+  const best = toWeeks(estimate(0).total);
+  const worst = toWeeks(estimate(prepDays).total);
+
+  let next: ReactNode;
+  if (missing > 0) {
+    next = (
+      <button className="btn btn-primary tile-btn" onClick={() => scrollToId("documents")}>
+        <Upload {...I} /> Upload {missingPriority[0].label.toLowerCase()}
+      </button>
+    );
+  } else if (!place) {
+    next = (
+      <button
+        className="btn btn-primary tile-btn"
+        onClick={() => {
+          const el = document.getElementById("map-search") as HTMLInputElement | null;
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          el?.focus({ preventScroll: true });
+        }}
+      >
+        <MapPin {...I} /> Add address
+      </button>
+    );
+  } else {
+    next = (
+      <a className="btn btn-primary tile-btn" href={IRVINE_PORTAL} target="_blank" rel="noreferrer">
+        <Send {...I} /> Submit on IrvineReady
+      </a>
+    );
+  }
 
   return (
-    <>
-      <PageHeader title="Overview" subtitle="Detached ADU in Irvine.">
-        {blocking > 0 ? (
-          <div className="notice notice-warn" role="status" style={{ marginTop: "var(--space-5)", marginBottom: 0 }}>
-            <p>
-              <b className="num">{blocking}</b> {blocking === 1 ? "document blocks" : "documents block"} submission.
-            </p>
-            <Link className="btn btn-primary" href="/documents">
-              Add documents
-            </Link>
-          </div>
-        ) : (
-          <div className="notice" role="status" style={{ marginTop: "var(--space-5)", marginBottom: 0 }}>
-            <p>All required documents are in. Review them, then submit to the city.</p>
-            <Link className="btn btn-primary" href="/documents">
-              Review documents
-            </Link>
-          </div>
-        )}
-      </PageHeader>
+    <div className="dash">
+      <section className="card tile enter" style={{ ["--i" as string]: 0 }} aria-label="Documents">
+        <div className="tile-label"><Files {...I} /> Documents</div>
+        <div className="tile-body">
+          <ReadinessRing ready={readyCount} total={total} size={56} />
+          <span className="tile-value num">{readyCount}/{total}</span>
+        </div>
+      </section>
 
-      <div className="grid">
-        <section className="card col-7">
-          <div className="card-head">
-            <h2>Document readiness</h2>
-            <span className="muted num">
-              {readyCount} of {total} ready
-            </span>
-          </div>
-          <div className="progress" role="progressbar" aria-label="Documents ready" aria-valuemin={0} aria-valuemax={total} aria-valuenow={readyCount}>
-            <span style={{ transform: `scaleX(${readyCount / total})` }} />
-          </div>
-          <div className="list">
-            {REQUIRED_DOCS.map((d) => (
-              <div className="row" key={d.id}>
-                <span>{d.label}</span>
-                <StatusBadge status={isReady(d.id) ? "ready" : d.priority ? "missing" : "todo"} />
-              </div>
-            ))}
-          </div>
-        </section>
+      <button className="card tile tile-click enter" style={{ ["--i" as string]: 1 }} onClick={() => scrollToId("documents")} aria-label={`${missing} missing documents, go to documents`}>
+        <span className="tile-label">
+          {missing > 0 ? <FileWarning {...I} /> : <CircleCheck {...I} />} Missing
+        </span>
+        <span className="tile-body">
+          <span className={`tile-badge ${missing > 0 ? "is-bad" : "is-good"}`}>
+            {missing > 0 ? <FileWarning size={20} strokeWidth={2} aria-hidden="true" /> : <CircleCheck size={20} strokeWidth={2} aria-hidden="true" />}
+          </span>
+          <span className="tile-value num">{missing}</span>
+        </span>
+      </button>
 
-        <section className="card col-5">
-          <h2>Project location</h2>
-          <AddressMap />
-        </section>
+      <section className="card tile enter" style={{ ["--i" as string]: 2 }} aria-label="Approval estimate">
+        <div className="tile-label"><CalendarClock {...I} /> Approval</div>
+        <div className="tile-body tile-stack">
+          <span className="tile-value num">{best === worst ? `${best}` : `${best} to ${worst}`} <small>wks</small></span>
+          <span className="tile-caption">Up to, legal limit</span>
+        </div>
+      </section>
 
-        <section className="card col-12">
-          <div className="estimate">
-            <h2>Approval estimate</h2>
-            <div className="stat">
-              <span className="k">If everything is submitted</span>
-              <span className="v">Up to about {toWeeks(best.total)} weeks</span>
-            </div>
-            <div className="stat">
-              <span className="k">If documents stay missing</span>
-              <span className="v">Up to about {toWeeks(withMissing.total)} weeks</span>
-            </div>
-            <p className="muted">
-              These are legal limits, not predictions. <Link href="/timeline">See how we estimate</Link>
-            </p>
-          </div>
-        </section>
+      <section className="card tile enter" style={{ ["--i" as string]: 3 }} aria-label="Next step">
+        <div className="tile-label"><ArrowRight {...I} /> Next step</div>
+        <div className="tile-body">{next}</div>
+      </section>
+
+      <section className="card span-12" aria-label="Journey">
+        <CardHead icon={<Route {...I} />} title="Journey" />
+        <JourneyTracker />
+      </section>
+
+      <div className="span-7 cell-map">
+        <MapCard />
       </div>
-    </>
+
+      <section className="card span-5 cell-docs" id="documents" aria-label="Documents">
+        <CardHead icon={<FileText {...I} />} title="Documents">
+          <span className="num">{readyCount}/{total} ready</span>
+        </CardHead>
+        <DocumentsCard />
+      </section>
+
+      <section className="card span-7" id="timeline" aria-label="Timeline">
+        <CardHead icon={<Compass {...I} />} title="Timeline" />
+        <PathTimeline />
+      </section>
+
+      <section className="card span-5 cell-nav" id="navigator" aria-label="Navigator">
+        <CardHead icon={<MessageCircle {...I} />} title="Navigator" />
+        <div className="cell-nav-body">
+          <NavigatorCard />
+        </div>
+      </section>
+    </div>
   );
 }

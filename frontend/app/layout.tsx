@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { ReactNode } from "react";
+import { House } from "lucide-react";
 import "./globals.css";
 import { ProjectProvider } from "@/lib/project-context";
-import Sidebar from "@/components/Sidebar";
 import Splash from "@/components/Splash";
+import Mark from "@/components/Mark";
+import CommandSearch from "@/components/panels/CommandSearch";
+import AskCityButton from "@/components/panels/AskCityButton";
 
 export const metadata: Metadata = {
   title: "ClearPath",
@@ -22,15 +25,28 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <Splash />
         <ProjectProvider>
-          <div className="shell">
-            <Sidebar />
-            <main className="main">
-              <div className="main-inner">
-                {children}
-                <footer className="site-footer">Prototype. Not legal advice. Confirm with the City of Irvine or a professional.</footer>
+          <header className="appbar">
+            <div className="appbar-inner">
+              <div className="appbar-left">
+                <a className="appbar-brand" href="/" aria-label="ClearPath home">
+                  <Mark size={26} />
+                  <span>ClearPath</span>
+                </a>
+                <span className="project-chip">
+                  <House size={16} strokeWidth={1.75} aria-hidden="true" />
+                  <span>Detached ADU, Irvine</span>
+                </span>
               </div>
-            </main>
-          </div>
+              <div className="appbar-right">
+                <CommandSearch />
+                <AskCityButton />
+              </div>
+            </div>
+          </header>
+          <main className="page">
+            {children}
+            <footer className="site-footer">Prototype. Not legal advice. Confirm with the City of Irvine or a professional.</footer>
+          </main>
         </ProjectProvider>
       </body>
     </html>
