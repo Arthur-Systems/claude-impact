@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
@@ -13,10 +13,12 @@ DataMode = Literal["public", "synthetic"]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="CLEARPATH_", hide_input_in_errors=True, extra="forbid"
+        env_prefix="CLEARPATH_", hide_input_in_errors=True, extra="forbid", populate_by_name=True
     )
 
-    database_url: SecretStr
+    database_url: SecretStr = Field(
+        validation_alias=AliasChoices("DATABASE_URL", "CLEARPATH_DATABASE_URL")
+    )
     api_key: SecretStr
     data_mode: DataMode = "public"
 

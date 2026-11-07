@@ -27,7 +27,7 @@ def main() -> None:
             "POSTGRES_DB=clearpath",
             f"POSTGRES_PASSWORD={password}",
             f"CLEARPATH_API_KEY={secrets.token_hex(32)}",
-            f"CLEARPATH_DATABASE_URL=postgresql+psycopg://clearpath:{password}@db:5432/clearpath",
+            f"DATABASE_URL=postgresql+psycopg://clearpath:{password}@db:5432/clearpath",
             f"CLEARPATH_DATA_MODE={args.mode}",
             f"BACKEND_API_PORT={8001 if args.mode == 'synthetic' else 8000}",
             f"BACKEND_DB_PORT={55433 if args.mode == 'synthetic' else 55432}",

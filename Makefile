@@ -21,7 +21,12 @@ $(error BACKEND_ENV must be public or demo)
 endif
 
 ENV_FILE := .runtime/$(BACKEND_ENV).env
-COMPOSE = CLEARPATH_DATA_MODE=$(DATA_MODE) docker compose --env-file $(ENV_FILE) -p clearpath-$(BACKEND_ENV)
+# Remove ambient interpolation values so the selected private env file owns all
+# credentials, database routing and ports (including both Settings URL spellings).
+COMPOSE = env -u DATABASE_URL -u CLEARPATH_DATABASE_URL -u CLEARPATH_API_KEY \
+  -u POSTGRES_USER -u POSTGRES_PASSWORD -u POSTGRES_DB \
+  -u BACKEND_API_PORT -u BACKEND_DB_PORT CLEARPATH_DATA_MODE=$(DATA_MODE) \
+  docker compose --env-file $(ENV_FILE) -p clearpath-$(BACKEND_ENV)
 
 .PHONY: backend-env backend-up backend-migrate backend-down backend-logs demo test-backend
 .NOTPARALLEL:

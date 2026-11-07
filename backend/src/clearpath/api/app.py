@@ -1,8 +1,11 @@
 """App factory and small, shared HTTP boundary for the foundation."""
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
+from uuid import uuid4
 
+from alembic.script import ScriptDirectory
 from fastapi import APIRouter, Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -20,7 +23,7 @@ from clearpath.core.config import DataMode, Settings
 from clearpath.db.session import create_session_factory, dispose_session_factory
 from clearpath.domain.errors import DomainError
 
-SCHEMA_REVISION = "0001_dataset_foundation"
+MIGRATIONS_PATH = Path(__file__).resolve().parents[3] / "migrations"
 
 
 class StatusQuery(BaseModel):
@@ -28,13 +31,28 @@ class StatusQuery(BaseModel):
     expected_mode: DataMode | None = None
 
 
-def error_response(code: str, message: str, status_code: int) -> JSONResponse:
-    return JSONResponse({"error": {"code": code, "message": message}}, status_code=status_code)
+def error_response(
+    request: Request,
+    code: str,
+    message: str,
+    status_code: int,
+    details: list[dict[str, str]] | None = None,
+) -> JSONResponse:
+    request_id = getattr(request.state, "request_id", None) or str(uuid4())
+    return JSONResponse(
+        {
+            "error": {"code": code, "message": message, "details": details or []},
+            "request_id": request_id,
+        },
+        status_code=status_code,
+        headers={"X-Request-ID": request_id},
+    )
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     configured = settings if settings is not None else Settings()
     factory = create_session_factory(configured)
+    schema_heads = frozenset(ScriptDirectory(str(MIGRATIONS_PATH)).get_heads())
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -52,19 +70,28 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = configured
     app.state.session_factory = factory
 
+    @app.middleware("http")
+    async def correlate_request(request: Request, call_next):
+        # Generate an ID; client-provided IDs are untrusted raw input.
+        request.state.request_id = str(uuid4())
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request.state.request_id
+        return response
+
     @app.exception_handler(DomainError)
     async def domain_error(request: Request, error: DomainError):
-        return error_response(error.code, error.message, error.status_code)
+        return error_response(request, error.code, error.message, error.status_code, error.details)
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, error: RequestValidationError):
         # Pydantic's input, ctx, loc and custom messages can contain raw values/secrets.
-        return error_response("validation_error", "Request validation failed.", 422)
+        return error_response(request, "validation_error", "Request validation failed.", 422)
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException):
         codes = {404: "not_found", 405: "method_not_allowed"}
         return error_response(
+            request,
             codes.get(error.status_code, "http_error"),
             "Request could not be completed.",
             error.status_code,
@@ -72,7 +99,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(Exception)
     async def unexpected_error(request: Request, error: Exception):
-        return error_response("internal_error", "An unexpected error occurred.", 500)
+        return error_response(request, "internal_error", "An unexpected error occurred.", 500)
 
     @app.get("/health/live", tags=["health"])
     def live(config: SettingsDependency):
@@ -81,11 +108,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/health/ready", tags=["health"])
     def ready(session: SessionDependency, config: SettingsDependency):
         try:
-            revision = session.scalar(text("SELECT version_num FROM alembic_version"))
+            revisions = frozenset(session.scalars(text("SELECT version_num FROM alembic_version")))
             vector = session.scalar(
                 text("SELECT extversion FROM pg_extension WHERE extname='vector'")
             )
-            if revision != SCHEMA_REVISION or not vector:
+            if revisions != schema_heads or not vector:
                 raise DomainError("not_ready", "Database schema is not ready.", 503)
             classification = "reviewed_public" if config.data_mode == "public" else "synthetic"
             available = session.scalar(

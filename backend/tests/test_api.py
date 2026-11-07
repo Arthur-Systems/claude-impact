@@ -66,6 +66,7 @@ def test_framework_not_found_uses_error_envelope():
 
 
 def test_default_mode_public_and_missing_secrets_have_no_fallback(monkeypatch):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.delenv("CLEARPATH_DATABASE_URL", raising=False)
     monkeypatch.delenv("CLEARPATH_API_KEY", raising=False)
     monkeypatch.delenv("CLEARPATH_DATA_MODE", raising=False)
@@ -114,3 +115,80 @@ def test_unexpected_exception_never_exposes_its_raw_message():
     assert response.status_code == 500
     assert response.json()["error"]["code"] == "internal_error"
     assert "private-database-password" not in response.text
+
+
+@pytest.mark.parametrize(
+    "path,status_code,code",
+    [
+        ("/api/v1/status", 401, "unauthorized"),
+        ("/api/v1/status?expected_mode=private-raw-value", 422, "validation_error"),
+        ("/api/v1/status?expected_mode=synthetic", 409, "data_mode_mismatch"),
+        ("/missing-route", 404, "not_found"),
+        ("/health/ready", 503, "not_ready"),
+        ("/__unexpected", 500, "internal_error"),
+    ],
+)
+def test_error_envelope_has_safe_details_and_generated_correlation(path, status_code, code):
+    from uuid import UUID
+
+    app = create_app(settings())
+
+    @app.get("/__unexpected")
+    def unexpected():
+        raise RuntimeError("private-exception-secret")
+
+    headers = {"X-Request-ID": "private-client-request-id"}
+    if status_code != 401:
+        headers["X-API-Key"] = KEY
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.get(path, headers=headers)
+        second = client.get(path, headers=headers)
+    assert response.status_code == status_code
+    payload = response.json()
+    assert set(payload) == {"error", "request_id"}
+    assert set(payload["error"]) == {"code", "message", "details"}
+    assert payload["error"]["code"] == code
+    assert payload["error"]["details"] == []
+    assert UUID(payload["request_id"]).version == 4
+    assert response.headers["X-Request-ID"] == payload["request_id"]
+    assert second.json()["request_id"] != payload["request_id"]
+    for secret in (
+        "private-raw-value",
+        "private-exception-secret",
+        "private-client-request-id",
+        KEY,
+    ):
+        assert secret not in response.text
+
+
+def test_domain_error_can_provide_only_safe_structured_details():
+    from clearpath.domain.errors import DomainError
+
+    app = create_app(settings())
+
+    @app.get("/__safe_domain_error")
+    def invalid_domain():
+        raise DomainError(
+            "unsupported_configuration",
+            "Configuration is unsupported.",
+            409,
+            details=[{"code": "unsupported_mode", "field": "data_mode"}],
+        )
+
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.get("/__safe_domain_error")
+    assert response.status_code == 409
+    assert response.json()["error"]["details"] == [
+        {"code": "unsupported_mode", "field": "data_mode"}
+    ]
+
+
+def test_database_url_environment_precedence_and_explicit_override(monkeypatch):
+    canonical = "postgresql+psycopg://canonical:dummy@127.0.0.1:5432/canonical"
+    legacy = "postgresql+psycopg://legacy:dummy@127.0.0.1:5432/legacy"
+    monkeypatch.setenv("DATABASE_URL", canonical)
+    monkeypatch.setenv("CLEARPATH_DATABASE_URL", legacy)
+    assert Settings(api_key=KEY).database_url.get_secret_value() == canonical
+    assert Settings(database_url=URL, api_key=KEY).database_url.get_secret_value() == URL
+    monkeypatch.delenv("DATABASE_URL")
+    assert Settings(api_key=KEY).database_url.get_secret_value() == legacy

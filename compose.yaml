@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
     environment:
-      CLEARPATH_DATABASE_URL: ${CLEARPATH_DATABASE_URL:?Use make backend-up to generate local credentials}
+      DATABASE_URL: ${DATABASE_URL:-${CLEARPATH_DATABASE_URL:?Use make backend-up to generate local credentials}}
       CLEARPATH_API_KEY: ${CLEARPATH_API_KEY:?Use make backend-up to generate local credentials}
       CLEARPATH_DATA_MODE: ${CLEARPATH_DATA_MODE:-public}
     ports:

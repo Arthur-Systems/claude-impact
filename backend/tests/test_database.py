@@ -143,7 +143,7 @@ def test_sources_and_citation_foreign_keys_preserve_evidence(migrated):
             checked_at=now,
             sha256="a" * 64,
             local_artifact_key="technical/source.txt",
-            extraction_status="succeeded",
+            extraction_status="parsed",
             review_status="reviewed",
         )
         session.add(source)
@@ -317,3 +317,143 @@ def test_orm_and_explicit_migration_expose_the_same_schema(migrated):
     with migrated.connect() as connection:
         context = MigrationContext.configure(connection, opts={"compare_type": True})
         assert compare_metadata(context, Base.metadata) == []
+
+
+def test_extraction_states_are_distinct_from_review_states(migrated):
+    import pytest
+    from sqlalchemy.exc import IntegrityError
+
+    with migrated.begin() as connection:
+        statement = text("""
+            INSERT INTO source_snapshots
+                (source_key, canonical_url, title, publisher, authority_type, mime_type,
+                 fetched_at, checked_at, sha256, local_artifact_key,
+                 extraction_status, review_status)
+            VALUES (:key, 'https://example.invalid', 'Synthetic technical fixture', 'Test',
+                    'synthetic', 'text/plain', now(), now(), :hash, 'test/source.txt',
+                    :extraction, :review)
+        """)
+        for index, extraction in enumerate(["pending", "parsed", "needs_review", "failed"]):
+            connection.execute(
+                statement,
+                {
+                    "key": f"technical-{index}",
+                    "hash": str(index) * 64,
+                    "extraction": extraction,
+                    "review": "pending",
+                },
+            )
+        for index, invalid in enumerate(["succeeded", "reviewed"]):
+            with pytest.raises(IntegrityError), connection.begin_nested():
+                connection.execute(
+                    statement,
+                    {
+                        "key": f"invalid-{index}",
+                        "hash": "a" * 64,
+                        "extraction": invalid,
+                        "review": "pending",
+                    },
+                )
+        with pytest.raises(IntegrityError), connection.begin_nested():
+            connection.execute(
+                statement,
+                {
+                    "key": "invalid-review",
+                    "hash": "b" * 64,
+                    "extraction": "parsed",
+                    "review": "parsed",
+                },
+            )
+        assert (
+            connection.scalar(
+                text("SELECT count(*) FROM source_snapshots WHERE review_status='pending'")
+            )
+            == 4
+        )
+
+
+def test_forward_migration_preserves_legacy_snapshot_and_has_coherent_downgrade(database):
+    import os
+    import subprocess
+
+    from conftest import BACKEND
+
+    migrate(database, "0001_dataset_foundation")
+    with database.begin() as connection:
+        snapshot_id = connection.scalar(
+            text("""
+            INSERT INTO source_snapshots
+                (source_key, canonical_url, title, publisher, authority_type, mime_type,
+                 fetched_at, checked_at, sha256, local_artifact_key,
+                 extraction_status, review_status)
+            VALUES ('legacy-technical', 'https://example.invalid', 'Synthetic fixture', 'Test',
+                    'synthetic', 'text/plain', now(), now(), repeat('a',64), 'technical/source.txt',
+                    'succeeded', 'pending') RETURNING id
+        """)
+        )
+    migrate(database)
+    with database.connect() as connection:
+        assert connection.execute(
+            text("SELECT extraction_status, review_status FROM source_snapshots WHERE id=:id"),
+            {"id": snapshot_id},
+        ).one() == ("parsed", "pending")
+    environment = os.environ | {
+        "DATABASE_URL": database.url.render_as_string(hide_password=False),
+        "CLEARPATH_DATABASE_URL": database.url.render_as_string(hide_password=False),
+        "CLEARPATH_API_KEY": "test-only-" + "a" * 40,
+    }
+    result = subprocess.run(
+        [
+            str(BACKEND / ".venv/bin/alembic"),
+            "-c",
+            str(BACKEND / "alembic.ini"),
+            "downgrade",
+            "0001_dataset_foundation",
+        ],
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    with database.connect() as connection:
+        assert (
+            connection.scalar(
+                text("SELECT extraction_status FROM source_snapshots WHERE id=:id"),
+                {"id": snapshot_id},
+            )
+            == "succeeded"
+        )
+    migrate(database)
+
+
+def test_readiness_uses_current_alembic_heads_instead_of_hardcoded_revision(
+    migrated, tmp_path, monkeypatch
+):
+    import shutil
+
+    from alembic import command
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+    from conftest import BACKEND
+
+    from clearpath.api import app as app_module
+
+    scripts = tmp_path / "migrations"
+    shutil.copytree(BACKEND / "migrations", scripts)
+    previous_head = ScriptDirectory(str(scripts)).get_current_head()
+    (scripts / "versions/future_noop.py").write_text(
+        f"revision = 'test_future_revision'\ndown_revision = {previous_head!r}\n"
+        "def upgrade():\n    pass\ndef downgrade():\n    pass\n"
+    )
+    monkeypatch.setattr(app_module, "MIGRATIONS_PATH", scripts, raising=False)
+    url = migrated.url.render_as_string(hide_password=False)
+    key = "test-only-" + "a" * 40
+    monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.setenv("CLEARPATH_DATABASE_URL", url)
+    monkeypatch.setenv("CLEARPATH_API_KEY", key)
+    config = Config()
+    config.set_main_option("script_location", str(scripts))
+    with TestClient(create_app(Settings(database_url=url, api_key=key))) as client:
+        assert client.get("/health/ready").status_code == 503
+        command.upgrade(config, "head")
+        assert client.get("/health/ready").status_code == 200

@@ -40,7 +40,8 @@ class SourceSnapshot(Identified, Base):
         CheckConstraint("source_key ~ '^[a-z0-9]+(-[a-z0-9]+)*$'", name="ck_snapshot_key"),
         CheckConstraint("sha256 ~ '^[0-9a-f]{64}$'", name="ck_snapshot_hash"),
         CheckConstraint(
-            "extraction_status IN ('pending','succeeded','failed')", name="ck_snapshot_extraction"
+            "extraction_status IN ('pending','parsed','needs_review','failed')",
+            name="ck_snapshot_extraction",
         ),
         CheckConstraint(
             "review_status IN ('pending','reviewed','rejected')", name="ck_snapshot_review"

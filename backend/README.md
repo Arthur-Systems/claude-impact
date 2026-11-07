@@ -37,7 +37,11 @@ Explicit `BACKEND_ENV=public` with `seed-demo` fails immediately. A separate
 Credentials are generated inside a pinned Python container, with private file
 permissions, and reused. They are not printed. Do not commit `.runtime/` or use
 `.env.example`'s placeholders as real credentials. Make explicitly sets the
-selected data mode so an ambient `CLEARPATH_DATA_MODE` cannot switch it silently.
+selected data mode and removes ambient database URL (both spellings), API key,
+PostgreSQL credentials and port variables before Compose interpolation. The
+selected private environment file supplies all credentials and database routing;
+exporting a public database URL cannot redirect the synthetic environment. Existing
+private files using the legacy URL spelling remain supported.
 
 Public health routes:
 
@@ -84,10 +88,17 @@ for tests. Source fixtures are synthetic technical examples, not city rules.
 - `clearpath.core.config.Settings`: required secret `database_url` (only
   `postgresql+psycopg`, host/database required) and `api_key` (at least 32 characters);
   `data_mode` defaults to `public` and permits `public|synthetic`. Environment
-  names are prefixed `CLEARPATH_`. No implicit dotenv loading or credential defaults.
-- `clearpath.domain.errors.DomainError(code, message, status_code=400)`: use fixed,
-  sanitized public code/message strings, never raw exceptions or applicant input.
-  All HTTP failures use `{"error":{"code":"...","message":"..."}}`.
+  names are `DATABASE_URL` (canonical), `CLEARPATH_API_KEY` and `CLEARPATH_DATA_MODE`.
+  `CLEARPATH_DATABASE_URL` remains a compatibility alias. An explicit
+  `Settings(database_url=...)` wins over environment; otherwise `DATABASE_URL`
+  wins over its alias. No implicit dotenv loading or credential defaults.
+- `clearpath.domain.errors.DomainError(code, message, status_code=400, *, details=None)`:
+  use fixed public code/message and structured details containing only safe public
+  reason codes/field names, never raw exceptions or applicant input. Details default
+  to an empty list. All HTTP failures use
+  `{"error":{"code":"...","message":"...","details":[]},"request_id":"<uuid>"}`.
+  The generated per-request UUID also appears in `X-Request-ID`; client IDs are
+  ignored. Validation/unexpected errors omit raw values, context and stack traces.
 - `clearpath.db.session.get_session() -> Iterator[Session]`: lazy default settings
   and cached engine. `create_session_factory(settings)` creates an explicit
   `sessionmaker[Session]`; `dispose_session_factory(factory)` releases its engine.
@@ -101,3 +112,12 @@ for tests. Source fixtures are synthetic technical examples, not city rules.
   timezone-aware PostgreSQL types, and references enforce evidence integrity.
   The task report documents every model field and constraint. JSON/array semantic
   validation, hashing, immutable staging and atomic publication belong to ingestion.
+
+Extraction states are `pending|parsed|needs_review|failed`, independently of source
+review states `pending|reviewed|rejected`. Forward migration `0002_extraction_status`
+converts historical extraction `succeeded` to `parsed` and preserves snapshot IDs
+and curator review status. The original `0001` remains historical. Downgrading to
+it maps `parsed` to `succeeded` and `needs_review` to `pending`. Readiness discovers
+current Alembic script heads, so adding a later migration requires no API edit.
+Shapely `2.2.0` is installed as part of the agreed scaffold; no location processing
+is implemented here.

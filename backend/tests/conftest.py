@@ -85,6 +85,7 @@ def database(postgres):
 
 def migrate(engine, revision="head"):
     environment = os.environ | {
+        "DATABASE_URL": engine.url.render_as_string(hide_password=False),
         "CLEARPATH_DATABASE_URL": engine.url.render_as_string(hide_password=False),
         "CLEARPATH_API_KEY": "test-only-" + "a" * 40,
     }
