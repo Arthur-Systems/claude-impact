@@ -2,8 +2,8 @@
 
 > For a nonprofit project manager or first-time ADU builder in Orange County: ClearPath turns a city's scattered ADU guidance into one checklist and approval timeline per project, with every requirement linked to the exact source passage, and says "unknown" instead of guessing.
 
-**Team:** [team name]
-**Members:** [names]
+**Team:** ClearPath
+**Members:** Arthur, Pranav, Miguel, Youting, John
 **Lane:** 2: Clear it
 **Built at:** Claude Impact Lab: UCI x SoCal Affordable Housing, November 7, 2026
 
@@ -83,7 +83,7 @@ npm install
 npm run dev                         # http://localhost:3000
 ```
 
-Checks: `make test-backend TEST_DB=clearpath_test_yourname` (803 tests) and `make smoke SMOKE_PORT=8799`. Synthetic test data instead of Irvine: `make seed-demo` with `CLEARPATH_MODE=synthetic`. More detail: [backend/README.md](backend/README.md).
+Checks: `make test-backend TEST_DB=clearpath_test_yourname` (800+ tests) and `make smoke SMOKE_PORT=8799`. Synthetic test data instead of Irvine: `make seed-demo` with `CLEARPATH_MODE=synthetic`. More detail: [backend/README.md](backend/README.md).
 
 ## Sources and assumptions
 
