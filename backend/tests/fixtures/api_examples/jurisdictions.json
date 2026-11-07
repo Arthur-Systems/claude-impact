@@ -1,0 +1,67 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/jurisdictions",
+    "headers": { "X-API-Key": "<CLEARPATH_API_KEY from env>" },
+    "body": null
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "request_id": "00000000-0000-4000-8000-000000000901",
+    "generated_at": "2026-11-07T19:00:00Z",
+    "jurisdictions": [
+      {
+        "slug": "irvine-ca",
+        "name": "Irvine",
+        "state": "CA",
+        "timezone": "America/Los_Angeles",
+        "permit_page_url": "<official URL from manifest>",
+        "coverage": [
+          {
+            "project_type": "adu",
+            "profile_key": "irvine-adu-detached-existing-dwelling",
+            "release": {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "content_hash": "0000000000000000000000000000000000000000000000000000000000000001",
+              "dataset_mode": "synthetic",
+              "published_at": "2026-11-07T18:00:00Z"
+            },
+            "sources": [
+              { "source_key": "IRV-ADU", "title": "<source title from manifest>", "checked_at": "2026-11-07" },
+              { "source_key": "IRV-APP", "title": "<source title from manifest>", "checked_at": "2026-11-07" },
+              { "source_key": "HCD-ADU", "title": "<source title from manifest>", "checked_at": "2026-11-07" }
+            ]
+          }
+        ]
+      },
+      {
+        "slug": "anaheim-ca",
+        "name": "Anaheim",
+        "state": "CA",
+        "timezone": "America/Los_Angeles",
+        "permit_page_url": null,
+        "coverage": []
+      },
+      {
+        "slug": "costa-mesa-ca",
+        "name": "Costa Mesa",
+        "state": "CA",
+        "timezone": "America/Los_Angeles",
+        "permit_page_url": null,
+        "coverage": []
+      }
+    ],
+    "warnings": [
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      },
+      {
+        "code": "registry_not_coverage",
+        "message": "A city in this list has rule coverage only if its coverage list is non-empty. Empty coverage means no curated rules yet."
+      }
+    ]
+  }
+}
