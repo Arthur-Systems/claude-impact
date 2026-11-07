@@ -38,6 +38,7 @@ def test_expected_files_exist():
         "permit_lookup_applies.json",
         "permit_lookup_needs_information.json",
         "permit_lookup_rule_coverage_unavailable.json",
+        "sources_get.json",
         "error_envelope.json",
         # Person 5: projects and timeline
         "project_created.json",
@@ -80,6 +81,14 @@ def test_permit_lookup_statuses(path):
             assert item["missing_fact_keys"] == [], item["key"]
     union = sorted({k for r in response["requirements"] for k in r["missing_fact_keys"]})
     assert response["missing_fact_keys"] == union
+    cited = []
+    for item in response["pathways"] + response["requirements"]:
+        for c in item["citations"]:
+            if c["source_key"] not in cited:
+                cited.append(c["source_key"])
+    assert [s["source_key"] for s in response["sources_used"]] == cited
+    for s in response["sources_used"]:
+        assert set(s) == {"source_key", "title", "url", "publisher", "checked_at", "verification_depth"}
 
 
 def test_needs_information_example_shows_missing_floor_area():
@@ -156,6 +165,7 @@ def test_service_output_keys_match_applies_example():
     assert set(out["requirements"][0]) == set(ex["requirements"][0])
     assert set(out["requirements"][0]["citations"][0]) == set(ex["requirements"][0]["citations"][0])
     assert set(out["pathways"][0]["citations"][0]) == set(ex["pathways"][0]["citations"][0])
+    assert set(out["sources_used"][0]) == set(ex["sources_used"][0])
     assert {"code", "message"} <= set(out["warnings"][0])
 
 

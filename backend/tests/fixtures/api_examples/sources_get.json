@@ -1,0 +1,65 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/sources/IRV-ADU",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": null
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "request_id": "00000000-0000-4000-8000-000000000908",
+    "source": {
+      "key": "IRV-ADU",
+      "url": "<official URL from manifest>",
+      "title": "<source title from manifest>",
+      "publisher": "<publisher from manifest>",
+      "authority_type": "<authority type from manifest>",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "title_only",
+      "terms_note": "<reuse terms or unknown>",
+      "passages": [
+        {
+          "id": "00000000-0000-4000-8000-000000000501",
+          "locator": "<page or heading from manifest>",
+          "excerpt": "<exact excerpt>",
+          "review_status": "reviewed"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000502",
+          "locator": "<page or heading from manifest>",
+          "excerpt": "<exact excerpt>",
+          "review_status": "needs_review"
+        }
+      ],
+      "releases": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "profile_key": "irvine-adu-detached-existing-dwelling",
+          "dataset_mode": "synthetic"
+        }
+      ]
+    },
+    "warnings": [
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      },
+      {
+        "code": "synthetic_dataset",
+        "message": "This checklist comes from a synthetic test dataset, not the reviewed city sources."
+      },
+      {
+        "code": "unreviewed_extraction",
+        "message": "Some text from this source has not been checked by a person yet.",
+        "source_keys": [
+          "IRV-ADU"
+        ]
+      }
+    ]
+  }
+}

@@ -71,6 +71,7 @@ class _Evidence:
         self.release = release
         self.unreviewed_sources: set[str] = set()
         self.unresolved = False
+        self.cited_sources: dict[str, None] = {}  # insertion-ordered set
 
     def citations(self, passage_ids: Any) -> list[dict]:
         out = []
@@ -82,6 +83,7 @@ class _Evidence:
                 continue
             if not self.release.is_reviewed(str(pid)):
                 self.unreviewed_sources.add(passage["source_key"])
+            self.cited_sources.setdefault(passage["source_key"], None)
             out.append(
                 {
                     "source_key": passage["source_key"],
@@ -95,6 +97,23 @@ class _Evidence:
                 }
             )
         return out
+
+    def sources_used(self) -> list[dict]:
+        """Each cited source once, in first-cited order."""
+        used = []
+        for key in self.cited_sources:
+            source = self.release.sources[key]
+            used.append(
+                {
+                    "source_key": key,
+                    "title": source.get("title"),
+                    "url": source.get("url"),
+                    "publisher": source.get("publisher"),
+                    "checked_at": str(source["checked_at"]) if source.get("checked_at") is not None else None,
+                    "verification_depth": source.get("verification_depth"),
+                }
+            )
+        return used
 
 
 def _evaluate(predicate: Any, facts: Mapping[str, Any], schema: Mapping[str, Any], path: str) -> PredicateResult | None:
@@ -130,6 +149,7 @@ def _base_result(dataset_mode: str, location, warnings: list[dict]) -> dict:
         "requirements": [],
         "missing_fact_keys": [],
         "conflicts": [],
+        "sources_used": [],
         "warnings": warnings,
     }
 
@@ -322,4 +342,5 @@ def lookup_permits(
     result["release"] = {"id": release.release_id, "content_hash": release.content_hash, "dataset_mode": release.dataset_mode}
     result["profile_key"] = release.profile_key
     result["facts_used"] = client_facts
+    result["sources_used"] = evidence.sources_used()
     return result

@@ -42,6 +42,7 @@
     "requirements": [],
     "missing_fact_keys": [],
     "conflicts": [],
+    "sources_used": [],
     "warnings": [
       {
         "code": "example_data",

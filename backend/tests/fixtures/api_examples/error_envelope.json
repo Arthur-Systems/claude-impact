@@ -4,18 +4,25 @@
     "path": "/api/v1/permit-lookups",
     "headers": {},
     "body": {
-      "location": { "selected_area": { "jurisdiction": "irvine-ca" } },
+      "location": {
+        "selected_area": {
+          "jurisdiction": "irvine-ca"
+        }
+      },
       "project_type": "adu",
       "profile_key": "irvine-adu-detached-existing-dwelling",
-      "facts": { "adu_form": "detached", "existing_dwelling": true }
+      "facts": {
+        "adu_form": "detached",
+        "existing_dwelling": true
+      }
     }
   },
   "status_code": 401,
   "response": {
     "example": true,
     "error": {
-      "code": "missing_api_key",
-      "message": "The X-API-Key header is missing or wrong.",
+      "code": "unauthorized",
+      "message": "A valid API key is required.",
       "details": {}
     },
     "request_id": "00000000-0000-4000-8000-000000000906"

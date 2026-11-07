@@ -234,6 +234,32 @@
     ],
     "missing_fact_keys": [],
     "conflicts": [],
+    "sources_used": [
+      {
+        "source_key": "IRV-ADU",
+        "title": "<source title from manifest>",
+        "url": "<official URL from manifest>",
+        "publisher": "<publisher from manifest>",
+        "checked_at": "2026-11-07",
+        "verification_depth": "title_only"
+      },
+      {
+        "source_key": "IRV-APP",
+        "title": "<source title from manifest>",
+        "url": "<official URL from manifest>",
+        "publisher": "<publisher from manifest>",
+        "checked_at": "2026-11-07",
+        "verification_depth": "title_only"
+      },
+      {
+        "source_key": "HCD-ADU",
+        "title": "<source title from manifest>",
+        "url": "<official URL from manifest>",
+        "publisher": "<publisher from manifest>",
+        "checked_at": "2026-11-07",
+        "verification_depth": "title_only"
+      }
+    ],
     "warnings": [
       {
         "code": "example_data",

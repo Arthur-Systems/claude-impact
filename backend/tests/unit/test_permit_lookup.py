@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from clearpath.locations.schemas import CoverageEntry, Jurisdiction
+from clearpath.permits.predicates import Tri, evaluate_predicate
 from clearpath.permits.release import (
     InMemoryReleaseProvider,
     ReleaseData,
@@ -636,25 +637,41 @@ def test_real_shape_manifest_lookup():
 
 
 @pytest.mark.skipif(not REAL_MANIFEST.exists(), reason="real Irvine manifest not present")
-def test_real_irvine_draft_manifest_c01_TEST_ONLY_public_label():
-    # TEST ONLY: Person 2's manifest is an unreviewed DRAFT (no kind, no review_status,
-    # no fact_schema or profile_key). It is NOT reviewed public data. We label it
-    # reviewed_public here only so it can run through a non-demo provider, using the
-    # explicit test_only_allow_unreviewed override. Without the override the loader
-    # refuses it (see test_unreviewed_or_draft_manifest_cannot_be_public).
+def test_real_irvine_manifest_c01_reviewed_public():
+    # Person 2's manifest now passes every reviewed_public check (kind, profile_key,
+    # fact_schema, all passages reviewed), so it loads as public with NO override.
+    # Refusal of unreviewed data is covered by test_unreviewed_or_draft_manifest_cannot_be_public.
     manifest = json.loads(REAL_MANIFEST.read_text())
     before = copy.deepcopy(manifest)
-    with pytest.raises(ReleaseLoadError):
-        ReleaseData.from_manifest(manifest, release_id="r", content_hash="0" * 64, dataset_mode="reviewed_public")
     r = ReleaseData.from_manifest(manifest, release_id="00000000-0000-4000-8000-0000000000aa",
-                                  content_hash="0" * 64, dataset_mode="reviewed_public",
-                                  test_only_allow_unreviewed=True)
+                                  content_hash="0" * 64, dataset_mode="reviewed_public")
+    assert r.test_only_unreviewed is False
+    assert r.draft_gaps == ()
+    assert r.profile_key == PROFILE
     p = InMemoryReleaseProvider([r], demo_mode=False)
     result = lookup_permits(body({"adu_form": "detached", "existing_dwelling": True}), p, REGISTRY)
-    assert "test_only_unreviewed_release" in warning_codes(result)
+    codes = warning_codes(result)
+    for absent in ("test_only_unreviewed_release", "synthetic_dataset", "draft_manifest_defaults", "unreviewed_extraction"):
+        assert absent not in codes, absent
+    assert result["dataset_mode"] == "reviewed_public"
+    assert result["profile_key"] == PROFILE
 
+    # C01 meets the pathway's rule, but Person 2 attached 3 source conflicts to the
+    # pathway, so it is not a definite answer (SPEC.md section 7): source_conflict.
+    pathway_row = next(pw for pw in manifest["pathways"] if pw["key"] == "irvine_adu_standard")
+    c01_facts = {"project_type": "adu", "adu_form": "detached", "existing_dwelling": True}
+    assert evaluate_predicate(pathway_row["applies_if"], c01_facts, r.fact_schema).value is Tri.TRUE
     pathways = {pw["key"]: pw for pw in result["pathways"]}
-    assert pathways["irvine_adu_standard"]["status"] == "applies"
+    pw = pathways["irvine_adu_standard"]
+    assert pw["status"] == "needs_information"
+    assert pw["status_reason"] == "source_conflict"
+    assert pw["missing_fact_keys"] == []
+    pathway_conflicts = [c for c in result["conflicts"] if "irvine_adu_standard" in c["rule_keys"]]
+    assert len(pathway_conflicts) == sum("irvine_adu_standard" in c["rule_keys"] for c in manifest["conflicts"]) >= 1
+    assert all(c["effect"].startswith("Not a definitive answer") for c in pathway_conflicts)
+    # Requirements combine their own rule with the pathway's RULE (true here), not its status.
+    statuses = {r_["key"]: r_["status"] for r_ in result["requirements"]}
+    assert all(v == "applies" for k, v in statuses.items() if k != "development-standards-checklist"), statuses
     assert result["requirements"]
     for r_ in result["requirements"]:
         assert len(r_["citations"]) >= 1, r_["key"]
@@ -668,5 +685,4 @@ def test_real_irvine_draft_manifest_c01_TEST_ONLY_public_label():
     for item in result["requirements"] + result["pathways"]:
         for c in item["citations"]:
             assert c["url"] in source_urls
-    assert "unreviewed_extraction" in warning_codes(result)
     assert manifest == before
