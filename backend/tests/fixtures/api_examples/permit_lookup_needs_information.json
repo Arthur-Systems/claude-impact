@@ -1,0 +1,280 @@
+{
+  "example_note": "floor_area_sqft is omitted on purpose to show needs_information.",
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/permit-lookups",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": {
+      "location": {
+        "selected_area": {
+          "jurisdiction": "irvine-ca"
+        }
+      },
+      "project_type": "adu",
+      "profile_key": "irvine-adu-detached-existing-dwelling",
+      "facts": {
+        "adu_form": "detached",
+        "existing_dwelling": true
+      }
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "request_id": "00000000-0000-4000-8000-000000000905",
+    "status": "needs_information",
+    "notice": "Prototype. Not legal advice. Confirm with the City of Irvine or a professional.",
+    "location": {
+      "mode": "selected_area",
+      "status": "selected_area",
+      "status_reason": null,
+      "property_verified": false,
+      "jurisdiction": {
+        "slug": "irvine-ca",
+        "name": "Irvine"
+      },
+      "candidates": [],
+      "boundary_evidence": null
+    },
+    "release": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "content_hash": "0000000000000000000000000000000000000000000000000000000000000001",
+      "dataset_mode": "synthetic"
+    },
+    "profile_key": "irvine-adu-detached-existing-dwelling",
+    "facts_used": {
+      "adu_form": "detached",
+      "existing_dwelling": true
+    },
+    "pathways": [
+      {
+        "key": "example_pathway_standard",
+        "title": "<pathway title from manifest>",
+        "status": "applies",
+        "status_reason": "facts_met",
+        "missing_fact_keys": [],
+        "citations": [
+          {
+            "source_key": "IRV-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000101",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      }
+    ],
+    "requirements": [
+      {
+        "key": "example_permit_a",
+        "kind": "permit",
+        "title": "<permit name as named by the city>",
+        "description": "<plain-language description from reviewed excerpt>",
+        "status": "applies",
+        "status_reason": "facts_met",
+        "missing_fact_keys": [],
+        "conflict_ids": [],
+        "required_for_preparation": false,
+        "citations": [
+          {
+            "source_key": "IRV-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000101",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      },
+      {
+        "key": "example_document_application",
+        "kind": "document",
+        "title": "<form title as named by the city>",
+        "description": "<plain-language description from reviewed excerpt>",
+        "status": "applies",
+        "status_reason": "facts_met",
+        "missing_fact_keys": [],
+        "conflict_ids": [],
+        "required_for_preparation": true,
+        "citations": [
+          {
+            "source_key": "IRV-APP",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000102",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000002",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      },
+      {
+        "key": "example_document_affidavit",
+        "kind": "document",
+        "title": "<form title as named by the city>",
+        "description": "<plain-language description from reviewed excerpt>",
+        "status": "applies",
+        "status_reason": "facts_met",
+        "missing_fact_keys": [],
+        "conflict_ids": [],
+        "required_for_preparation": true,
+        "citations": [
+          {
+            "source_key": "IRV-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000101",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      },
+      {
+        "key": "example_document_floor_area",
+        "kind": "document",
+        "title": "<form title as named by the city>",
+        "description": "<plain-language description from reviewed excerpt>",
+        "status": "needs_information",
+        "status_reason": "missing_facts",
+        "missing_fact_keys": [
+          "floor_area_sqft"
+        ],
+        "conflict_ids": [],
+        "required_for_preparation": true,
+        "citations": [
+          {
+            "source_key": "IRV-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000101",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          },
+          {
+            "source_key": "HCD-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000103",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000003",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      },
+      {
+        "key": "example_document_attached_only",
+        "kind": "document",
+        "title": "<form title as named by the city>",
+        "description": "<plain-language description from reviewed excerpt>",
+        "status": "not_applicable",
+        "status_reason": "facts_not_met",
+        "missing_fact_keys": [],
+        "conflict_ids": [],
+        "required_for_preparation": true,
+        "citations": [
+          {
+            "source_key": "IRV-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000101",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      },
+      {
+        "key": "example_review_completeness",
+        "kind": "review",
+        "title": "<review name as named by the city>",
+        "description": "<plain-language description from reviewed excerpt>",
+        "status": "needs_information",
+        "status_reason": "source_conflict",
+        "missing_fact_keys": [],
+        "conflict_ids": [
+          "00000000-0000-4000-8000-000000000301"
+        ],
+        "required_for_preparation": false,
+        "citations": [
+          {
+            "source_key": "IRV-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000101",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          },
+          {
+            "source_key": "HCD-ADU",
+            "source_snapshot_id": "00000000-0000-4000-8000-000000000103",
+            "url": "<official URL from manifest>",
+            "title": "<source title from manifest>",
+            "locator": "<page or heading from manifest>",
+            "snapshot_sha256": "0000000000000000000000000000000000000000000000000000000000000003",
+            "checked_at": "2026-11-07",
+            "excerpt": "<exact excerpt>"
+          }
+        ]
+      }
+    ],
+    "missing_fact_keys": [
+      "floor_area_sqft"
+    ],
+    "conflicts": [
+      {
+        "id": "00000000-0000-4000-8000-000000000301",
+        "rule_keys": [
+          "example_review_completeness"
+        ],
+        "source_keys": [
+          "IRV-ADU",
+          "HCD-ADU"
+        ],
+        "summary": "<what the two sources disagree about, from the manifest>",
+        "effect": "Not a definitive answer until a person resolves the conflict."
+      }
+    ],
+    "warnings": [
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      },
+      {
+        "code": "synthetic_dataset",
+        "message": "This checklist comes from a synthetic test dataset, not the reviewed Irvine sources."
+      },
+      {
+        "code": "selected_area_property_not_verified",
+        "message": "You chose the Irvine area. No specific property was checked, so results are area-level only."
+      },
+      {
+        "code": "unreviewed_extraction",
+        "message": "Part of the application package text has not been checked by a person yet. Items citing it may change.",
+        "source_keys": [
+          "IRV-APP"
+        ]
+      },
+      {
+        "code": "statutory_clock_unverified",
+        "message": "State completeness and decision time limits have not been checked against the statute text. No legal due date is calculated."
+      }
+    ]
+  }
+}
