@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "kind": "synthetic",
+  "jurisdiction": "irvine-ca",
+  "project_type": "adu",
+  "profile_key": "irvine-adu-detached-existing-dwelling",
+  "curator_label": "SYNTHETIC TEST DATA, not real Irvine rules",
+  "fact_schema": {
+    "adu_form": "string",
+    "existing_dwelling": "boolean",
+    "floor_area_sqft": "number",
+    "project_type": "string"
+  },
+  "sources": [
+    {
+      "key": "SYN-SOURCE",
+      "title": "SYNTHETIC TEST SOURCE",
+      "url": "https://example.org/synthetic",
+      "publisher": "ClearPath synthetic fixture",
+      "authority_type": "synthetic",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "title_only",
+      "terms_note": null
+    }
+  ],
+  "passages": [
+    {
+      "id": "7f9c2b1e-0000-4000-8000-000000000001",
+      "source_key": "SYN-SOURCE",
+      "locator": "#synthetic-1",
+      "excerpt": "SYNTHETIC: Test-only pathway evidence; not a city rule.",
+      "review_status": "reviewed"
+    },
+    {
+      "id": "7f9c2b1e-0000-4000-8000-000000000002",
+      "source_key": "SYN-SOURCE",
+      "locator": "#synthetic-2",
+      "excerpt": "SYNTHETIC: Test-only document evidence; not a city requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "id": "7f9c2b1e-0000-4000-8000-000000000003",
+      "source_key": "SYN-SOURCE",
+      "locator": "#synthetic-3",
+      "excerpt": "SYNTHETIC: Unreviewed test evidence; intentionally not cited.",
+      "review_status": "needs_review"
+    }
+  ],
+  "pathways": [
+    {
+      "key": "synthetic_detached",
+      "title": "Synthetic detached pathway",
+      "description": "Synthetic test pathway, not real Irvine guidance.",
+      "applies_if": {
+        "eq": [
+          "adu_form",
+          "detached"
+        ]
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "key": "synthetic_document_a",
+      "pathways": [
+        "synthetic_detached"
+      ],
+      "kind": "document",
+      "title": "Synthetic document A",
+      "description": "Synthetic test requirement, not a real form.",
+      "applies_if": {
+        "eq": [
+          "adu_form",
+          "detached"
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "key": "synthetic_document_b",
+      "pathways": [
+        "synthetic_detached"
+      ],
+      "kind": "document",
+      "title": "Synthetic document B",
+      "description": "Synthetic test requirement, not a real form.",
+      "applies_if": {
+        "gt": [
+          "floor_area_sqft",
+          500
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "key": "synthetic_document_c",
+      "pathways": [
+        "synthetic_detached"
+      ],
+      "kind": "document",
+      "title": "Synthetic document C",
+      "description": "Synthetic test requirement, not a real form.",
+      "applies_if": {
+        "eq": [
+          "existing_dwelling",
+          true
+        ]
+      },
+      "required_for_preparation": false,
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000002"
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "key": "application_preparation",
+      "title": "Application preparation",
+      "predecessors": [],
+      "requirements": [
+        "synthetic_document_a",
+        "synthetic_document_b"
+      ],
+      "published_clock": null,
+      "assumed_days": {
+        "min": 7,
+        "max": 21,
+        "label": "ASSUMPTION",
+        "rationale": "synthetic test value"
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "key": "submission",
+      "title": "Submission",
+      "predecessors": [
+        "application_preparation"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": 1,
+        "max": 3,
+        "label": "ASSUMPTION",
+        "rationale": "synthetic test value"
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "key": "completeness_review",
+      "title": "Completeness review",
+      "predecessors": [
+        "submission"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": 10,
+        "max": 30,
+        "label": "ASSUMPTION",
+        "rationale": "synthetic test value"
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "key": "plan_review",
+      "title": "Plan review",
+      "predecessors": [
+        "completeness_review"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": 20,
+        "max": 60,
+        "label": "ASSUMPTION",
+        "rationale": "synthetic test value"
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "key": "fee_payment_readiness",
+      "title": "Fee payment readiness",
+      "predecessors": [
+        "completeness_review"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": 3,
+        "max": 10,
+        "label": "ASSUMPTION",
+        "rationale": "synthetic test value"
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "key": "permit_issuance",
+      "title": "Permit issuance",
+      "predecessors": [
+        "plan_review",
+        "fee_payment_readiness"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": 1,
+        "max": 5,
+        "label": "ASSUMPTION",
+        "rationale": "synthetic test value"
+      },
+      "citations": [
+        "7f9c2b1e-0000-4000-8000-000000000001"
+      ]
+    }
+  ],
+  "conflicts": []
+}
