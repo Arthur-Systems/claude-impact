@@ -37,6 +37,12 @@ and have it return the matched document type and a confidence level.
 Save the official logo as public/oc-logo.png. It shows in the sidebar on a
 white plate. Until the file exists, a plain text label shows instead.
 
+## Connect to the backend
+Copy .env.local.example to .env.local and set NEXT_PUBLIC_API_URL and NEXT_PUBLIC_API_KEY.
+Start the backend with CLEARPATH_API_KEY set to the same key and CLEARPATH_CORS_ORIGINS=http://localhost:3000.
+Documents then shows the live Irvine checklist with sources, and Timeline shows live milestones.
+If the API is off or the variables are unset, both pages show demo data and say so in a banner.
+
 ## Connect the Navigator to the backend (optional)
 Create a file named .env.local with:
    NEXT_PUBLIC_API_URL=http://localhost:8000

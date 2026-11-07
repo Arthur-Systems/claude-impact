@@ -16,7 +16,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ProjectProvider>
           <div className="shell">
             <Sidebar />
-            <main>{children}</main>
+            <main>
+              {children}
+              <footer className="muted site-footer">Prototype. Not legal advice.</footer>
+            </main>
           </div>
         </ProjectProvider>
       </body>
