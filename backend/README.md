@@ -37,8 +37,8 @@ foundation probes, not permit lookup or project endpoints.
 | `make seed-demo` | Import and publish the synthetic fixture. Repeats reuse the release and record a no-op import. |
 | `make seed-irvine` | Validate and import the curated Irvine bundle, then attempt public publication. Publication requires every cited passage to be reviewed. Validation or review failures stop the command. |
 | `make run` | Start Uvicorn on `127.0.0.1:8000`, reading the root `.env`. Stop with Ctrl-C. |
-| `make test-backend` | Create `clearpath_test` if missing, migrate it, and run pytest on PostgreSQL. |
-| `make test-backend TEST_DB=clearpath_test_myname` | Use a separate test database for a teammate or worktree. Names must start with `clearpath_test`. |
+| `make test-backend` | Create `clearpath_test` if missing, migrate it, and run pytest on PostgreSQL. Person 5's project-timeline tests wipe their database, so they get their own `clearpath_test_p5` (created if missing). |
+| `make test-backend TEST_DB=clearpath_test_myname` | Use a separate test database (plus `clearpath_test_myname_p5`) for a teammate or worktree. Names must start with `clearpath_test` and be at most 60 characters. |
 | `make smoke` | Start/check the DB, migrate the dev DB, seed-demo, run synthetic-mode HTTP checks on `127.0.0.1:8765`, and stop the temporary API on exit. |
 
 The smoke check creates a throwaway API key, checks live/ready and authenticated

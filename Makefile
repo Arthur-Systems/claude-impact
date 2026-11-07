@@ -17,11 +17,15 @@ backend-migrate:
 run:
 	cd backend && uv run uvicorn --factory clearpath.api.app:create_app --host 127.0.0.1 --port 8000
 
+# Person 5's project-timeline tests drop and rebuild the public schema, so they get
+# their own disposable database, $(TEST_DB)_p5 (TEST_DB is capped at 60 characters
+# so that name stays within PostgreSQL's 63-character limit).
 test-backend:
-	@uv run --project backend python -c 'import re, sys; name = sys.argv[1]; sys.exit(0 if re.fullmatch(r"clearpath_test[a-z0-9_]{0,49}", name) else "TEST_DB must start with clearpath_test and contain only lowercase letters, digits or underscores")' "$(TEST_DB)"
+	@uv run --project backend python -c 'import re, sys; name = sys.argv[1]; sys.exit(0 if re.fullmatch(r"clearpath_test[a-z0-9_]{0,46}", name) else "TEST_DB must start with clearpath_test, contain only lowercase letters, digits or underscores, and be at most 60 characters")' "$(TEST_DB)"
 	docker compose exec -T db psql -U clearpath -tc "SELECT 1 FROM pg_database WHERE datname='$(TEST_DB)'" | grep -q 1 || docker compose exec -T db createdb -U clearpath $(TEST_DB)
+	docker compose exec -T db psql -U clearpath -tc "SELECT 1 FROM pg_database WHERE datname='$(TEST_DB)_p5'" | grep -q 1 || docker compose exec -T db createdb -U clearpath $(TEST_DB)_p5
 	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/$(TEST_DB) CLEARPATH_API_KEY=test-key uv run alembic upgrade head
-	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/$(TEST_DB) CLEARPATH_API_KEY=test-key uv run pytest -q
+	cd backend && DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/$(TEST_DB) CLEARPATH_API_KEY=test-key CLEARPATH_P5_TEST_DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/$(TEST_DB)_p5 uv run pytest -q
 
 smoke:
 	bash backend/scripts/smoke.sh

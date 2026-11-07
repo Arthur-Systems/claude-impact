@@ -87,6 +87,8 @@ class ReleaseData:
     draft_gaps: tuple[str, ...] = field(default=())
     test_only_unreviewed: bool = False
     """True only when a test forced unreviewed data to load as reviewed_public."""
+    schema_version: str | None = None
+    """The manifest's schema_version as a string, or None if it has none."""
 
     @property
     def coverage_entry(self) -> CoverageEntry:
@@ -175,6 +177,7 @@ class ReleaseData:
             conflicts=tuple(conflicts),
             draft_gaps=fallbacks.gaps,
             test_only_unreviewed=forced,
+            schema_version=str(m["schema_version"]) if m.get("schema_version") is not None else None,
         )
 
 

@@ -68,6 +68,9 @@ def test_test_backend_target_uses_selected_database():
     assert "datname='clearpath_test_i2'" in result.stdout
     assert "createdb -U clearpath clearpath_test_i2" in result.stdout
     assert result.stdout.count("/clearpath_test_i2 CLEARPATH_API_KEY=test-key") == 2
+    # Person 5's schema-wiping suite gets its own database, never the shared one.
+    assert "createdb -U clearpath clearpath_test_i2_p5\n" in result.stdout
+    assert "CLEARPATH_P5_TEST_DATABASE_URL=postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/clearpath_test_i2_p5 uv run pytest" in result.stdout
 
 
 def test_test_backend_target_refuses_dev_database_before_docker(tmp_path):
