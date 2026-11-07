@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "reviewed_public",
+  "jurisdiction": "irvine-ca",
+  "project_type": "adu",
+  "profile_key": "irvine-adu-detached-existing-dwelling",
+  "curator_label": "STUB: Person 2 fills from checked City of Irvine sources",
+  "fact_schema": {
+    "adu_form": {
+      "type": "enum",
+      "values": [
+        "detached",
+        "attached",
+        "conversion",
+        "jadu"
+      ]
+    },
+    "existing_dwelling": {
+      "type": "bool"
+    },
+    "floor_area_sqft": {
+      "type": "number"
+    }
+  },
+  "sources": [],
+  "passages": [],
+  "pathways": [],
+  "requirements": [],
+  "milestones": [],
+  "conflicts": []
+}
