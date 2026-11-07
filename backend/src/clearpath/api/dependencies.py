@@ -15,5 +15,5 @@ def require_api_key(
         x_api_key.encode("utf-8"), settings.api_key.get_secret_value().encode("utf-8")
     ):
         raise DomainError(
-            "missing_api_key", "The X-API-Key header is missing or wrong.", http_status=401,
+            "unauthorized", "A valid API key is required.", http_status=401,
         )

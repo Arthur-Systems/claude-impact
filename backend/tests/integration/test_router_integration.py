@@ -8,7 +8,7 @@ def test_projects_routes_require_the_platform_api_key(client):
     for headers in ({}, {"X-API-Key": "wrong"}):
         response = client.get("/api/v1/projects", headers=headers)
         assert response.status_code == 401
-        assert response.json()["error"]["code"] == "missing_api_key"
+        assert response.json()["error"]["code"] == "unauthorized"
         assert response.headers["X-Request-ID"] == response.json()["request_id"]
 
 
