@@ -86,7 +86,7 @@ export type Timeline = {
   warnings: { code: string; message: string }[];
 };
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T | null> {
+async function request<T>(method: string, path: string, body?: unknown, onError?: (status: number) => void): Promise<T | null> {
   if (!backendConfigured()) return null;
   try {
     const res = await fetch(`${API_URL}${path}`, {
@@ -98,7 +98,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       body: body !== undefined ? JSON.stringify(body) : undefined,
       cache: "no-store",
     });
-    if (!res.ok) return null;
+    if (!res.ok) { onError?.(res.status); return null; }
     return (await res.json()) as T;
   } catch {
     return null;
@@ -142,23 +142,73 @@ export function getTimeline(id: string, asOf?: string): Promise<Timeline | null>
   return request<Timeline>("GET", `/api/v1/projects/${encodeURIComponent(id)}/timeline${q}`);
 }
 
-const PROJECT_KEY = "clearpath.projectId";
+export const PROJECT_KEY = "clearpath.projectId";
 
-// Reuses the project id stored in localStorage; creates and activates one if missing or stale.
-export async function loadDemoTimeline(asOf?: string): Promise<Timeline | null> {
-  if (!backendConfigured()) return null;
-  let id: string | null = null;
+export type ProjectChecklistItem = { key: string; title: string; status: string; applicability?: string };
+export type Project = { id: string; revision: number; state: string; checklist: ProjectChecklistItem[] };
+
+export function getProject(id: string): Promise<Project | null> {
+  return request<Project>("GET", `/api/v1/projects/${encodeURIComponent(id)}`);
+}
+
+export function readStoredProjectId(): string | null {
   try {
-    id = window.localStorage.getItem(PROJECT_KEY);
-  } catch {}
-  if (id) {
-    const t = await getTimeline(id, asOf);
-    if (t) return t;
+    return window.localStorage.getItem(PROJECT_KEY);
+  } catch {
+    return null;
   }
-  id = await createAndActivateProject();
-  if (!id) return null;
-  try {
-    window.localStorage.setItem(PROJECT_KEY, id);
-  } catch {}
-  return getTimeline(id, asOf);
+}
+
+let projectGeneration = 0;
+let projectPending: Promise<Project | null> | null = null;
+let activeProjectId: string | null = null;
+
+export function clearStoredProjectId() {
+  projectGeneration++;
+  projectPending = null;
+  activeProjectId = null;
+  try { window.localStorage.removeItem(PROJECT_KEY); } catch {}
+}
+
+// Single flight across StrictMode effects and Documents/Timeline. Never replace an
+// existing identity merely because the API is temporarily unavailable.
+export function ensureProject(): Promise<Project | null> {
+  if (!backendConfigured()) return Promise.resolve(null);
+  if (projectPending) return projectPending;
+  const generation = projectGeneration;
+  const pending = (async () => {
+    const stored = readStoredProjectId() ?? activeProjectId;
+    if (stored) {
+      const project = await getProject(stored);
+      return generation === projectGeneration ? project : null;
+    }
+    const id = await createAndActivateProject();
+    if (!id || generation !== projectGeneration) return null;
+    activeProjectId = id;
+    try { window.localStorage.setItem(PROJECT_KEY, id); } catch {}
+    const project = await getProject(id);
+    return generation === projectGeneration ? project : null;
+  })();
+  projectPending = pending;
+  void pending.finally(() => { if (projectPending === pending) projectPending = null; });
+  return pending;
+}
+
+// Retry exactly once, only for optimistic revision conflicts.
+export async function markRequirementReady(id: string, key: string, revision: number): Promise<Project | null> {
+  const path = `/api/v1/projects/${encodeURIComponent(id)}/requirements/${encodeURIComponent(key)}`;
+  let status = 0;
+  const first = await request<{ project: Project }>("PATCH", path, { status: "ready", expected_revision: revision }, (s) => { status = s; });
+  if (first?.project) return first.project;
+  if (status !== 409) return null;
+  const latest = await getProject(id);
+  if (!latest) return null;
+  if (latest.checklist?.some((c) => c.key === key && c.status === "ready")) return latest;
+  const second = await request<{ project: Project }>("PATCH", path, { status: "ready", expected_revision: latest.revision });
+  return second?.project ?? null;
+}
+
+export async function loadDemoTimeline(asOf?: string): Promise<Timeline | null> {
+  const project = await ensureProject();
+  return project ? getTimeline(project.id, asOf) : null;
 }

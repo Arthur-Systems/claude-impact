@@ -18,6 +18,7 @@ build/
 .next/
 .DS_Store
 *.zip
+!/clearpath/public/demo/clearpath-demo-*.zip
 
 # local editor settings and temporary files
 .idea/

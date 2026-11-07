@@ -10,9 +10,11 @@
 ## What works right now
 - Sidebar navigation across all six tabs
 - Overview and Documents pages are fully working
-- Upload files on Documents: each file is matched to a required document by its file name (try site_plan.pdf, floor_plan.pdf, structural.pdf, or vacation.pdf)
-- Unmatched files show up under "Needs your attention"
-- The Overview, the nav badge, and the checklist all update together
+- Documents accepts individual PDFs/images and standard ZIPs. This is filename-only demo matching, not OCR, form validation, completeness review, or city acceptance. Use fictional files only.
+- With the API configured, Documents matches the live requirement keys, shows per-file activity and Received chips, and sequentially saves self-reported checklist status to the same project used by Timeline. Legal Unknown/source conflicts remain unchanged.
+- Receipt metadata is scoped to the project in this browser. Reloading restores receipts; API failures stay visibly browser-only. Reset clears local receipts and selects a fresh project on next use without deleting old API history.
+- Without the backend, ZIP entry names feed the existing labeled mock matcher. Only that mock state updates the Overview and nav badge.
+- Download the fictional staged samples in Documents: stage 1 receives 3 of 10 requirements, stage 2 reaches 7 of 10 plus unmatched Site_Photos.pdf, and stage 3 reaches 10 of 10. The all-in-one ZIP contains the same 11 PDFs. Duplicates do not increase the live requirement count.
 - Overview has a working map: type an address and a pin is placed (OpenStreetMap, no API key)
 - Navigator: chat with suggested questions and a step by step guide that updates from your uploads
 - Search: search sourced Irvine and California entries plus your uploaded file names
@@ -29,9 +31,11 @@
                   This is the file to connect to the backend.
 
 ## Where the backend plugs in
-In lib/project-context.tsx, guessMatch() is a mock that looks at file names.
-Replace it with a call to the FastAPI endpoint that runs OCR and Claude,
-and have it return the matched document type and a confidence level.
+lib/backend.ts connects the live checklist and shared project identity to the API.
+lib/docmatch.ts matches filenames only against keys returned by that checklist.
+lib/zip.ts reads bounded ZIP central-directory names locally without extracting PDF contents.
+lib/project-context.tsx retains the separate mock matcher for backend-off demos.
+No model, OCR service, or document-content upload is involved.
 
 ## Add the Orange County logo
 Save the official logo as public/oc-logo.png. It shows in the sidebar on a
@@ -54,6 +58,14 @@ the demo answers in lib/api.ts are used and labeled as demo answers.
 lib/timeline.ts: the 60 day and 15 business day limits are state law
 (California Gov. Code 66317). The 4 day completeness check is an assumption
 based on Irvine saying it takes about two business days. Edit it there.
+
+## Verification and fictional samples
+From this folder, run `node --experimental-strip-types scripts/check-demo-zips.ts`
+and `node --experimental-strip-types scripts/check-demo-state.ts` with a Node version
+supporting type stripping (Node 22.6+), then `npm run build`.
+Regenerate the four sample ZIPs with `python3 scripts/make_demo_docs.py`.
+Processing pauses about 350 ms per entry for demo visibility, not a permit duration.
+Only receipt status and requirement keys are sent to the API, never document bytes.
 
 ## Still to do
 Real OCR matching, pgvector search in place of lib/knowledge.ts, and

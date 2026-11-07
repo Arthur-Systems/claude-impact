@@ -112,7 +112,7 @@ Label any assumed numbers as ASSUMPTION here and in the tool.
 | Permit lookup (applies / needs information / not applicable) | Working over the API |
 | Projects, checklist status, milestone order, timeline | Working over the API |
 | Frontend Documents checklist and Timeline | Working against the live API; a banner says whether the page shows live or demo data |
-| Frontend document upload matching | Mocked: matches by file name, no OCR |
+| Frontend document upload matching | Demo filename-only PDF/image/ZIP matching, no OCR or content validation. Live receipt status persists on the shared Documents/Timeline API project; API failures are labeled browser-only. Received is not city acceptance and does not resolve Unknown source conflicts. Fictional staged ZIPs are linked in Documents |
 | Navigator answers | Mocked: labeled demo answers, no model call |
 | Finish-date forecast | Not available: no reviewed durations, so the tool shows none |
 | Legal due dates | Not calculated: statute text for Gov. Code 66317 could not be opened |
