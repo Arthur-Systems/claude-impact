@@ -1,0 +1,392 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/projects/c1ea0001-0000-4000-8000-000000000001/timeline?as_of=2026-11-07",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": null
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "project_id": "c1ea0001-0000-4000-8000-000000000001",
+    "status": "timeline_available",
+    "as_of": "2026-11-07",
+    "revision": 10,
+    "coverage_status": "configured",
+    "coverage_reason": null,
+    "release": {
+      "id": "c1ea0002-0000-4000-8000-000000000001",
+      "jurisdiction": "irvine-ca",
+      "project_type": "adu",
+      "profile_key": "irvine-adu-detached-existing-dwelling",
+      "content_hash": "sha256:b672c666f11da25800f24680ecb40b199b95e16c89af0be8da594288ef1b016b",
+      "schema_version": "1",
+      "dataset_mode": "synthetic",
+      "published_at": "2026-11-07T15:00:00Z"
+    },
+    "pathway": {
+      "key": "irvine_adu_standard",
+      "title": "Irvine ADU building permit (standard plan check)",
+      "citation_ids": [
+        "c1ea0004-0000-4000-8000-000000000001"
+      ]
+    },
+    "progress": {
+      "completed": 2,
+      "total": 6,
+      "percent": 33.3
+    },
+    "document_readiness": {
+      "ready": 9,
+      "applicable": 11,
+      "needs_information": 1,
+      "denominator": 12,
+      "percent": 75.0,
+      "provisional": true,
+      "unknown_count": 1
+    },
+    "next_actions": [
+      {
+        "milestone_key": "completeness_review",
+        "event_kind": "complete",
+        "title": "Record when the city finds the application complete",
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000001"
+        ]
+      }
+    ],
+    "bottlenecks": [
+      {
+        "code": "awaiting_city",
+        "milestone_key": "completeness_review",
+        "requirement_keys": [],
+        "missing_fact_keys": [],
+        "since": "2026-11-04",
+        "message": "Waiting on the city's completeness review."
+      },
+      {
+        "code": "missing_information",
+        "milestone_key": "fee_payment_readiness",
+        "requirement_keys": [
+          "fee_determinations_school_transportation"
+        ],
+        "missing_fact_keys": [
+          "floor_area_sqft"
+        ],
+        "since": null,
+        "message": "Add the ADU floor area to see whether this fee determination applies."
+      },
+      {
+        "code": "missing_documents",
+        "milestone_key": "fee_payment_readiness",
+        "requirement_keys": [
+          "residential_takeoff_sheet"
+        ],
+        "missing_fact_keys": [],
+        "since": null,
+        "message": "Residential Take-Off Sheet is not marked ready yet."
+      }
+    ],
+    "milestones": [
+      {
+        "key": "application_preparation",
+        "title": "Application preparation",
+        "predecessor_keys": [],
+        "requirement_keys": [
+          "building_permit_application",
+          "adu_development_standards_checklist",
+          "adu_verification_form",
+          "ocfa_residential_plan_submittal_criteria",
+          "owner_acknowledgments",
+          "architectural_structural_plan_set",
+          "site_plan",
+          "title24_energy_calculations"
+        ],
+        "state": "completed",
+        "availability": "completed",
+        "started_at": "2026-10-20T16:00:00Z",
+        "completed_at": "2026-11-02T22:00:00Z",
+        "blocked_by": [],
+        "timing": {
+          "city_service_target": null,
+          "statutory_clock": null,
+          "observed": null,
+          "assumption": {
+            "min_days": 7,
+            "max_days": 30,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          }
+        },
+        "forecast_finish": null,
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "key": "submission",
+        "title": "Submission",
+        "predecessor_keys": [
+          "application_preparation"
+        ],
+        "requirement_keys": [],
+        "state": "completed",
+        "availability": "completed",
+        "started_at": "2026-11-03T16:00:00Z",
+        "completed_at": "2026-11-03T17:30:00Z",
+        "blocked_by": [],
+        "timing": {
+          "city_service_target": null,
+          "statutory_clock": null,
+          "observed": null,
+          "assumption": {
+            "min_days": 1,
+            "max_days": 3,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          }
+        },
+        "forecast_finish": null,
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "key": "completeness_review",
+        "title": "Completeness review",
+        "predecessor_keys": [
+          "submission"
+        ],
+        "requirement_keys": [],
+        "state": "in_progress",
+        "availability": "in_progress",
+        "started_at": "2026-11-04T17:00:00Z",
+        "completed_at": null,
+        "blocked_by": [],
+        "timing": {
+          "city_service_target": null,
+          "statutory_clock": null,
+          "observed": null,
+          "assumption": {
+            "min_days": 10,
+            "max_days": 30,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          }
+        },
+        "forecast_finish": {
+          "earliest": "2026-11-14",
+          "latest": "2026-12-04",
+          "label": "ASSUMPTION"
+        },
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "key": "plan_review",
+        "title": "Plan review",
+        "predecessor_keys": [
+          "completeness_review"
+        ],
+        "requirement_keys": [],
+        "state": "not_started",
+        "availability": "blocked",
+        "started_at": null,
+        "completed_at": null,
+        "blocked_by": [
+          {
+            "kind": "predecessor",
+            "key": "completeness_review"
+          }
+        ],
+        "timing": {
+          "city_service_target": null,
+          "statutory_clock": null,
+          "observed": null,
+          "assumption": {
+            "min_days": 30,
+            "max_days": 60,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          }
+        },
+        "forecast_finish": {
+          "earliest": "2026-12-14",
+          "latest": "2027-02-02",
+          "label": "ASSUMPTION"
+        },
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "key": "fee_payment_readiness",
+        "title": "Fee / payment readiness",
+        "predecessor_keys": [
+          "submission"
+        ],
+        "requirement_keys": [
+          "fee_determinations_school_transportation",
+          "developer_deposit_case_setup",
+          "residential_takeoff_sheet"
+        ],
+        "state": "not_started",
+        "availability": "blocked",
+        "started_at": null,
+        "completed_at": null,
+        "blocked_by": [
+          {
+            "kind": "requirement",
+            "key": "fee_determinations_school_transportation"
+          },
+          {
+            "kind": "requirement",
+            "key": "residential_takeoff_sheet"
+          }
+        ],
+        "timing": {
+          "city_service_target": null,
+          "statutory_clock": null,
+          "observed": null,
+          "assumption": {
+            "min_days": 3,
+            "max_days": 14,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          }
+        },
+        "forecast_finish": {
+          "earliest": "2026-11-10",
+          "latest": "2026-11-21",
+          "label": "ASSUMPTION"
+        },
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000003"
+        ]
+      },
+      {
+        "key": "permit_issuance",
+        "title": "Permit issuance",
+        "predecessor_keys": [
+          "plan_review",
+          "fee_payment_readiness"
+        ],
+        "requirement_keys": [
+          "adu_covenant"
+        ],
+        "state": "not_started",
+        "availability": "blocked",
+        "started_at": null,
+        "completed_at": null,
+        "blocked_by": [
+          {
+            "kind": "predecessor",
+            "key": "plan_review"
+          },
+          {
+            "kind": "predecessor",
+            "key": "fee_payment_readiness"
+          },
+          {
+            "kind": "requirement",
+            "key": "adu_covenant"
+          }
+        ],
+        "timing": {
+          "city_service_target": null,
+          "statutory_clock": null,
+          "observed": null,
+          "assumption": {
+            "min_days": 1,
+            "max_days": 7,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          }
+        },
+        "forecast_finish": {
+          "earliest": "2026-12-15",
+          "latest": "2027-02-09",
+          "label": "ASSUMPTION"
+        },
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000001"
+        ]
+      }
+    ],
+    "forecast": {
+      "label": "ASSUMPTION",
+      "timing_kind": "assumption",
+      "status": "available",
+      "finish_range": {
+        "earliest": "2026-12-15",
+        "latest": "2027-02-09"
+      },
+      "missing_stage_estimates": [],
+      "disclaimer": "Assumed range from synthetic per-stage estimates. Not a city promise or a legal due date. Running past it does not mean the city missed a deadline."
+    },
+    "source_conflicts": [],
+    "citations": [
+      {
+        "id": "c1ea0004-0000-4000-8000-000000000001",
+        "snapshot_id": "c1ea0003-0000-4000-8000-000000000001",
+        "source_key": "IRV-ADU",
+        "url": "<irvine-adu-page-url>",
+        "title": "Project: Constructing an Accessory Dwelling Unit (ADU)",
+        "publisher": "City of Irvine",
+        "authority_type": "city_guidance",
+        "locator": "#adu-overview",
+        "snapshot_sha256": "70fae903ca098462f17b61f42cad4e393ba509c2f27b5acb199ce73a6225aa5f",
+        "checked_at": "2026-11-07",
+        "review_status": "synthetic_demo"
+      },
+      {
+        "id": "c1ea0004-0000-4000-8000-000000000002",
+        "snapshot_id": "c1ea0003-0000-4000-8000-000000000001",
+        "source_key": "IRV-ADU",
+        "url": "<irvine-adu-page-url>",
+        "title": "Project: Constructing an Accessory Dwelling Unit (ADU)",
+        "publisher": "City of Irvine",
+        "authority_type": "city_guidance",
+        "locator": "#submittal-requirements",
+        "snapshot_sha256": "70fae903ca098462f17b61f42cad4e393ba509c2f27b5acb199ce73a6225aa5f",
+        "checked_at": "2026-11-07",
+        "review_status": "synthetic_demo"
+      },
+      {
+        "id": "c1ea0004-0000-4000-8000-000000000003",
+        "snapshot_id": "c1ea0003-0000-4000-8000-000000000001",
+        "source_key": "IRV-ADU",
+        "url": "<irvine-adu-page-url>",
+        "title": "Project: Constructing an Accessory Dwelling Unit (ADU)",
+        "publisher": "City of Irvine",
+        "authority_type": "city_guidance",
+        "locator": "#fees",
+        "snapshot_sha256": "70fae903ca098462f17b61f42cad4e393ba509c2f27b5acb199ce73a6225aa5f",
+        "checked_at": "2026-11-07",
+        "review_status": "synthetic_demo"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "synthetic_dataset",
+        "message": "Demo release uses synthetic, unreviewed data. Do not rely on it for a real permit."
+      },
+      {
+        "code": "property_not_verified",
+        "message": "Location is a selected area (City of Irvine). No specific property was checked."
+      },
+      {
+        "code": "self_reported_status",
+        "message": "Ready means you marked it prepared. It does not mean the city accepted it."
+      },
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      }
+    ]
+  }
+}

@@ -70,3 +70,34 @@ is implemented. `point` and `address` return `unresolved` / `mode_not_implemente
 `invalid_location_input`, `invalid_project_type`, `invalid_facts`,
 `project_type_conflict` and fact-validation codes such as `unknown_fact`,
 `invalid_fact_value`, `enum_value_not_allowed` (all 422), `dataset_unavailable` (503).
+
+## Projects and timeline (Person 5)
+
+Files: `project_created.json`, `requirement_patch.json`, `timeline.json`,
+`milestone_event_conflict_409.json`. Values match `backend/src/clearpath/projects/` and
+`backend/src/clearpath/timelines/`.
+
+**Project `state`**: `draft` (no pinned release) and `active` (after
+`POST /api/v1/projects/{id}/activate` pins a release).
+
+**Requirement `status`**: `not_started`, `in_progress`, `ready`. "Ready" is self-reported.
+It does not mean the city accepted the document.
+
+**Milestone `state`**: `not_started`, `in_progress`, `completed`. Events: `start`,
+`complete`, `reopen`.
+
+**Timeline bottleneck `code`s**: `missing_information`, `missing_documents`,
+`awaiting_city`, `source_conflict`, `estimate_exceeded`.
+
+**Project / timeline warning `code`s**:
+- `synthetic_dataset`: the result comes from synthetic demo data.
+- `property_not_verified`: area-level project; no specific property was checked.
+- `self_reported_status`: "ready" means the applicant marked it prepared, not that the
+  city accepted it.
+
+**Error `code`s** (HTTP status): `project_not_found`, `requirement_not_found`,
+`milestone_not_found` (404); `stale_revision`, `project_not_active`,
+`project_already_active`, `project_scope_immutable`, `milestone_transition_conflict`,
+`requirement_transition_conflict`, `requirement_not_applicable` (409);
+`validation_error`, `invalid_cursor`, `rule_facts_not_accepted` (422);
+`dataset_unavailable`, `release_graph_invalid` (503).
