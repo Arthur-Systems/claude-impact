@@ -216,8 +216,15 @@ placeholders, not facts):
 
 Field rules:
 
-- `kind`: `synthetic` or `reviewed_public`. `profile_key`, every `key`: lowercase slug
-  `^[a-z0-9][a-z0-9_-]{0,79}$`. `jurisdiction` must match a seeded `jurisdictions.slug`.
+- `kind`: `synthetic` or `reviewed_public`. `jurisdiction`, `profile_key`, and pathway,
+  requirement and milestone keys: lowercase slug `^[a-z0-9][a-z0-9_-]{0,79}$`.
+  **Source keys are uppercase** `^[A-Z0-9][A-Z0-9_-]{0,79}$` (e.g. `IRV-ADU`), matching the
+  team's existing source IDs. `jurisdiction` must match a seeded `jurisdictions.slug`; this is
+  checked by `import_bundle` against the database (code `unknown_jurisdiction`), not by the
+  file-only `validate_bundle`.
+- Diagnostics never contain submitted text: unknown field names are masked as `*`, and each
+  issue carries a static `reason` (Pydantic error type or predicate reason) to help the curator.
+- `NaN`/`Infinity` are rejected anywhere in the manifest (PostgreSQL JSONB cannot store them).
 - `fact_schema` types: `bool`, `number` (int or float), `enum` (with `values`), `string`.
 - `sources[].verification_depth`: `full_text_read`, `title_only` or `blocked`. `sha256`: null or
   64 lowercase hex characters (null means "not hashed", shown as such in provenance).
@@ -269,6 +276,8 @@ value text in error output). Checks:
 
 ### 6.2 `import_bundle(session, bundle) -> ImportResult`
 
+- If `bundle.manifest.jurisdiction` is not a seeded `jurisdictions.slug`: fail with
+  `unknown_jurisdiction` (run `clearpath data import-cities` first).
 - If a release with the same `content_hash` exists: return it with `no_op=True`, write nothing
   except an `ingestion_runs` row with `status=no_op`.
 - Otherwise, in the caller's transaction, insert the release (`status=draft`), sources, passages
@@ -284,6 +293,8 @@ value text in error output). Checks:
   (`release_kind_mismatch`).
 - Any pathway, requirement or milestone citing a passage whose `review_status != reviewed` →
   `unreviewed_evidence` (lists owner keys).
+- A `reviewed_public` release with zero pathways or zero requirements → `empty_release`, so the
+  empty stub can never become the active dataset.
 - Then `SELECT ... FOR UPDATE` the jurisdiction row, set the current active release for the same
   `(jurisdiction, project_type, profile_key, kind)` to `retired`, set this one `active` with
   `published_at=now()`. Same transaction. Existing projects keep their `release_id`.
@@ -375,6 +386,7 @@ asking Person 3; never edit `0001_initial.py`.
 | Full citation association tables for every relation | §5 | `citation_links` for passages; other references JSONB validated at import |
 | Image digest pinning, CI workflow | §4, Task 6 | Deferred; tag `pgvector/pgvector:pg17` |
 | Personal-data detection in imports | §6 | Not automated; manifest schema has no free-form personal fields and Person 2 reviews content |
+| `validate_bundle(..., allowed_roots=...)` | n/a | Keyword-only test hook; the CLI never passes it, so production paths stay limited to `backend/data/` and `backend/tests/fixtures/` |
 | `GET /api/v1/sources/{id}`, `/jurisdictions` | §9 | Not Backend A today; P4 owns catalog routes, can query these tables |
 
 The README "What is real and what is mocked" table must list these deferrals.
