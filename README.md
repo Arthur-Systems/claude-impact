@@ -99,9 +99,21 @@ variable names here when application code is added. Keep keys out of the repo.
 
 | Item | Source or assumption | Date checked |
 |---|---|---|
-| | law, dataset, program or ASSUMPTION | |
+| Irvine ADU submittal requirements and next steps | City of Irvine, [Project: Constructing an Accessory Dwelling Unit (ADU)](https://cityofirvine.gov/building-permits-and-inspections/project-constructing-accessory-dwelling-unit-adu) (full text read) | 2026-11-07 |
+| Completeness review, approx. 2 business days | City service target, same ADU page ("Next Steps"). Not an approval forecast | 2026-11-07 |
+| Plan check fee at submittal; permit fees at issuance | City of Irvine, [Fee Schedule](https://cityofirvine.gov/node/4706). No fee amounts entered | 2026-11-07 |
+| Development standards (setbacks, size limits, parking) | City of Irvine Form 67-01, [Pre-Approved ADU Development Standards Checklist](https://cityofirvine.gov/sites/default/files/legacy-documents/civica-35890-67-01.pdf). Cites old Gov. Code 65852.2 (flagged as stale) | 2026-11-07 |
+| Application package forms | City of Irvine [ADU application package](https://cityofirvine.gov/sites/default/files/legacy-documents/civica-34716-adu-application-package_updated-2025.pdf). Extracted text partly garbled: needs_review | 2026-11-07 |
+| Hold Harmless Affidavit (pre-approved plans) | City of Irvine [Form 67-02](https://cityofirvine.gov/sites/default/files/legacy-documents/civica-35928-67-02.pdf) (title only read). Scope conflicts with ADU page; not entered as a requirement | 2026-11-07 |
+| Pre-approved plan list | City of Irvine [Pre-Approved ADU Plans Program](https://cityofirvine.gov/building-permits-and-inspections/pre-approved-adu-plans-program): list says "Coming soon". No plan catalog seeded | 2026-11-07 |
+| 15-business-day completeness, 60-day decision, renumbering to Gov. Code 66310-66342 | California HCD, [ADU Handbook (March 2026)](https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ADU-Handbook-Update.pdf), pp. 11, 13, 34-35. Excerpts need hand-check | 2026-11-07 |
+| Gov. Code § 66317 statute text | [leginfo](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=66317): **blocked**, not verified. No legal due dates are calculated | 2026-11-07 |
+| AB 2234 post-entitlement review periods | City of Irvine, [Building Permit Requirements Under AB 2234](https://cityofirvine.gov/community-development/building-permit-requirements-under-assembly-bill-ab-2234) | 2026-11-07 |
+| Milestone durations | None. All null; the tool shows "no estimate". Any future numbers will be labeled ASSUMPTION | n/a |
+| Demo packet and example applications | Synthetic test data (fictional names, addresses, APNs). Not official forms | n/a |
 
 Label any assumed numbers as ASSUMPTION here and in the tool.
+
 
 ## What is real and what is mocked
 
