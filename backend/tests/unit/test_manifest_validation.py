@@ -5,13 +5,13 @@ import json
 import pytest
 from clearpath.ingestion.schemas import Manifest
 from clearpath.ingestion.validation import (
-    BundleValidationError, validate_bundle, validate_manifest_dict,
+    BundleValidationError, ValidationIssue, validate_bundle, validate_manifest_dict,
 )
 from clearpath.permits.predicates import validate_predicate
 
 BACKEND = Path(__file__).resolve().parents[2]
 FIXTURE = BACKEND / 'tests/fixtures/irvine_adu_synthetic/manifest.json'
-STUB = BACKEND / 'data/irvine_adu/manifest.json'
+REVIEWED_PUBLIC = BACKEND / 'data/irvine_adu/manifest.json'
 PID = '7f9c2b1e-0000-4000-8000-000000000001'
 UNKNOWN = '7f9c2b1e-0000-4000-8000-000000000099'
 
@@ -129,7 +129,31 @@ def test_collects_all_issues_and_nested_path(base):
     base['passages'][0]['source_key'] = 'UNKNOWN'
     issues = validate_manifest_dict(base)
     assert {i.code for i in issues} == {'invalid_predicate', 'dangling_reference'}
-    assert any(i.path == 'requirements[0].applies_if.all[0]' for i in issues)
+    assert any(i.path == 'requirements[0].applies_if.all[0].eq'
+               and i.reason == 'literal_type_mismatch' for i in issues)
+
+
+@pytest.mark.parametrize(('predicate', 'suffix', 'reason'), [
+    ({'eq': ['flag', 'SENTINEL\nX']}, '.eq', 'literal_type_mismatch'),
+    ({'SENTINEL\nX': []}, '', 'unknown_operator'),
+    ({'not': []}, '.not', 'not_an_object'),
+    ({'eq': ['SENTINEL\nX', True]}, '.eq', 'unknown_fact'),
+])
+def test_manifest_propagates_predicate_path_and_static_reason(base, tmp_path, predicate, suffix, reason):
+    base['requirements'].append(deepcopy(base['requirements'][0]))
+    base['requirements'][1]['key'] = 'other-doc'
+    base['requirements'][1]['applies_if'] = {'all': [predicate]}
+    path = tmp_path / 'manifest.json'
+    path.write_text(json.dumps(base), encoding='utf-8')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    expected_path = f'requirements[1].applies_if.all[0]{suffix}'
+    assert [(i.code, i.path, i.reason) for i in caught.value.issues] == [
+        ('invalid_predicate', expected_path, reason),
+    ]
+    assert str(caught.value) == f'invalid_predicate: {expected_path} ({reason})'
+    assert 'SENTINEL' not in str(caught.value)
+    assert '\n' not in str(caught.value)
 
 
 def test_error_redaction(base, tmp_path):
@@ -141,7 +165,62 @@ def test_error_redaction(base, tmp_path):
     output = str(caught.value) + repr(caught.value.issues)
     assert base['passages'][0]['excerpt'] not in output
     assert 'FAKE_SECRET_SENTINEL' not in output
-    assert caught.value.issues[0].path == 'passages[0].extra'
+    assert caught.value.issues[0].path == 'passages[0].*'
+
+
+@pytest.mark.parametrize(('owner', 'key', 'expected_path'), [
+    ([], 'excerpt', '*'),
+    ([], 'type', '*'),  # A field in FactSpec is still an extra at the top level.
+    (['passages', 0], 'SENTINEL\nX\x1b\x7f', 'passages[0].*'),
+    (['passages', 0], 'description', 'passages[0].*'),
+    (['fact_schema', 'flag'], 'SENTINEL\nX', 'fact_schema.*.*'),
+    (['milestones', 0, 'assumed_days'], 'SENTINEL\nX', 'milestones[0].assumed_days.*'),
+])
+def test_schema_diagnostics_mask_unknown_field_names(base, tmp_path, owner, key, expected_path):
+    key = base['passages'][0]['excerpt'] if key == 'excerpt' else key
+    target = base
+    for part in owner:
+        target = target[part]
+    target[key] = 'FAKE_SECRET_VALUE'
+    path = tmp_path / 'manifest.json'
+    path.write_text(json.dumps(base), encoding='utf-8')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    assert [issue.path for issue in caught.value.issues] == [expected_path]
+    assert [issue.reason for issue in caught.value.issues] == ['extra_forbidden']
+    assert str(caught.value) == f'schema_invalid: {expected_path} (extra_forbidden)'
+    assert key not in str(caught.value)
+    assert key not in repr(caught.value.issues)
+    assert 'FAKE_SECRET_VALUE' not in str(caught.value)
+    assert all(ord(c) >= 32 and ord(c) != 127 for c in str(caught.value))
+
+
+@pytest.mark.parametrize('key', ['FAKE_SECRET_SENTINEL', 'SENTINEL\nX', 'type'])
+def test_fact_schema_keys_are_masked_even_when_they_match_field_names(base, key):
+    base['fact_schema'][key] = {'type': 'invalid'}
+    issues = validate_manifest_dict(base)
+    assert issues
+    assert {issue.path for issue in issues} <= {'fact_schema.*.*', 'fact_schema.*.type'}
+    assert all(issue.reason for issue in issues)
+
+
+@pytest.mark.parametrize(('path', 'value', 'expected_path', 'reason'), [
+    (['jurisdiction'], 'BAD\nSLUG', 'jurisdiction', 'string_pattern_mismatch'),
+    (['sources', 0, 'key'], 'lowercase', 'sources[0].key', 'string_pattern_mismatch'),
+    (['milestones', 0, 'assumed_days', 'min'], 'bad', 'milestones[0].assumed_days.min', 'int_type'),
+    (['fact_schema', 'flag', 'type'], 'bad', 'fact_schema.*.type', 'literal_error'),
+])
+def test_schema_diagnostics_keep_static_reasons(base, path, value, expected_path, reason):
+    set_at(base, path, value)
+    issues = validate_manifest_dict(base)
+    assert [(i.code, i.path, i.reason) for i in issues] == [('schema_invalid', expected_path, reason)]
+
+
+def test_missing_field_reason_and_backwards_compatible_issue_default(base):
+    del base['passages'][0]['locator']
+    issues = validate_manifest_dict(base)
+    assert [(i.path, i.reason) for i in issues] == [('passages[0].locator', 'missing')]
+    assert ValidationIssue('dangling_reference', 'passages[0].source_key').reason == ''
 
 
 def test_fact_schema_key_diagnostics_do_not_leak_values(base):
@@ -178,6 +257,45 @@ def test_path_checked_before_read_and_symlinks(tmp_path):
     assert caught.value.issues[0].code == 'path_outside_bundle'
 
 
+@pytest.mark.parametrize('error_type', [RuntimeError, OSError])
+@pytest.mark.parametrize('failure_target', ['manifest', 'root'])
+def test_path_resolution_failures_are_sanitized(tmp_path, monkeypatch, error_type, failure_target):
+    root = tmp_path / 'allowed'
+    root.mkdir()
+    path = root / 'manifest.json'
+    path.write_text('{}', encoding='utf-8')
+    failing_path = path if failure_target == 'manifest' else root
+    original_resolve = Path.resolve
+
+    def fail_resolution(self, *args, **kwargs):
+        if self == failing_path:
+            raise error_type(f'SENTINEL\nX: {failing_path}')
+        return original_resolve(self, *args, **kwargs)
+
+    with monkeypatch.context() as patcher:
+        patcher.setattr(Path, 'resolve', fail_resolution)
+        with pytest.raises(BundleValidationError) as caught:
+            validate_bundle(path, allowed_roots=[root])
+    assert [(i.code, i.path) for i in caught.value.issues] == [('path_outside_bundle', '$')]
+    assert str(caught.value) == 'path_outside_bundle: $'
+    assert 'SENTINEL' not in str(caught.value)
+    assert str(tmp_path) not in str(caught.value)
+    assert caught.value.__suppress_context__
+
+
+@pytest.mark.parametrize('loop_target', ['manifest', 'root'])
+def test_real_symlink_loops_are_sanitized(tmp_path, loop_target):
+    loop = tmp_path / 'loop'
+    loop.symlink_to(loop.name)
+    path = loop if loop_target == 'manifest' else tmp_path / 'manifest.json'
+    root = tmp_path if loop_target == 'manifest' else loop
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[root])
+    assert [(i.code, i.path) for i in caught.value.issues] == [('path_outside_bundle', '$')]
+    assert str(caught.value) == 'path_outside_bundle: $'
+    assert str(tmp_path) not in str(caught.value)
+
+
 def test_bad_json(tmp_path):
     path = tmp_path / 'bad.json'
     path.write_text('{FAKE_SECRET_SENTINEL')
@@ -185,6 +303,118 @@ def test_bad_json(tmp_path):
         validate_bundle(path, allowed_roots=[tmp_path])
     assert [(i.code, i.path) for i in caught.value.issues] == [('schema_invalid', '$')]
     assert 'FAKE_SECRET_SENTINEL' not in str(caught.value)
+
+
+@pytest.mark.parametrize('constant', ['NaN', 'Infinity', '-Infinity'])
+@pytest.mark.parametrize('location', ['$', 'curator_label', 'predicate', 'extra'])
+def test_non_standard_json_constants_are_rejected_anywhere(base, tmp_path, constant, location):
+    marker = 'NON_STANDARD_CONSTANT_SENTINEL'
+    if location == '$':
+        payload = constant
+    else:
+        if location == 'predicate':
+            base['requirements'][0]['applies_if'] = {'eq': ['size', marker]}
+        else:
+            base[location] = marker
+        payload = json.dumps(base).replace(json.dumps(marker), constant)
+    path = tmp_path / 'manifest.json'
+    path.write_text(payload, encoding='utf-8')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    assert [(i.code, i.path, i.reason) for i in caught.value.issues] == [
+        ('schema_invalid', '$', 'non_standard_json_constant'),
+    ]
+    assert str(caught.value) == 'schema_invalid: $ (non_standard_json_constant)'
+
+
+def test_in_memory_non_finite_predicate_has_static_reason(base):
+    base['requirements'][0]['applies_if'] = {'eq': ['size', float('nan')]}
+    issues = validate_manifest_dict(base)
+    assert [(i.code, i.path, i.reason) for i in issues] == [
+        ('invalid_predicate', 'requirements[0].applies_if.eq', 'non_finite_number'),
+    ]
+
+
+def test_json_constant_names_inside_strings_remain_valid(base, tmp_path):
+    base['curator_label'] = 'NaN Infinity -Infinity'
+    path = tmp_path / 'manifest.json'
+    path.write_text(json.dumps(base), encoding='utf-8')
+    assert validate_bundle(path, allowed_roots=[tmp_path]).manifest.curator_label == base['curator_label']
+
+
+def test_manifest_predicate_depth_is_bounded(base, tmp_path):
+    pred = {'eq': ['flag', True]}
+    for _ in range(33):
+        pred = {'not': pred}
+    base['requirements'][0]['applies_if'] = pred
+    path = tmp_path / 'manifest.json'
+    path.write_text(json.dumps(base), encoding='utf-8')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    assert [(i.code, i.path, i.reason) for i in caught.value.issues] == [
+        ('invalid_predicate', 'requirements[0].applies_if' + '.not' * 33, 'too_deep'),
+    ]
+
+
+@pytest.mark.parametrize('surrogate', ['\ud800', '\udfff'], ids=['high-surrogate', 'low-surrogate'])
+@pytest.mark.parametrize('location', ['curator_label', 'excerpt', 'predicate', 'unknown_key'])
+def test_lone_surrogates_are_sanitized_before_hashing(base, tmp_path, surrogate, location):
+    text = f'SENTINEL{surrogate}'
+    if location == 'excerpt':
+        base['passages'][0]['excerpt'] = text
+    elif location == 'predicate':
+        base['fact_schema']['label'] = {'type': 'string'}
+        base['requirements'][0]['applies_if'] = {'eq': ['label', text]}
+    elif location == 'unknown_key':
+        base[text] = True
+    else:
+        base[location] = text
+    path = tmp_path / 'manifest.json'
+    path.write_text(json.dumps(base, ensure_ascii=True), encoding='utf-8')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    assert [(i.code, i.path, i.reason) for i in caught.value.issues] == [
+        ('schema_invalid', '$', 'invalid_unicode'),
+    ]
+    assert str(caught.value) == 'schema_invalid: $ (invalid_unicode)'
+    assert 'SENTINEL' not in str(caught.value)
+    assert str(tmp_path) not in str(caught.value)
+
+
+def test_excessive_json_nesting_has_a_sanitized_depth_error(base, tmp_path):
+    marker = 'DEEP_PREDICATE_SENTINEL'
+    base['requirements'][0]['applies_if'] = marker
+    deep_predicate = '{"not":' * 10000 + '{"eq":["flag",true]}' + '}' * 10000
+    payload = json.dumps(base).replace(json.dumps(marker), deep_predicate)
+    path = tmp_path / 'manifest.json'
+    path.write_text(payload, encoding='utf-8')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    assert [(i.code, i.path, i.reason) for i in caught.value.issues] == [
+        ('schema_invalid', '$', 'too_deep'),
+    ]
+    assert str(caught.value) == 'schema_invalid: $ (too_deep)'
+
+
+def test_non_utf8_file_has_sanitized_root_error(tmp_path):
+    path = tmp_path / 'manifest.json'
+    path.write_bytes(b'{"curator_label":"SENTINEL\xff"}')
+    with pytest.raises(BundleValidationError) as caught:
+        validate_bundle(path, allowed_roots=[tmp_path])
+    assert [(i.code, i.path) for i in caught.value.issues] == [('schema_invalid', '$')]
+    assert 'SENTINEL' not in str(caught.value)
+    assert str(tmp_path) not in str(caught.value)
+
+
+def test_valid_unicode_hash_does_not_depend_on_json_escape_style(base, tmp_path):
+    base['curator_label'] = 'SYNTHETIC: café 🏠'
+    path = tmp_path / 'manifest.json'
+    path.write_text(json.dumps(base, ensure_ascii=True), encoding='utf-8')
+    escaped = validate_bundle(path, allowed_roots=[tmp_path])
+    path.write_text(json.dumps(base, ensure_ascii=False), encoding='utf-8')
+    literal = validate_bundle(path, allowed_roots=[tmp_path])
+    assert escaped.content_hash == literal.content_hash
+    assert literal.manifest.curator_label == base['curator_label']
 
 
 def test_seed_bundles():
@@ -199,6 +429,36 @@ def test_seed_bundles():
     assert all(p.review_status == 'reviewed' for p in synthetic.passages if p.id in cited)
     assert all(m.assumed_days.label == 'ASSUMPTION' for m in synthetic.milestones)
     assert synthetic.milestones[0].requirements == [r.key for r in synthetic.requirements if r.required_for_preparation]
-    stub = validate_bundle(STUB).manifest
-    assert stub.kind == 'reviewed_public'
-    assert not any([stub.sources, stub.passages, stub.pathways, stub.requirements, stub.milestones, stub.conflicts])
+
+
+def test_real_reviewed_public_manifest_validates_with_zero_issues():
+    data = json.loads(REVIEWED_PUBLIC.read_text(encoding='utf-8'))
+    assert validate_manifest_dict(data) == []
+    assert validate_bundle(REVIEWED_PUBLIC).manifest.kind == 'reviewed_public'
+
+
+def test_empty_reviewed_public_stub_is_valid_in_memory(base):
+    stub = deepcopy(base)
+    stub['kind'] = 'reviewed_public'
+    collections = ('sources', 'passages', 'pathways', 'requirements', 'milestones', 'conflicts')
+    for name in collections:
+        stub[name] = []
+    assert validate_manifest_dict(stub) == []
+    manifest = Manifest.model_validate(stub)
+    assert manifest.kind == 'reviewed_public'
+    assert not any(getattr(manifest, name) for name in collections)
+
+
+@pytest.mark.parametrize('key', ['A', '0', 'IRV-ADU', 'IRV_ADU-01', 'A' * 80])
+def test_uppercase_source_keys_remain_valid(base, key):
+    base['sources'][0]['key'] = key
+    base['passages'][0]['source_key'] = key
+    assert validate_manifest_dict(base) == []
+
+
+@pytest.mark.parametrize('key', ['a', 'irv-adu', '_IRV', '-IRV', 'A' * 81, 'IRV\nADU', 'IRV.ADU'])
+def test_source_keys_reject_lowercase_or_invalid_pattern(base, key):
+    base['sources'][0]['key'] = key
+    assert [(i.code, i.path, i.reason) for i in validate_manifest_dict(base)] == [
+        ('schema_invalid', 'sources[0].key', 'string_pattern_mismatch'),
+    ]

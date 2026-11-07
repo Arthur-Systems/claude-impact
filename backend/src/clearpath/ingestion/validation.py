@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from hashlib import sha256
 import json
 from pathlib import Path
+from types import UnionType
+from typing import NoReturn, get_args, get_origin
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from clearpath.ingestion.schemas import Manifest
 from clearpath.permits.predicates import PredicateError, validate_predicate
@@ -19,12 +21,16 @@ ALLOWED_ROOTS = (BACKEND_DIR / 'data', BACKEND_DIR / 'tests' / 'fixtures')
 class ValidationIssue:
     code: str
     path: str
+    reason: str = ''
 
 
 class BundleValidationError(Exception):
     def __init__(self, issues: list[ValidationIssue]):
         self.issues = issues
-        super().__init__('; '.join(f'{issue.code}: {issue.path}' for issue in issues))
+        super().__init__('; '.join(
+            f'{issue.code}: {issue.path}' + (f' ({issue.reason})' if issue.reason else '')
+            for issue in issues
+        ))
 
 
 @dataclass(frozen=True)
@@ -35,15 +41,29 @@ class ValidatedBundle:
 
 
 def _field_path(loc: tuple) -> str:
+    """Render schema-owned names and list indices, never submitted mapping keys."""
     result = ''
-    for index, part in enumerate(loc):
-        # Mapping keys are submitted data, unlike fixed model field names.
-        if index == 1 and loc[0] == 'fact_schema':
-            part = '*'
-        if isinstance(part, int):
+    schema = Manifest
+    for part in loc:
+        if get_origin(schema) is UnionType:
+            schema = next(t for t in get_args(schema) if t is not type(None))
+        origin = get_origin(schema)
+        if origin is list and type(part) is int:
             result += f'[{part}]'
+            schema = get_args(schema)[0]
+            continue
+        if origin is dict:
+            # Even keys matching a model field name are submitted data.
+            part = '*'
+            schema = get_args(schema)[1]
+        elif (isinstance(schema, type) and issubclass(schema, BaseModel)
+              and isinstance(part, str) and part in schema.model_fields):
+            schema = schema.model_fields[part].annotation
         else:
-            result += ('.' if result else '') + str(part)
+            # Extra fields and diagnostic markers cannot inject text or controls.
+            part = '*'
+            schema = None
+        result += ('.' if result else '') + part
     return result or '$'
 
 
@@ -55,7 +75,7 @@ def validate_manifest_dict(data: dict) -> list[ValidationIssue]:
     try:
         manifest = Manifest.model_validate(data)
     except ValidationError as error:
-        issues.extend(ValidationIssue('schema_invalid', _field_path(e['loc']))
+        issues.extend(ValidationIssue('schema_invalid', _field_path(e['loc']), e['type'])
                       for e in error.errors(include_input=False, include_context=False))
         return issues
 
@@ -96,7 +116,7 @@ def validate_manifest_dict(data: dict) -> list[ValidationIssue]:
                 try:
                     validate_predicate(owner.applies_if, manifest.fact_schema, f'{path}.applies_if')
                 except PredicateError as error:
-                    issues.append(ValidationIssue('invalid_predicate', error.path))
+                    issues.append(ValidationIssue('invalid_predicate', error.path, error.reason))
             if name == 'requirements':
                 references(owner.pathways, keys['pathways'], f'{path}.pathways')
             if name == 'milestones':
@@ -134,15 +154,48 @@ def validate_manifest_dict(data: dict) -> list[ValidationIssue]:
     return issues
 
 
+def _check_unicode(data: object) -> None:
+    # Walk decoded JSON without recursion, including object keys, before Pydantic
+    # or hashing can encounter an escaped lone surrogate.
+    pending = [data]
+    while pending:
+        value = pending.pop()
+        if isinstance(value, str):
+            value.encode('utf-8')
+        elif isinstance(value, dict):
+            pending.extend(value)
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+
+
+def _reject_json_constant(_value: str) -> NoReturn:
+    raise BundleValidationError([ValidationIssue('schema_invalid', '$', 'non_standard_json_constant')])
+
+
 def validate_bundle(
     path: Path | str, *, allowed_roots: Sequence[Path] | None = None
 ) -> ValidatedBundle:
-    resolved = Path(path).resolve()
-    roots = ALLOWED_ROOTS if allowed_roots is None else allowed_roots
-    if not any(resolved.is_relative_to(Path(root).resolve()) for root in roots):
+    """Validate a manifest under the approved bundle roots.
+
+    ``allowed_roots`` is a keyword-only test hook. Production callers, including
+    the CLI, must omit it and use the default roots.
+    """
+    try:
+        resolved = Path(path).resolve()
+        roots = ALLOWED_ROOTS if allowed_roots is None else allowed_roots
+        contained = any(resolved.is_relative_to(Path(root).resolve()) for root in roots)
+    except (RuntimeError, OSError):
+        raise BundleValidationError([ValidationIssue('path_outside_bundle', '$')]) from None
+    if not contained:
         raise BundleValidationError([ValidationIssue('path_outside_bundle', '$')])
     try:
-        data = json.loads(resolved.read_text(encoding='utf-8'))
+        data = json.loads(resolved.read_text(encoding='utf-8'), parse_constant=_reject_json_constant)
+        _check_unicode(data)
+    except UnicodeError:
+        raise BundleValidationError([ValidationIssue('schema_invalid', '$', 'invalid_unicode')]) from None
+    except RecursionError:
+        raise BundleValidationError([ValidationIssue('schema_invalid', '$', 'too_deep')]) from None
     except (ValueError, OSError):
         raise BundleValidationError([ValidationIssue('schema_invalid', '$')]) from None
     issues = validate_manifest_dict(data)
