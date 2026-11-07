@@ -1,6 +1,8 @@
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
+from types import UnionType
+from typing import Annotated, Union, get_args, get_origin
 from uuid import uuid4
 
 from alembic.config import Config
@@ -9,6 +11,7 @@ from fastapi import APIRouter, Depends, FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -25,6 +28,49 @@ from clearpath.domain.schemas import StrictModel
 def get_alembic_head() -> str | None:
     config = Config(str(Path(__file__).resolve().parents[3] / "alembic.ini"))
     return ScriptDirectory.from_config(config).get_current_head()
+
+
+def _safe_loc(request, loc: tuple) -> list:
+    """Keep only schema-declared names and array indices, never submitted keys."""
+    if not loc or loc[0] not in {"body", "path", "query", "header", "cookie"}:
+        return ["*"] * len(loc)
+    source, *parts = loc
+    route = request.scope.get("route")
+    if source == "body":
+        field = getattr(route, "body_field", None)
+        schema = field.field_info.annotation if field is not None else None
+    else:
+        schema = {}
+        pending = [getattr(route, "dependant", None)]
+        while pending:
+            dependant = pending.pop()
+            for field in getattr(dependant, source + "_params", ()):
+                schema[field.alias] = field.field_info.annotation
+            pending.extend(getattr(dependant, "dependencies", ()))
+    result = [source]
+    for part in parts:
+        if get_origin(schema) is Annotated:
+            schema = get_args(schema)[0]
+        if get_origin(schema) in (Union, UnionType):
+            candidates = [item for item in get_args(schema) if item is not type(None)]
+            schema = candidates[0] if len(candidates) == 1 else None
+        origin = get_origin(schema)
+        if isinstance(schema, dict) and isinstance(part, str) and part in schema:
+            schema = schema[part]
+        elif isinstance(schema, type) and issubclass(schema, BaseModel):
+            fields = {field.alias or name: field for name, field in schema.model_fields.items()}
+            if isinstance(part, str) and part in fields:
+                schema = fields[part].annotation
+            else:
+                part, schema = "*", None
+        elif origin in (list, tuple) and type(part) is int:
+            schema = get_args(schema)[0]
+        elif origin is dict:
+            part, schema = "*", get_args(schema)[1]
+        else:
+            part, schema = "*", None
+        result.append(part)
+    return result
 
 
 class EchoBody(StrictModel):
@@ -50,7 +96,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
-        fields = [{"loc": list(err["loc"]), "type": err["type"]} for err in exc.errors()]
+        fields = [{"loc": _safe_loc(request, err["loc"]), "type": err["type"]} for err in exc.errors()]
         return error_response(request, 422, "validation_error", "Request validation failed.", {"fields": fields})
 
     @app.exception_handler(StarletteHTTPException)

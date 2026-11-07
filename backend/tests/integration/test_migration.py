@@ -14,10 +14,10 @@ TABLES = {
 }
 
 
-def test_migration_creates_schema(settings, monkeypatch):
+def test_migration_creates_schema(settings, monkeypatch, test_database_name):
     # Isolate DDL from all transactional tests (and never reset the dev database).
     url = make_url(settings.database_url)
-    assert url.database == "clearpath_test"
+    assert url.database == test_database_name
     name = "clearpath_migration_" + uuid4().hex
     admin = create_engine(url.set(database="postgres"), isolation_level="AUTOCOMMIT")
     with admin.connect() as connection:
