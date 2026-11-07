@@ -1,0 +1,1615 @@
+{
+  "packet_id": "clearpath-irvine-adu-abbrev",
+  "version": "0.1.0",
+  "title": "Abbreviated ADU Submittal Packet",
+  "jurisdiction": "City of Irvine, CA (demo basis)",
+  "project_type": "Accessory Dwelling Unit (ADU / JADU)",
+  "disclaimer": "ClearPath hackathon sample. Not an official City of Irvine document and not for submittal. Abbreviated from public City of Irvine and OCFA forms for software testing; field sets are condensed and staff-only content is simplified.",
+  "source_page": "https://cityofirvine.gov/building-permits-and-inspections/project-constructing-accessory-dwelling-unit-adu",
+  "documents": [
+    {
+      "id": "DOC-01",
+      "title": "Building Permit Application (ADU)",
+      "based_on": "City of Irvine Form 65-59 Building Permit Application; Form 41-60 Address Application",
+      "completed_by": "Applicant",
+      "required": true,
+      "condition": "All ADU and JADU projects",
+      "fields": [
+        {
+          "name": "doc01.staff_plan_check_no",
+          "label": "Plan check no.",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "For office use only",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc01.staff_submittal_date",
+          "label": "Submittal date",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "For office use only",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc01.staff_target_date",
+          "label": "Target date",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "For office use only",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc01.project_address",
+          "label": "Project address",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.unit",
+          "label": "Unit / suite",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.city",
+          "label": "City",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.zip",
+          "label": "ZIP",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.apn",
+          "label": "Assessor parcel number (APN)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.tract",
+          "label": "Tract",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.lot",
+          "label": "Lot",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.planning_area",
+          "label": "Planning area no. / name",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Project location",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_name",
+          "label": "Applicant / company name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_phone",
+          "label": "Phone",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_email",
+          "label": "Email",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_address",
+          "label": "Mailing address",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Applicant",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_city",
+          "label": "City",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Applicant",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_zip",
+          "label": "ZIP",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Applicant",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.owner_name",
+          "label": "Owner name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Property owner",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.owner_phone",
+          "label": "Phone",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Property owner",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.owner_email",
+          "label": "Email",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Property owner",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.owner_address",
+          "label": "Mailing address",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Property owner",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.owner_city",
+          "label": "City",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Property owner",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.owner_zip",
+          "label": "ZIP",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Property owner",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.adu_type",
+          "label": "ADU type",
+          "type": "choice",
+          "options": [
+            "Detached ADU",
+            "Attached ADU",
+            "Garage conversion",
+            "JADU"
+          ],
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.uses_preapproved_plan",
+          "label": "Using a pre-approved ADU plan?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.preapproved_plan_id",
+          "label": "Pre-approved plan name / ID",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.permit_types",
+          "label": "Permit types applied for",
+          "type": "multi",
+          "options": [
+            "Building",
+            "Plumbing",
+            "Electrical",
+            "Mechanical"
+          ],
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.adu_sqft",
+          "label": "ADU floor area (sq ft)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.bedrooms",
+          "label": "Bedrooms",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.bathrooms",
+          "label": "Bathrooms",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.stories",
+          "label": "Stories",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.valuation",
+          "label": "Valuation ($)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.fire_sprinklers",
+          "label": "Fire sprinklers?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.solar_pv",
+          "label": "Solar PV included?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.new_address_needed",
+          "label": "New address needed?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.description_of_work",
+          "label": "Description of work",
+          "type": "area",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_signature",
+          "label": "Applicant signature",
+          "type": "sign",
+          "options": null,
+          "required": true,
+          "section": "Certification",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_print_name",
+          "label": "Print name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Certification",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc01.applicant_sign_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Certification",
+          "completed_by": "Applicant"
+        }
+      ]
+    },
+    {
+      "id": "DOC-02",
+      "title": "ADU Development Standards Checklist (Site Plan)",
+      "based_on": "City of Irvine Form 67-01 Pre-Approved ADU Development Standards Checklist",
+      "completed_by": "Applicant / designer",
+      "required": true,
+      "condition": "All ADU and JADU projects",
+      "fields": [
+        {
+          "name": "doc02.std.property_type.proposed",
+          "label": "Property type - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Single-family or multi-family, per ADU Verification Form (DOC-03)"
+        },
+        {
+          "name": "doc02.std.property_type.sheet",
+          "label": "Property type - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Single-family or multi-family, per ADU Verification Form (DOC-03)"
+        },
+        {
+          "name": "doc02.std.adu_type.proposed",
+          "label": "ADU type - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "JADU (one per SFR; not for multi-family), attached, or detached"
+        },
+        {
+          "name": "doc02.std.adu_type.sheet",
+          "label": "ADU type - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "JADU (one per SFR; not for multi-family), attached, or detached"
+        },
+        {
+          "name": "doc02.std.units.proposed",
+          "label": "Units existing / proposed - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Confirm total units allowed with Planning"
+        },
+        {
+          "name": "doc02.std.units.sheet",
+          "label": "Units existing / proposed - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Confirm total units allowed with Planning"
+        },
+        {
+          "name": "doc02.std.property_lines.proposed",
+          "label": "Property lines - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Located, labeled and shown on site plan"
+        },
+        {
+          "name": "doc02.std.property_lines.sheet",
+          "label": "Property lines - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Located, labeled and shown on site plan"
+        },
+        {
+          "name": "doc02.std.easements.proposed",
+          "label": "Easements - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Label and dimension width, or sign owner statement below"
+        },
+        {
+          "name": "doc02.std.easements.sheet",
+          "label": "Easements - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Label and dimension width, or sign owner statement below"
+        },
+        {
+          "name": "doc02.std.side_setback_ft.proposed",
+          "label": "Side setback (ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Minimum 4 ft from side property line"
+        },
+        {
+          "name": "doc02.std.side_setback_ft.sheet",
+          "label": "Side setback (ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Minimum 4 ft from side property line"
+        },
+        {
+          "name": "doc02.std.rear_setback_ft.proposed",
+          "label": "Rear setback (ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Minimum 4 ft from rear property line"
+        },
+        {
+          "name": "doc02.std.rear_setback_ft.sheet",
+          "label": "Rear setback (ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Minimum 4 ft from rear property line"
+        },
+        {
+          "name": "doc02.std.building_separation_ft.proposed",
+          "label": "Building separation (ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Minimum 6 ft building to building"
+        },
+        {
+          "name": "doc02.std.building_separation_ft.sheet",
+          "label": "Building separation (ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Minimum 6 ft building to building"
+        },
+        {
+          "name": "doc02.std.primary_footprint_sqft.proposed",
+          "label": "Primary residence footprint (sq ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Include existing accessory structures"
+        },
+        {
+          "name": "doc02.std.primary_footprint_sqft.sheet",
+          "label": "Primary residence footprint (sq ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Include existing accessory structures"
+        },
+        {
+          "name": "doc02.std.adu_size_sqft.proposed",
+          "label": "Proposed ADU size (sq ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Detached up to 1,200; attached up to 1,200 or 50% of primary, whichever is less; JADU up to 500 (+150 for entry)"
+        },
+        {
+          "name": "doc02.std.adu_size_sqft.sheet",
+          "label": "Proposed ADU size (sq ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Detached up to 1,200; attached up to 1,200 or 50% of primary, whichever is less; JADU up to 500 (+150 for entry)"
+        },
+        {
+          "name": "doc02.std.garage_sqft.proposed",
+          "label": "Garage (sq ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Depict and label garage"
+        },
+        {
+          "name": "doc02.std.garage_sqft.sheet",
+          "label": "Garage (sq ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Depict and label garage"
+        },
+        {
+          "name": "doc02.std.lot_size_sqft.proposed",
+          "label": "Lot size (sq ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": null
+        },
+        {
+          "name": "doc02.std.lot_size_sqft.sheet",
+          "label": "Lot size (sq ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": null
+        },
+        {
+          "name": "doc02.std.lot_coverage_sqft.proposed",
+          "label": "Lot coverage (sq ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "May be exceeded to allow an 800 sq ft unit"
+        },
+        {
+          "name": "doc02.std.lot_coverage_sqft.sheet",
+          "label": "Lot coverage (sq ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "May be exceeded to allow an 800 sq ft unit"
+        },
+        {
+          "name": "doc02.std.height_ft.proposed",
+          "label": "Building height (ft) - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": null
+        },
+        {
+          "name": "doc02.std.height_ft.sheet",
+          "label": "Building height (ft) - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": null
+        },
+        {
+          "name": "doc02.std.adu_parking.proposed",
+          "label": "ADU parking - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "1 space if 1+ bedrooms, unless a state exemption applies"
+        },
+        {
+          "name": "doc02.std.adu_parking.sheet",
+          "label": "ADU parking - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "1 space if 1+ bedrooms, unless a state exemption applies"
+        },
+        {
+          "name": "doc02.std.walls_fences.proposed",
+          "label": "Walls and fences - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Show existing / proposed; 2 ft from property line"
+        },
+        {
+          "name": "doc02.std.walls_fences.sheet",
+          "label": "Walls and fences - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Show existing / proposed; 2 ft from property line"
+        },
+        {
+          "name": "doc02.std.mechanical_equipment.proposed",
+          "label": "Mechanical equipment - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Show location; screen from off-site views"
+        },
+        {
+          "name": "doc02.std.mechanical_equipment.sheet",
+          "label": "Mechanical equipment - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Show location; screen from off-site views"
+        },
+        {
+          "name": "doc02.std.waste_bins.proposed",
+          "label": "Solid waste bins - Proposed / shown",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Show collection bin location"
+        },
+        {
+          "name": "doc02.std.waste_bins.sheet",
+          "label": "Solid waste bins - Plan sheet",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Development standards",
+          "completed_by": "Applicant",
+          "requirement": "Show collection bin location"
+        },
+        {
+          "name": "doc02.no_easement_owner_name",
+          "label": "Owner (or authorized agent) name",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Easement statement (complete only if no easements exist)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc02.no_easement_signature",
+          "label": "Signature confirming no restricting easements",
+          "type": "sign",
+          "options": null,
+          "required": false,
+          "section": "Easement statement (complete only if no easements exist)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc02.preparer_name",
+          "label": "Name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Prepared by",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc02.preparer_firm",
+          "label": "Firm",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "Prepared by",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc02.preparer_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Prepared by",
+          "completed_by": "Applicant"
+        }
+      ]
+    },
+    {
+      "id": "DOC-03",
+      "title": "ADU Verification Form",
+      "based_on": "City of Irvine ADU Verification Form (issued by Planning on request)",
+      "completed_by": "Applicant (Part A) + City Planning staff (Part B)",
+      "required": true,
+      "condition": "All ADU and JADU projects; must be signed by Planning staff before submittal",
+      "fields": [
+        {
+          "name": "doc03.property_address",
+          "label": "Property address",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part A - Request (applicant)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc03.apn",
+          "label": "APN",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part A - Request (applicant)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc03.owner_name",
+          "label": "Owner name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part A - Request (applicant)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc03.contact_email",
+          "label": "Contact email",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part A - Request (applicant)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc03.proposed_type",
+          "label": "Proposed unit type",
+          "type": "choice",
+          "options": [
+            "Detached ADU",
+            "Attached ADU",
+            "Garage conversion",
+            "JADU"
+          ],
+          "required": true,
+          "section": "Part A - Request (applicant)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc03.property_type",
+          "label": "Property type",
+          "type": "choice",
+          "options": [
+            "Single-family",
+            "Multi-family"
+          ],
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.zoning_district",
+          "label": "Zoning / planning area",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.adu_eligible",
+          "label": "Eligible for ADU?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.jadu_eligible",
+          "label": "Eligible for JADU?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.max_units",
+          "label": "Max. ADU/JADU units",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.planning_notes",
+          "label": "Notes / conditions",
+          "type": "area",
+          "options": null,
+          "required": false,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.planner_name",
+          "label": "Planner name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.planner_signature",
+          "label": "Planner signature",
+          "type": "sign",
+          "options": null,
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc03.planner_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Part B - Planning determination (City staff only)",
+          "completed_by": "City staff"
+        }
+      ]
+    },
+    {
+      "id": "DOC-04",
+      "title": "Fire Authority Plan Submittal Criteria (Residential)",
+      "based_on": "Orange County Fire Authority (OCFA) Plan Submittal Criteria Form, single-family / duplex",
+      "completed_by": "Applicant",
+      "required": true,
+      "condition": "All ADU projects; any YES answer may trigger an OCFA plan review",
+      "fields": [
+        {
+          "name": "doc04.address",
+          "label": "Address",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.zip",
+          "label": "ZIP",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.stories",
+          "label": "Stories",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.existing_area_sqft",
+          "label": "Existing area (sq ft)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.added_area_sqft",
+          "label": "Area to be added (sq ft)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.total_area_sqft",
+          "label": "Total resulting area (sq ft)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.q_adu_sprinklered_house",
+          "label": "1. New ADU on a lot whose house has, or will get, fire sprinklers?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Questionnaire (answer every item)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.q_distance_over_140ft",
+          "label": "2. Any part of the ADU more than 140 ft from the fire access roadway?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Questionnaire (answer every item)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.q_total_area_threshold",
+          "label": "3. Total area over 3,600 sq ft (unsprinklered) or 6,200 sq ft (sprinklered)?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Questionnaire (answer every item)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.q_gate",
+          "label": "4. Gate across a fire access driveway or road?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Questionnaire (answer every item)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.q_methane",
+          "label": "5. Within 100 ft of an oil/gas field or well, 300 ft of a seep, or 1,000 ft of a landfill?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Questionnaire (answer every item)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.q_vegetation",
+          "label": "6. Adjacent to wildland or open space, or in a Fire Hazard Severity Zone?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "Questionnaire (answer every item)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.cert_name",
+          "label": "Print name",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant certification",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.cert_signature",
+          "label": "Signature",
+          "type": "sign",
+          "options": null,
+          "required": true,
+          "section": "Applicant certification",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.cert_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant certification",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.cert_phone",
+          "label": "Phone",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant certification",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc04.cert_email",
+          "label": "Email",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "Applicant certification",
+          "completed_by": "Applicant"
+        }
+      ]
+    },
+    {
+      "id": "DOC-05",
+      "title": "Fee Determinations: School Facilities and Transportation Corridor",
+      "based_on": "City of Irvine Form 42-97 School Facilities Fee Determination; Form 66-92 TCA Residential Fee Determination",
+      "completed_by": "Applicant (project info) + City staff (determination)",
+      "required": true,
+      "condition": "All ADU projects",
+      "fields": [
+        {
+          "name": "doc05.sf_owner_name",
+          "label": "Property owner",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "A. School facilities fee - project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.sf_owner_phone",
+          "label": "Phone",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "A. School facilities fee - project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.sf_property_address",
+          "label": "Property address",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "A. School facilities fee - project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.sf_adu_sqft",
+          "label": "ADU gross floor area (sq ft)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "A. School facilities fee - project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.sf_school_district",
+          "label": "School district",
+          "type": "choice",
+          "options": [
+            "IUSD",
+            "IUSD (CFD)",
+            "Santa Ana USD",
+            "Tustin USD",
+            "Saddleback Valley USD"
+          ],
+          "required": true,
+          "section": "A. School facilities fee - project information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.sf_determination",
+          "label": "Determination",
+          "type": "choice",
+          "options": [
+            "Fee required",
+            "Exempt: ADU 749 sq ft or less",
+            "Exempt: within CFD",
+            "Exempt: other"
+          ],
+          "required": false,
+          "section": "A. School facilities fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.sf_fee_amount",
+          "label": "Fee ($)",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "A. School facilities fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.sf_prepared_by",
+          "label": "Prepared by",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "A. School facilities fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.sf_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "A. School facilities fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.tca_lot",
+          "label": "Lot",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "B. Transportation corridor fee - unit information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.tca_address",
+          "label": "Unit address",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "B. Transportation corridor fee - unit information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.tca_unit_sqft",
+          "label": "Unit sq ft (no garage)",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "B. Transportation corridor fee - unit information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.tca_detached",
+          "label": "Detached?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "B. Transportation corridor fee - unit information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.tca_separate_lot",
+          "label": "On a separate lot?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "B. Transportation corridor fee - unit information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.tca_over_1500",
+          "label": "1,500 sq ft or larger?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "B. Transportation corridor fee - unit information",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc05.tca_class",
+          "label": "Unit classification",
+          "type": "choice",
+          "options": [
+            "Single-family",
+            "Multi-family"
+          ],
+          "required": false,
+          "section": "B. Transportation corridor fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.tca_zone",
+          "label": "Corridor zone",
+          "type": "choice",
+          "options": [
+            "Zone A",
+            "Zone B"
+          ],
+          "required": false,
+          "section": "B. Transportation corridor fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.tca_fee_amount",
+          "label": "Fee ($)",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Transportation corridor fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.tca_prepared_by",
+          "label": "Prepared by",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Transportation corridor fee - determination (City staff only)",
+          "completed_by": "City staff"
+        },
+        {
+          "name": "doc05.tca_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Transportation corridor fee - determination (City staff only)",
+          "completed_by": "City staff"
+        }
+      ]
+    },
+    {
+      "id": "DOC-06",
+      "title": "Owner Acknowledgments",
+      "based_on": "City of Irvine Form 66-122A C&D Waste Assessment; Form 67-02 Hold Harmless Affidavit; Electronic/Digital Signature Disclosure",
+      "completed_by": "Owner / applicant",
+      "required": true,
+      "condition": "Part B only when a pre-approved ADU plan is used (notarized in the real process)",
+      "fields": [
+        {
+          "name": "doc06.cd_new_residential",
+          "label": "New residential main or accessory building?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "A. Construction and demolition waste assessment",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.cd_remodel_adds_area",
+          "label": "Remodel that adds conditioned area or volume?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": true,
+          "section": "A. Construction and demolition waste assessment",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.cd_name",
+          "label": "Name of person completing",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "A. Construction and demolition waste assessment",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.cd_company",
+          "label": "Company",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "A. Construction and demolition waste assessment",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.cd_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "A. Construction and demolition waste assessment",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.cd_signature",
+          "label": "Signature",
+          "type": "sign",
+          "options": null,
+          "required": true,
+          "section": "A. Construction and demolition waste assessment",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_owner_name",
+          "label": "Owner name",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_apn",
+          "label": "APN",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_property_address",
+          "label": "Property address",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_owner_phone",
+          "label": "Phone",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_owner_signature",
+          "label": "Owner signature",
+          "type": "sign",
+          "options": null,
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.hh_notarized",
+          "label": "Notary acknowledgment attached?",
+          "type": "yesno",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "required": false,
+          "section": "B. Pre-approved plan release (summary of hold-harmless terms)",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.esig_signature",
+          "label": "Signature",
+          "type": "sign",
+          "options": null,
+          "required": true,
+          "section": "C. Electronic signature consent",
+          "completed_by": "Applicant"
+        },
+        {
+          "name": "doc06.esig_date",
+          "label": "Date",
+          "type": "text",
+          "options": null,
+          "required": true,
+          "section": "C. Electronic signature consent",
+          "completed_by": "Applicant"
+        }
+      ]
+    }
+  ],
+  "external_documents": [
+    {
+      "id": "PLAN-01",
+      "title": "Architectural / structural plan set with City Standard Title Sheet as first page",
+      "required": true,
+      "completed_by": "Designer or pre-approved plan provider",
+      "note": "Use a downloadable pre-approved plan set (e.g., Santa Ana or Laguna Hills) for demo uploads."
+    },
+    {
+      "id": "PLAN-02",
+      "title": "Site plan (property lines, setbacks, easements, parking, utilities)",
+      "required": true,
+      "completed_by": "Designer",
+      "note": "Values must match DOC-02."
+    },
+    {
+      "id": "EXT-01",
+      "title": "Title 24 energy calculations",
+      "required": true,
+      "completed_by": "Energy consultant",
+      "note": "Site-specific even for pre-approved plans."
+    },
+    {
+      "id": "EXT-02",
+      "title": "ADU covenant (notarized; recorded later with County Recorder)",
+      "required": true,
+      "completed_by": "Owner + notary",
+      "note": "Obtained from Planning; recorded when the case planner says so."
+    },
+    {
+      "id": "EXT-03",
+      "title": "Developer Deposit Case Set-Up form",
+      "required": true,
+      "completed_by": "Owner / applicant",
+      "note": "Online form in the real process; omitted here."
+    },
+    {
+      "id": "EXT-04",
+      "title": "Residential Take-Off Sheet (fixture counts)",
+      "required": true,
+      "completed_by": "Applicant",
+      "note": "Omitted from the abbreviated packet."
+    },
+    {
+      "id": "EXT-05",
+      "title": "HOA / ARC approval letter",
+      "required": false,
+      "completed_by": "HOA",
+      "note": "Conditional: only where an HOA or community association applies."
+    }
+  ],
+  "packet_fields": [
+    {
+      "name": "packet.included.DOC-01",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.DOC-02",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.DOC-03",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.DOC-04",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.DOC-05",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.DOC-06",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.PLAN-01",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.PLAN-02",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.EXT-01",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.EXT-02",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.EXT-03",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.EXT-04",
+      "type": "checkbox"
+    },
+    {
+      "name": "packet.included.EXT-05",
+      "type": "checkbox"
+    }
+  ]
+}
