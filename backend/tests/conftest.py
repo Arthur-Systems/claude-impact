@@ -1,8 +1,9 @@
-"""Own only a randomly named disposable PostgreSQL container and per-test databases."""
+"""Shared source bootstrap and owned disposable PostgreSQL test resources."""
 
 import os
 import secrets
 import subprocess
+import sys
 import time
 from pathlib import Path
 from uuid import uuid4
@@ -13,6 +14,9 @@ from psycopg import sql
 from sqlalchemy import create_engine
 
 BACKEND = Path(__file__).resolve().parents[1]
+_SRC = BACKEND / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
 DB_IMAGE = (
     "pgvector/pgvector:0.8.7-pg17-trixie@"
     "sha256:01215e09bd4bd582d20230e025b6c971deeeffee49ceef1aae167e839cb62a7e"
