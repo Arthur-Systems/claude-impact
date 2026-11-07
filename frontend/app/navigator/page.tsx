@@ -54,10 +54,39 @@ export default function Navigator() {
   ];
   const nextIdx = steps.findIndex((s) => !s.done);
   const started = msgs.length > 1;
+  const guide = (
+    <ol className="steps">
+      {steps.map((s, i) => (
+        <li key={s.label}>
+          <span>
+            {i === nextIdx ? (
+              s.external ? (
+                <a className="btn btn-ghost" href={s.href} target="_blank" rel="noopener noreferrer">
+                  {s.label}
+                </a>
+              ) : (
+                <Link className="btn btn-ghost" href={s.href}>
+                  {s.label}
+                </Link>
+              )
+            ) : (
+              s.label
+            )}
+          </span>
+          {s.done ? <span className="badge badge-done">Done</span> : i === nextIdx ? <span className="badge badge-next">Do this next</span> : <span className="badge">To do</span>}
+        </li>
+      ))}
+    </ol>
+  );
 
   return (
     <>
       <PageHeader title="Navigator" subtitle="Ask about permits, forms, or fees. Answers cite sources." />
+
+      <details className="disclosure guide-mobile">
+        <summary>Step by step</summary>
+        <div className="body">{guide}</div>
+      </details>
 
       <div className="grid">
         <section className="card chat col-8">
@@ -115,28 +144,7 @@ export default function Navigator() {
 
         <section className="card col-4 guide">
           <h2>Step by step</h2>
-          <ol className="steps">
-            {steps.map((s, i) => (
-              <li key={s.label}>
-                <span>
-                  {i === nextIdx ? (
-                    s.external ? (
-                      <a className="btn btn-ghost" href={s.href} target="_blank" rel="noopener noreferrer">
-                        {s.label}
-                      </a>
-                    ) : (
-                      <Link className="btn btn-ghost" href={s.href}>
-                        {s.label}
-                      </Link>
-                    )
-                  ) : (
-                    s.label
-                  )}
-                </span>
-                {s.done ? <span className="badge badge-done">Done</span> : i === nextIdx ? <span className="badge badge-next">Do this next</span> : <span className="badge">To do</span>}
-              </li>
-            ))}
-          </ol>
+          {guide}
         </section>
       </div>
     </>
