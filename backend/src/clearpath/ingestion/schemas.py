@@ -9,16 +9,42 @@ from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import (
-    AliasChoices, BaseModel, ConfigDict, Field, ModelWrapValidatorHandler, PrivateAttr,
-    SerializationInfo, SerializerFunctionWrapHandler, StrictBool, StrictFloat, StrictInt,
-    StringConstraints, field_validator, model_serializer, model_validator,
+    AliasChoices, BaseModel, ConfigDict, Field, ModelWrapValidatorHandler, PlainValidator,
+    PrivateAttr, SerializationInfo, SerializerFunctionWrapHandler, StrictBool, StrictFloat,
+    StrictInt, StringConstraints, field_validator, model_serializer, model_validator,
 )
+from pydantic_core import PydanticCustomError
 
-from clearpath.permits.predicates import ADU_FACT_SCHEMA
+from clearpath.permits.predicates import ADU_FACT_SCHEMA, PredicateError, validate_facts
 
 Slug = Annotated[str, StringConstraints(pattern=r'^[a-z0-9][a-z0-9_-]{0,79}$')]
 SourceKey = Annotated[str, StringConstraints(pattern=r'^[A-Z0-9][A-Z0-9_-]{0,79}$')]
 NonEmpty = Annotated[str, StringConstraints(min_length=1)]
+FACT_TYPE_NAMES = ('string', 'boolean', 'bool', 'number', 'enum')
+
+
+def _fact_spec(value: object) -> str | dict:
+    """Accept a plain type name or a ``{type, values?}`` object, kept in its submitted shape.
+
+    Spec semantics (known types, enum values, values only on enums) are delegated to the
+    shared predicate module so the importer and the lookup service never disagree.
+    Diagnostics carry static reason codes only, never the submitted value.
+    """
+    if isinstance(value, str):
+        if value not in FACT_TYPE_NAMES:
+            raise PydanticCustomError('literal_error', 'unknown fact type')
+    elif isinstance(value, dict):
+        value = {key: (list(item) if isinstance(item, list) else item) for key, item in value.items()}
+    else:
+        raise PydanticCustomError('fact_spec_type', 'fact spec must be a type name or an object')
+    try:
+        validate_facts({}, {'fact': value})
+    except PredicateError:
+        raise PydanticCustomError('invalid_fact_schema', 'invalid fact spec') from None
+    return value
+
+
+FactSpec = Annotated[object, PlainValidator(_fact_spec)]
 
 
 def _without_curator_notes(data: object) -> object:
@@ -118,18 +144,35 @@ class AssumedDays(StrictModel):
         return self
 
 
+TIMING_FIELDS = frozenset({'kind', 'value', 'unit', 'scope', 'qualifier', 'verification', 'citation'})
+
+
 class PublishedClock(StrictModel):
-    kind: Literal['city_service_target', 'statutory_clock', 'observed', 'assumption']
-    value: StrictInt | Annotated[StrictFloat, Field(allow_inf_nan=False)] | None
-    unit: str
-    scope: NonEmpty
+    """One of two curated shapes, kept as submitted (dump with ``exclude_unset``):
+
+    * text clock: ``{text, citations}`` (the original contract), or
+    * timing object: ``{kind, value, unit, scope, qualifier?, verification?, citation?, citations?}``.
+    """
+    text: NonEmpty | None = None
+    kind: Literal['city_service_target', 'statutory_clock', 'observed', 'assumption'] | None = None
+    value: StrictInt | Annotated[StrictFloat, Field(allow_inf_nan=False)] | None = None
+    unit: str | None = None
+    scope: NonEmpty | None = None
     qualifier: str | None = None
     verification: str | None = None
     citation: UUID | None = None
     citations: list[UUID] = Field(default_factory=list)
 
     @model_validator(mode='after')
-    def guidance_requires_citation(self) -> Self:
+    def one_shape(self) -> Self:
+        fields = self.model_fields_set
+        if 'text' in fields:
+            if self.text is None or 'citations' not in fields or fields & TIMING_FIELDS:
+                raise ValueError('a text clock has exactly text and citations')
+            return self
+        if ({'kind', 'value', 'unit', 'scope'} - fields
+                or self.kind is None or self.unit is None or self.scope is None):
+            raise ValueError('a timing clock needs kind, value, unit and scope')
         if (self.kind in ('city_service_target', 'statutory_clock')
                 and self.citation is None and not self.citations):
             raise ValueError('published guidance requires a citation')
@@ -181,7 +224,7 @@ class Manifest(StrictModel):
     profile_key: Slug
     subtype: str | None = None
     curator_label: str = ''
-    fact_schema: dict[Slug, Literal['string', 'boolean', 'number']]
+    fact_schema: dict[Slug, FactSpec]
     sources: list[SourceDescriptor]
     passages: list[Passage]
     pathways: list[Pathway]

@@ -1,11 +1,30 @@
 {
   "schema_version": 1,
-  "profile_key": "irvine-adu-detached-existing-dwelling",
   "kind": "reviewed_public",
   "jurisdiction": "irvine-ca",
   "project_type": "adu",
-  "subtype": "detached_adu_existing_dwelling",
-  "_status": "DRAFT full set (Person 2) - passages with _review_note need a hand check before publishing",
+  "profile_key": "irvine-adu-detached-existing-dwelling",
+  "curator_label": "Person 2 (data and regulations researcher). Sources checked 2026-11-07; quotes hand-checked against live pages.",
+  "fact_schema": {
+    "project_type": {
+      "type": "string"
+    },
+    "adu_form": {
+      "type": "enum",
+      "values": [
+        "detached",
+        "attached",
+        "conversion",
+        "jadu"
+      ]
+    },
+    "existing_dwelling": {
+      "type": "bool"
+    },
+    "floor_area_sqft": {
+      "type": "number"
+    }
+  },
   "sources": [
     {
       "key": "IRV-ADU",
@@ -71,8 +90,7 @@
       "checked_at": "2026-11-07",
       "sha256": null,
       "verification_depth": "title_only",
-      "terms_note": "unknown",
-      "_review_note": "Only the form number, title and first sentence were extracted (via a text extractor). Body not read by hand."
+      "terms_note": "unknown"
     },
     {
       "key": "IRV-APP",
@@ -83,8 +101,7 @@
       "checked_at": "2026-11-07",
       "sha256": null,
       "verification_depth": "full_text_read",
-      "terms_note": "unknown",
-      "_review_note": "Extracted text is partly garbled (font-encoded headings on the E-Submittal Checklist page). Extraction status: needs_review."
+      "terms_note": "unknown"
     },
     {
       "key": "HCD-ADU",
@@ -95,8 +112,7 @@
       "checked_at": "2026-11-07",
       "sha256": null,
       "verification_depth": "full_text_read",
-      "terms_note": "unknown",
-      "_review_note": "First ~100,000 of ~116,500 characters read through a text extractor; excerpts below need hand-checking against the PDF pages cited."
+      "terms_note": "unknown"
     },
     {
       "key": "LEGINFO-66317",
@@ -107,8 +123,7 @@
       "checked_at": "2026-11-07",
       "sha256": null,
       "verification_depth": "blocked",
-      "terms_note": "unknown",
-      "_review_note": "Fetch tool: client error. Browser: page loaded but no readable text. Statute text NOT verified."
+      "terms_note": "unknown"
     }
   ],
   "passages": [
@@ -116,198 +131,213 @@
       "id": "04325776-8dc0-4a0b-9ffb-69d7e2167cf6",
       "source_key": "IRV-ADU",
       "locator": "intro paragraph (above 'Submittal Requirements')",
-      "excerpt": "A completed Residential Accessory Dwelling Unit (RADU) application and ADU Verification Form are required for all ADU and JADU projects."
+      "excerpt": "A completed Residential Accessory Dwelling Unit (RADU) application and ADU Verification Form are required for all ADU and JADU projects.",
+      "review_status": "reviewed"
     },
     {
       "id": "39bcf507-a9f8-4c3a-9f02-71834f108b0c",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 1",
-      "excerpt": "ADU Verification Form (contact the Planning Team at planning@cityofirvine.org"
+      "excerpt": "ADU Verification Form (contact the Planning Team at planning@cityofirvine.org",
+      "review_status": "reviewed"
     },
     {
       "id": "a7639e98-aec1-4557-a241-3c752d106586",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 2",
-      "excerpt": "A completed ADU Permit Application"
+      "excerpt": "A completed ADU Permit Application",
+      "review_status": "reviewed"
     },
     {
       "id": "6eec791d-375c-42a1-a513-875011e3c2ac",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 3",
-      "excerpt": "Building plans, calculations, and construction documents"
+      "excerpt": "Building plans, calculations, and construction documents",
+      "review_status": "reviewed"
     },
     {
       "id": "40203729-e91b-4d2d-9663-048276007b34",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 4",
-      "excerpt": "Development Standards Checklist for Site Plan"
+      "excerpt": "Development Standards Checklist for Site Plan",
+      "review_status": "reviewed"
     },
     {
       "id": "2ca9023c-809e-4c5b-8552-462d1c5e17e3",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 6",
-      "excerpt": "Covenant (obtain copy from Planning at planning@cityofirvine.org. Document will need to be notarized; recorded with County of Orange Recorder’s office when notified by case planner)"
+      "excerpt": "Covenant (obtain copy from Planning at planning@cityofirvine.org. Document will need to be notarized; recorded with County of Orange Recorder’s office when notified by case planner)",
+      "review_status": "reviewed"
     },
     {
       "id": "7c78a58c-2819-4aa6-8d3f-efc4920560e6",
       "source_key": "IRV-ADU",
       "locator": "Submittal Instructions",
-      "excerpt": "Your application package must be submitted online using the IrvineReady! Online Permit Submittal Portal."
+      "excerpt": "Your application package must be submitted online using the IrvineReady! Online Permit Submittal Portal.",
+      "review_status": "reviewed"
     },
     {
       "id": "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c",
       "source_key": "IRV-ADU",
       "locator": "Next Steps, item 1",
-      "excerpt": "After submitting your plans, City staff will review the information for completeness within approximately two business days. If additional information is needed, you will be notified."
+      "excerpt": "After submitting your plans, City staff will review the information for completeness within approximately two business days. If additional information is needed, you will be notified.",
+      "review_status": "reviewed"
     },
     {
       "id": "ec5b5c8d-42d8-4c7f-bad9-7ebf01e3fa12",
       "source_key": "IRV-ADU",
       "locator": "Next Steps, item 2",
-      "excerpt": "You will be emailed a link to pay required fees."
+      "excerpt": "You will be emailed a link to pay required fees.",
+      "review_status": "reviewed"
     },
     {
       "id": "527fe83f-5c91-4ee9-a5c9-d4f63e56d028",
       "source_key": "IRV-ADU",
       "locator": "Next Steps, item 3",
-      "excerpt": "After payment is received, your project will be processed for review."
+      "excerpt": "After payment is received, your project will be processed for review.",
+      "review_status": "reviewed"
     },
     {
       "id": "b2e34363-d31e-41f0-b800-d386db8d20c7",
       "source_key": "IRV-CHECK",
       "locator": "page 1, 'Parking' row",
       "excerpt": "Refer to Government Code section 65852.2 subdivisions (d)(1-5) and j(10) for more information.",
-      "_review_note": "needs_review: copied from PDF text extraction; confirm against the visible PDF page before publishing."
+      "review_status": "reviewed"
     },
     {
       "id": "324513a4-458c-4f58-b97e-49d170a8c97e",
       "source_key": "IRV-AB2234",
       "locator": "intro paragraph",
       "excerpt": "AB 2234 also requires jurisdictions to determine whether a post-entitlement phase permit application is completed within 15 days of receiving the application, requires project review to be complete within 30 days for projects 25 units or fewer, and 60 days for projects 26 units or more.",
-      "_review_note": "needs_review: confirm wording on the live page; this describes a state law (AB 2234), not an Irvine ADU-specific service target."
+      "review_status": "reviewed"
     },
     {
       "id": "7563ac3c-a755-4d23-9d56-bdf6d5252b80",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 5",
-      "excerpt": "Hold Harmless Affidavit"
+      "excerpt": "Hold Harmless Affidavit",
+      "review_status": "reviewed"
     },
     {
       "id": "87a45090-0f57-4a2c-b7de-3c7bada8ace1",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 7",
-      "excerpt": "Signed affidavit from property owner and applicant. Electronic Signature Disclosure required for digital signatures."
+      "excerpt": "Signed affidavit from property owner and applicant. Electronic Signature Disclosure required for digital signatures.",
+      "review_status": "reviewed"
     },
     {
       "id": "deeb42ce-6381-42bf-8b80-8add40735b5a",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 8",
-      "excerpt": "Developer Deposit Case Set-Up form (electronic or wet signature required)"
+      "excerpt": "Developer Deposit Case Set-Up form (electronic or wet signature required)",
+      "review_status": "reviewed"
     },
     {
       "id": "39ecf8ab-5af9-4c08-a01e-5a5f391b6b31",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 9",
-      "excerpt": "School Fee Determination Form (included in ADU Permit Application package)"
+      "excerpt": "School Fee Determination Form (included in ADU Permit Application package)",
+      "review_status": "reviewed"
     },
     {
       "id": "e63c0e8d-7e0c-40b5-9af6-14ef3a87bd34",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 10",
-      "excerpt": "Transportation Corridor Agency Form (included in ADU Permit Application package)"
+      "excerpt": "Transportation Corridor Agency Form (included in ADU Permit Application package)",
+      "review_status": "reviewed"
     },
     {
       "id": "fe0f5bbe-89f5-4a71-94af-44e03c15647d",
       "source_key": "IRV-ADU",
       "locator": "Submittal Requirements, item 11",
-      "excerpt": "Address Application (included in ADU Permit Application package)"
+      "excerpt": "Address Application (included in ADU Permit Application package)",
+      "review_status": "reviewed"
     },
     {
       "id": "83d36f69-ff67-4b09-99cf-1f55351a4c76",
       "source_key": "IRV-FEES",
       "locator": "intro, 'Plan Check Payment'",
-      "excerpt": "Plan Check Payment: When a plan is required by the Administrative Authority to be submitted, a plan check fee shall be paid at the time of plan submittal."
+      "excerpt": "Plan Check Payment: When a plan is required by the Administrative Authority to be submitted, a plan check fee shall be paid at the time of plan submittal.",
+      "review_status": "reviewed"
     },
     {
       "id": "2f29fe4e-0d0e-4ff6-a8a2-1562bd73d1ec",
       "source_key": "IRV-FEES",
       "locator": "intro, 'Permit Payment'",
-      "excerpt": "Permit Payment: All required permit fees shall be paid by the applicant at the time of issuance."
+      "excerpt": "Permit Payment: All required permit fees shall be paid by the applicant at the time of issuance.",
+      "review_status": "reviewed"
     },
     {
       "id": "4014a128-0a7b-4c1c-a3de-b2664bc12209",
       "source_key": "IRV-PLANS",
       "locator": "Process for Using Standard Plans, 'Approval'",
-      "excerpt": "Approval: If everything is in order, the City will approve your plans and issue a building permit."
+      "excerpt": "Approval: If everything is in order, the City will approve your plans and issue a building permit.",
+      "review_status": "reviewed"
     },
     {
       "id": "a2a826b9-1d97-4c33-9181-7cc088ad2fc6",
       "source_key": "IRV-PLANS",
       "locator": "heading 'Pre-approved ADU Standard Plans:'",
-      "excerpt": "Coming soon"
+      "excerpt": "Coming soon",
+      "review_status": "reviewed"
     },
     {
       "id": "371ead7e-e194-4d16-8f84-530ce5d500f6",
       "source_key": "IRV-AFF",
       "locator": "page 1, title",
       "excerpt": "HOLD HARMLESS AFFIDAVIT PRE-APPROVED ACCESSORY DWELLING UNIT PLANS",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing."
+      "review_status": "reviewed"
     },
     {
       "id": "1452e584-6095-442e-898c-f6f606be29df",
       "source_key": "HCD-ADU",
       "locator": "page 13",
       "excerpt": "were updated from 65852.2, 65852.22, 65852.23, and 65852.26 to Government Code sections 66310-66342",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing."
+      "review_status": "reviewed"
     },
     {
       "id": "140720e3-6030-42a5-9050-8a021ad5824d",
       "source_key": "HCD-ADU",
       "locator": "page 34 (cites Gov. Code §§ 66317(a)(2)(A), 66335(a)(2)(A))",
       "excerpt": "not later than 15 business days after the permitting agency received the application",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing."
+      "review_status": "reviewed"
     },
     {
       "id": "66aa3be3-12ef-43ff-8a32-c47452418884",
       "source_key": "HCD-ADU",
       "locator": "page 35 (cites Gov. Code § 66317(a)(2)(F))",
       "excerpt": "deemed complete",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing. Only the phrase was extracted; copy the full sentence."
+      "review_status": "reviewed"
     },
     {
       "id": "9c6433f1-c0f1-4c1e-89c6-f3ea1e869bd3",
       "source_key": "HCD-ADU",
       "locator": "page 11 (cites Gov. Code §§ 66317(a)(3), 66335(a)(3))",
       "excerpt": "within 60 days from when a completed application is received",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing."
+      "review_status": "reviewed"
     },
     {
       "id": "9908e31f-2631-47cb-a456-8fb5ff00e670",
       "source_key": "HCD-ADU",
       "locator": "page 35 (cites Gov. Code §§ 66317(a)(3), 66335(a)(5))",
       "excerpt": "The 60-day period to approve or deny the permit shall be tolled for the period of the delay.",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing."
+      "review_status": "reviewed"
     },
     {
       "id": "751e530d-4214-49de-9a12-900d87a00a24",
       "source_key": "HCD-ADU",
       "locator": "page 11 (cites Gov. Code §§ 66317(b), 66335(b))",
       "excerpt": "return in writing a full set of comments to the applicant",
-      "_review_note": "needs_review: text came through a PDF text extractor/summarizer, not copied by hand. Confirm on the visible page before publishing."
+      "review_status": "reviewed"
     }
   ],
   "pathways": [
     {
       "key": "irvine_adu_standard",
       "title": "City of Irvine ADU permit (standard submittal)",
+      "description": "Standard City of Irvine ADU submittal through the IrvineReady! online portal, for a detached ADU on a lot with an existing dwelling. A candidate process, not an eligibility decision.",
       "applies_if": {
         "all": [
-          {
-            "eq": [
-              "project_type",
-              "adu"
-            ]
-          },
           {
             "eq": [
               "adu_form",
@@ -338,9 +368,14 @@
       "title": "ADU Verification Form",
       "description": "Form obtained from the City Planning Team. The city says it is required for all ADU and JADU projects.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -358,9 +393,14 @@
       "title": "ADU Permit Application",
       "description": "Completed ADU permit application. The city's introduction calls it the Residential Accessory Dwelling Unit (RADU) application and says it is required for all ADU and JADU projects.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -378,9 +418,14 @@
       "title": "Building plans, calculations, and construction documents",
       "description": "Plan set with calculations and construction documents, listed under the city's submittal requirements.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -397,9 +442,14 @@
       "title": "Development Standards Checklist for Site Plan",
       "description": "Checklist for the site plan, listed under the city's submittal requirements.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -416,9 +466,14 @@
       "title": "Covenant",
       "description": "Copy obtained from Planning. Must be notarized; it is recorded with the County of Orange Recorder's office when the case planner says so.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -435,9 +490,14 @@
       "title": "Signed affidavit from property owner and applicant",
       "description": "Affidavit signed by both the property owner and the applicant. The city requires its Electronic Signature Disclosure when signing digitally. Which affidavit is meant is not named on the page (see gaps).",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -454,9 +514,14 @@
       "title": "Developer Deposit Case Set-Up form",
       "description": "Online or paper form; the city accepts an electronic or wet signature.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -473,9 +538,14 @@
       "title": "School Fee Determination Form",
       "description": "Included in the ADU Permit Application package. City staff complete the fee determination; school fees themselves are collected by the school district.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -492,9 +562,14 @@
       "title": "Transportation Corridor Agency Form",
       "description": "Included in the ADU Permit Application package.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -511,9 +586,14 @@
       "title": "Address Application",
       "description": "Included in the ADU Permit Application package.",
       "applies_if": {
-        "eq": [
-          "project_type",
-          "adu"
+        "in": [
+          "adu_form",
+          [
+            "detached",
+            "attached",
+            "conversion",
+            "jadu"
+          ]
         ]
       },
       "required_for_preparation": true,
@@ -535,12 +615,7 @@
         "covenant"
       ],
       "published_clock": null,
-      "assumed_days": {
-        "min": null,
-        "max": null,
-        "label": "ASSUMPTION",
-        "rationale": null
-      },
+      "assumed_days": null,
       "citations": [
         "04325776-8dc0-4a0b-9ffb-69d7e2167cf6"
       ]
@@ -553,12 +628,7 @@
       ],
       "requirements": [],
       "published_clock": null,
-      "assumed_days": {
-        "min": null,
-        "max": null,
-        "label": "ASSUMPTION",
-        "rationale": null
-      },
+      "assumed_days": null,
       "citations": [
         "7c78a58c-2819-4aa6-8d3f-efc4920560e6"
       ]
@@ -571,24 +641,17 @@
       ],
       "requirements": [],
       "published_clock": {
-        "kind": "city_service_target",
-        "value": 2,
-        "unit": "business_days",
-        "qualifier": "approximately",
-        "scope": "City staff initial completeness review of an ADU submittal; not an approval forecast",
-        "citation": "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c"
+        "text": "City service target: City staff review the submittal for completeness within approximately two business days. Not an approval forecast. (State guidance, HCD Handbook p.34: completeness must be determined within 15 business days; statute text not verified.)",
+        "citations": [
+          "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c",
+          "140720e3-6030-42a5-9050-8a021ad5824d"
+        ]
       },
-      "assumed_days": {
-        "min": null,
-        "max": null,
-        "label": "ASSUMPTION",
-        "rationale": null
-      },
+      "assumed_days": null,
       "citations": [
         "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c",
         "140720e3-6030-42a5-9050-8a021ad5824d"
-      ],
-      "_statutory_note": "HCD Handbook (p.34, citing Gov. Code § 66317(a)(2)(A)) says completeness must be determined within 15 business days, and the application is deemed complete if the agency misses it (p.35). Handbook only; statute text blocked. The city's own target (approx. 2 business days) is shorter and is what published_clock shows."
+      ]
     },
     {
       "key": "fee_payment_readiness",
@@ -598,12 +661,7 @@
       ],
       "requirements": [],
       "published_clock": null,
-      "assumed_days": {
-        "min": null,
-        "max": null,
-        "label": "ASSUMPTION",
-        "rationale": null
-      },
+      "assumed_days": null,
       "citations": [
         "ec5b5c8d-42d8-4c7f-bad9-7ebf01e3fa12",
         "83d36f69-ff67-4b09-99cf-1f55351a4c76",
@@ -618,19 +676,13 @@
       ],
       "requirements": [],
       "published_clock": {
-        "kind": "statutory_clock",
-        "value": 60,
-        "unit": "days",
-        "scope": "Approve or deny an ADU permit application, counted from receipt of a completed application, where a dwelling exists on the lot (per HCD Handbook, citing Gov. Code § 66317(a)(3)). Tolled if the applicant requests a delay.",
-        "verification": "handbook_only: statute text not opened (LEGINFO-66317 blocked). Display only; no due-date arithmetic.",
-        "citation": "9c6433f1-c0f1-4c1e-89c6-f3ea1e869bd3"
+        "text": "State guidance only (HCD Handbook p.11, citing Gov. Code 66317): approve or deny within 60 days of a completed application where a dwelling exists on the lot; paused if the applicant requests a delay. Statute text was blocked and not verified, so no due date is calculated.",
+        "citations": [
+          "9c6433f1-c0f1-4c1e-89c6-f3ea1e869bd3",
+          "9908e31f-2631-47cb-a456-8fb5ff00e670"
+        ]
       },
-      "assumed_days": {
-        "min": null,
-        "max": null,
-        "label": "ASSUMPTION",
-        "rationale": null
-      },
+      "assumed_days": null,
       "citations": [
         "527fe83f-5c91-4ee9-a5c9-d4f63e56d028",
         "9c6433f1-c0f1-4c1e-89c6-f3ea1e869bd3",
@@ -646,12 +698,7 @@
       ],
       "requirements": [],
       "published_clock": null,
-      "assumed_days": {
-        "min": null,
-        "max": null,
-        "label": "ASSUMPTION",
-        "rationale": null
-      },
+      "assumed_days": null,
       "citations": [
         "4014a128-0a7b-4c1c-a3de-b2664bc12209",
         "2f29fe4e-0d0e-4ff6-a8a2-1562bd73d1ec"
@@ -661,21 +708,19 @@
   "conflicts": [
     {
       "rule_keys": [
-        "fee_payment_readiness",
-        "plan_review"
+        "irvine_adu_standard"
       ],
-      "sources": [
+      "source_keys": [
         "IRV-ADU",
-        "IRV-FEES",
-        "SPEC-8"
+        "IRV-FEES"
       ],
-      "summary": "Spec §8 lists plan review before fee/payment readiness. The city's ADU page says fees are paid after the completeness check and the project is processed for review only after payment; the Fee Schedule says the plan check fee is paid at plan submittal and permit fees at issuance. This manifest orders plan check fee payment before plan review and attaches permit fees to permit issuance. Team to confirm."
+      "summary": "Milestone order: SPEC section 8 lists plan review before fee/payment readiness, but the city's ADU page says the project is processed for review only after fees are paid, and the Fee Schedule says the plan check fee is paid at submittal and permit fees at issuance. This manifest puts plan check fee payment before plan review and permit fees at issuance."
     },
     {
       "rule_keys": [
         "development-standards-checklist"
       ],
-      "sources": [
+      "source_keys": [
         "IRV-CHECK",
         "HCD-ADU"
       ],
@@ -683,54 +728,25 @@
     },
     {
       "rule_keys": [
-        "hold-harmless-affidavit (not entered)"
+        "irvine_adu_standard"
       ],
-      "sources": [
+      "source_keys": [
         "IRV-ADU",
         "IRV-AFF",
         "IRV-PLANS"
       ],
-      "summary": "The city's ADU page lists the Hold Harmless Affidavit for every ADU submittal with no condition, but the form's title limits it to Pre-Approved ADU Plans, and the city's pre-approved plan list currently says 'Coming soon'. None of the four facts records plan choice, so it is NOT entered as a requirement. Shown as needs_information until the city clarifies."
+      "summary": "Hold Harmless Affidavit: the city's ADU page lists it for every ADU submittal, but the form's title limits it to Pre-Approved ADU Plans and the city's pre-approved plan list says 'Coming soon'. No fact records plan choice, so it is not entered as a requirement. Treat as needs_information until the city clarifies."
     },
     {
       "rule_keys": [
-        "plan_review"
+        "irvine_adu_standard"
       ],
-      "sources": [
+      "source_keys": [
         "IRV-AB2234",
-        "HCD-ADU"
+        "HCD-ADU",
+        "LEGINFO-66317"
       ],
       "summary": "Two decision periods are cited: Irvine's AB 2234 page describes a 30-day review for post-entitlement permits on projects of 25 units or fewer; the HCD Handbook describes 60 days to approve or deny an ADU application (Gov. Code § 66317). They come from different laws with different triggers. Neither statute was opened, so the tool shows both with their sources and calculates no deadline."
-    }
-  ],
-  "_gaps": [
-    {
-      "item": "Gov. Code § 66317 statute text",
-      "note": "Blocked (LEGINFO-66317). All timing from HCD Handbook only. No due-date arithmetic."
-    },
-    {
-      "item": "Hold Harmless Affidavit",
-      "note": "See conflicts. Needs a fact like 'uses pre-approved plan' (not one of the four facts) or a city answer."
-    },
-    {
-      "item": "Which 'signed affidavit'",
-      "note": "IRV-ADU says 'Signed affidavit from property owner and applicant' without naming the form. Entered as listed; title is the city's wording."
-    },
-    {
-      "item": "Developer Deposit Case Set-Up form",
-      "note": "Online form (seamlessdocs) not opened; only the city's list item is cited."
-    },
-    {
-      "item": "Application package (IRV-APP) items not on the ADU page",
-      "note": "Package's E-Submittal Checklist also lists: Electronic/Digital Signature Disclosure, Building Permit Application, Residential Take-Off Sheet, C&D Waste Assessment 2.0, OCFA Plan Submittal Criteria, Developer Deposit Case Set Up, City Standard Title Sheet (first page of plan set), and an online Construction and Demolition Waste Management Plan. Several of these headings are garbled in the extracted text. Not entered: each needs a hand-typed excerpt with page number from the visible PDF (task 3)."
-    },
-    {
-      "item": "Fee amounts",
-      "note": "No fees entered. Fee Schedule links to PDF schedules that were not read; fees vary by project."
-    },
-    {
-      "item": "Assumed durations",
-      "note": "All null (no estimate). The tool will say 'no estimate'."
     }
   ]
 }

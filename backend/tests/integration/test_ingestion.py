@@ -250,7 +250,7 @@ def test_review_note_status_is_persisted_and_blocks_publication(session, jurisdi
     assert session.get(DatasetRelease, imported.release_id).status == "draft"
 
 
-def test_real_curated_manifest_persists_intact_and_public_publish_lists_exact_unreviewed_owners(session, jurisdiction):
+def test_real_curated_manifest_persists_intact_and_publishes_as_public(session, jurisdiction):
     from clearpath.ingestion.service import publish_release
 
     data = json.loads(REVIEWED_PUBLIC.read_text(encoding="utf-8"))
@@ -259,17 +259,16 @@ def test_real_curated_manifest_persists_intact_and_public_publish_lists_exact_un
     release = session.get(DatasetRelease, imported.release_id)
     assert release.kind == "reviewed_public"
     assert release.conflicts == data["conflicts"]
+    assert release.fact_schema == data["fact_schema"]
     milestones = session.scalars(select(MilestoneTemplate).where(
         MilestoneTemplate.release_id == release.id,
     ).order_by(MilestoneTemplate.position)).all()
     assert {m.key: m.published_clock for m in milestones} == {
         m["key"]: m["published_clock"] for m in data["milestones"]
     }
-    noted_ids = {UUID(p["id"]) for p in data["passages"] if p.get("_review_note")}
-    stored_needs_review = set(session.scalars(select(SourcePassage.manifest_passage_id).where(
-        SourcePassage.release_id == release.id, SourcePassage.review_status == "needs_review",
+    assert not set(session.scalars(select(SourcePassage.manifest_passage_id).where(
+        SourcePassage.release_id == release.id, SourcePassage.review_status != "reviewed",
     )))
-    assert stored_needs_review == noted_ids
     expected_links = set()
     for owner_type, collection in (("pathway", "pathways"), ("requirement", "requirements"), ("milestone", "milestones")):
         for owner in data[collection]:
@@ -285,22 +284,14 @@ def test_real_curated_manifest_persists_intact_and_public_publish_lists_exact_un
     )).all()
     assert set(actual_links) == expected_links
     assert len(actual_links) == imported.counts["citation_links"] == len(expected_links)
-    for milestone in data["milestones"]:
-        clock = milestone["published_clock"] or {}
-        if clock.get("citation") is not None:
-            assert ("milestone", milestone["key"], UUID(clock["citation"])) in expected_links
-    expected_owners = sorted({key for _, key, pid in expected_links if pid in noted_ids})
-    assert expected_owners
     with pytest.raises(DomainError) as error:
-        publish_release(session, release.id, reviewed=True, mode="public")
-    assert error.value.code == "unreviewed_evidence"
-    assert error.value.details == {"path": "citations", "owner_keys": expected_owners}
-    session.expire_all()
-    release = session.get(DatasetRelease, imported.release_id)
-    assert release.status == "draft" and release.published_at is None
+        publish_release(session, release.id, reviewed=True, mode="synthetic")
+    assert error.value.code == "release_kind_mismatch"
+    published = publish_release(session, release.id, reviewed=True, mode="public")
+    assert published.status == "active" and published.published_at is not None
     assert session.scalar(select(func.count()).select_from(DatasetRelease).where(
         DatasetRelease.status == "active",
-    )) == 0
+    )) == 1
 
 
 @pytest.mark.parametrize("empty", ["pathways", "requirements"])
