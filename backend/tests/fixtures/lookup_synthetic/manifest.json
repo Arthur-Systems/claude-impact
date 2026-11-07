@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "kind": "synthetic",
+  "jurisdiction": "irvine-ca",
+  "project_type": "adu",
+  "profile_key": "irvine-adu-detached-existing-dwelling",
+  "curator_label": "SYNTHETIC TEST DATA for the Person 4 lookup dev server. Not real Irvine rules, forms, fees or deadlines.",
+  "fact_schema": {
+    "project_type": "string",
+    "adu_form": "string",
+    "existing_dwelling": "boolean",
+    "floor_area_sqft": "number"
+  },
+  "sources": [
+    {
+      "key": "SYN-CITY-GUIDE",
+      "url": "https://example.org/synthetic/city-guide",
+      "title": "SYNTHETIC city ADU guide (not a real page)",
+      "publisher": "SYNTHETIC publisher",
+      "authority_type": "synthetic",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "title_only",
+      "terms_note": "SYNTHETIC fixture"
+    },
+    {
+      "key": "SYN-STATE-GUIDE",
+      "url": "https://example.org/synthetic/state-guide",
+      "title": "SYNTHETIC state ADU guidance (not a real document)",
+      "publisher": "SYNTHETIC publisher",
+      "authority_type": "synthetic",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "title_only",
+      "terms_note": "SYNTHETIC fixture"
+    }
+  ],
+  "passages": [
+    {
+      "id": "5e7a0c00-0000-4000-8000-000000000001",
+      "source_key": "SYN-CITY-GUIDE",
+      "locator": "#synthetic-intro",
+      "excerpt": "SYNTHETIC: test-only text describing a detached ADU pathway. Not a city rule.",
+      "review_status": "reviewed"
+    },
+    {
+      "id": "5e7a0c00-0000-4000-8000-000000000002",
+      "source_key": "SYN-CITY-GUIDE",
+      "locator": "#synthetic-item-1",
+      "excerpt": "SYNTHETIC: test-only text for an application form. Not a real form.",
+      "review_status": "reviewed"
+    },
+    {
+      "id": "5e7a0c00-0000-4000-8000-000000000003",
+      "source_key": "SYN-CITY-GUIDE",
+      "locator": "#synthetic-item-2",
+      "excerpt": "SYNTHETIC: test-only text that depends on floor area. The number in the rule is arbitrary.",
+      "review_status": "reviewed"
+    },
+    {
+      "id": "5e7a0c00-0000-4000-8000-000000000004",
+      "source_key": "SYN-STATE-GUIDE",
+      "locator": "SYNTHETIC page 1",
+      "excerpt": "SYNTHETIC: test-only text that disagrees with the city guide, to show a conflict.",
+      "review_status": "needs_review"
+    }
+  ],
+  "pathways": [
+    {
+      "key": "synthetic_detached_standard",
+      "title": "SYNTHETIC detached ADU pathway",
+      "description": "SYNTHETIC test pathway, not real Irvine guidance.",
+      "applies_if": {
+        "all": [
+          { "eq": ["project_type", "adu"] },
+          { "eq": ["adu_form", "detached"] },
+          { "eq": ["existing_dwelling", true] }
+        ]
+      },
+      "citations": ["5e7a0c00-0000-4000-8000-000000000001"]
+    }
+  ],
+  "requirements": [
+    {
+      "key": "synthetic_application_form",
+      "pathways": ["synthetic_detached_standard"],
+      "kind": "permit",
+      "title": "SYNTHETIC application form",
+      "description": "SYNTHETIC test requirement, not a real form.",
+      "applies_if": { "eq": ["project_type", "adu"] },
+      "required_for_preparation": true,
+      "citations": ["5e7a0c00-0000-4000-8000-000000000001", "5e7a0c00-0000-4000-8000-000000000002"]
+    },
+    {
+      "key": "synthetic_large_unit_document",
+      "pathways": ["synthetic_detached_standard"],
+      "kind": "document",
+      "title": "SYNTHETIC document that depends on floor area",
+      "description": "SYNTHETIC test requirement. Its floor-area threshold (500) is an arbitrary test value, not a real rule.",
+      "applies_if": { "gt": ["floor_area_sqft", 500] },
+      "required_for_preparation": true,
+      "citations": ["5e7a0c00-0000-4000-8000-000000000003"]
+    },
+    {
+      "key": "synthetic_conflicted_checklist",
+      "pathways": ["synthetic_detached_standard"],
+      "kind": "document",
+      "title": "SYNTHETIC checklist with a source conflict",
+      "description": "SYNTHETIC test requirement whose sources disagree.",
+      "applies_if": { "eq": ["project_type", "adu"] },
+      "required_for_preparation": true,
+      "citations": ["5e7a0c00-0000-4000-8000-000000000002", "5e7a0c00-0000-4000-8000-000000000004"]
+    },
+    {
+      "key": "synthetic_completeness_review",
+      "pathways": ["synthetic_detached_standard"],
+      "kind": "review",
+      "title": "SYNTHETIC completeness review",
+      "description": "SYNTHETIC test review step.",
+      "applies_if": { "eq": ["existing_dwelling", true] },
+      "required_for_preparation": false,
+      "citations": ["5e7a0c00-0000-4000-8000-000000000001"]
+    }
+  ],
+  "milestones": [
+    {
+      "key": "synthetic_preparation",
+      "title": "SYNTHETIC application preparation",
+      "predecessors": [],
+      "requirements": ["synthetic_application_form", "synthetic_large_unit_document", "synthetic_conflicted_checklist"],
+      "published_clock": null,
+      "assumed_days": null,
+      "citations": ["5e7a0c00-0000-4000-8000-000000000001"]
+    },
+    {
+      "key": "synthetic_review",
+      "title": "SYNTHETIC city review",
+      "predecessors": ["synthetic_preparation"],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": null,
+      "citations": ["5e7a0c00-0000-4000-8000-000000000001"]
+    }
+  ],
+  "conflicts": [
+    {
+      "rule_keys": ["synthetic_conflicted_checklist"],
+      "source_keys": ["SYN-CITY-GUIDE", "SYN-STATE-GUIDE"],
+      "summary": "SYNTHETIC: the two synthetic sources disagree about this checklist, to show how a conflict appears."
+    }
+  ]
+}
