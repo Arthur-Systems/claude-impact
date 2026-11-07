@@ -343,13 +343,15 @@ def test_dev_server_real_serves_reviewed_public_irvine():
     codes = [w["code"] for w in body["warnings"]]
     assert "test_only_unreviewed_release" not in codes and "synthetic_dataset" not in codes
     assert body["dataset_mode"] == "reviewed_public"
-    # C01 on real data. The pathway's rule is met (its requirements apply), but it has
-    # source conflicts attached, so its status is needs_information / source_conflict.
+    # C01 on real data: the pathway applies; no conflict names it.
     pw = {p["key"]: p for p in body["pathways"]}["irvine_adu_standard"]
-    assert (pw["status"], pw["status_reason"], pw["missing_fact_keys"]) == ("needs_information", "source_conflict", [])
-    assert any("irvine_adu_standard" in c["rule_keys"] for c in body["conflicts"])
+    assert (pw["status"], pw["status_reason"], pw["missing_fact_keys"]) == ("applies", "facts_met", [])
+    assert not any("irvine_adu_standard" in c["rule_keys"] for c in body["conflicts"])
+    assert any(c["rule_keys"] == ["plan_review"] for c in body["conflicts"])  # milestone conflict passes through
     reqs = {r["key"]: r for r in body["requirements"]}
-    assert all(r["status"] == "applies" for k, r in reqs.items() if k != "development-standards-checklist")
+    assert all(r["status"] == "applies" for k, r in reqs.items() if k not in {"development-standards-checklist", "signed-affidavit-esig"})
+    assert (reqs["signed-affidavit-esig"]["status"], reqs["signed-affidavit-esig"]["status_reason"]) == (
+        "needs_information", "source_conflict")
     assert all(r["citations"] for r in body["requirements"])
     assert reqs["development-standards-checklist"]["status_reason"] == "source_conflict"
     assert REAL_MANIFEST.read_bytes() == before

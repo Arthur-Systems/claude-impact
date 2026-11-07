@@ -137,11 +137,17 @@ def test_real_irvine_c01(real):
         assert m["statutory_clock"] == src.get("statutory_clock")
         if src.get("published_clock"):
             assert set(src["published_clock"]["citations"]) <= cite_ids
-    # pathway: C01 meets its rule, but source conflicts are attached
+    # pathway: C01 meets its rule and no conflict names it
     pw = {p["key"]: p for p in res.pathways}["irvine_adu_standard"]
-    assert pw["status"] == "needs_information"
-    assert pw["status_reason"] == "source_conflict"
+    assert pw["status"] == "applies"
+    assert pw["status_reason"] == "facts_met"
     assert pw["rule_status"] == "applies"
+    affidavit = {r["key"]: r for r in res.requirements}["signed-affidavit-esig"]
+    assert (affidavit["applicability"], affidavit["status_reason"]) == ("needs_information", "source_conflict")
+    # conflicts naming milestones pass through unchanged
+    for out, src in zip(res.conflicts, manifest["conflicts"]):
+        assert out["rule_keys"] == src["rule_keys"] and out["sources"] == src["source_keys"]
+    assert ["fee_payment_readiness", "plan_review"] in [c["rule_keys"] for c in res.conflicts]
     assert pw["citation_ids"] and set(pw["citation_ids"]) <= cite_ids
     dsc = {r["key"]: r for r in res.requirements}["development-standards-checklist"]
     assert dsc["status_reason"] == "source_conflict"
@@ -297,9 +303,9 @@ def _person5_activation_gate(result: LookupResult, pathway_key: str, *, accept_c
 
 def test_activation_with_real_data_today_vs_proposed_rule(real):
     res = real.lookup(req())
-    # Person 5's current rule refuses: the pathway is needs_information because of source conflicts.
-    assert _person5_activation_gate(res, "irvine_adu_standard", accept_conflicted_pathway=False) == "missing_information"
-    # With the proposed rule (conflicted pathway whose rule is met may activate), every other check passes.
+    # No conflict names the pathway any more, so it applies and Person 5's CURRENT rule activates.
+    assert _person5_activation_gate(res, "irvine_adu_standard", accept_conflicted_pathway=False) == "activated"
+    # The proposed rule (also accept a conflicted pathway whose rule is met) still activates.
     assert _person5_activation_gate(res, "irvine_adu_standard", accept_conflicted_pathway=True) == "activated"
 
 

@@ -714,7 +714,8 @@
   "conflicts": [
     {
       "rule_keys": [
-        "irvine_adu_standard"
+        "fee_payment_readiness",
+        "plan_review"
       ],
       "source_keys": [
         "IRV-ADU",
@@ -734,18 +735,18 @@
     },
     {
       "rule_keys": [
-        "irvine_adu_standard"
+        "signed-affidavit-esig"
       ],
       "source_keys": [
         "IRV-ADU",
         "IRV-AFF",
         "IRV-PLANS"
       ],
-      "summary": "Hold Harmless Affidavit: the city's ADU page lists it for every ADU submittal, but the form's title limits it to Pre-Approved ADU Plans and the city's pre-approved plan list says 'Coming soon'. No fact records plan choice, so it is not entered as a requirement. Treat as needs_information until the city clarifies."
+      "summary": "Which affidavit? The city's ADU page lists 'Signed affidavit from property owner and applicant' without naming the form, and separately lists the Hold Harmless Affidavit. That form's title limits it to Pre-Approved ADU Plans, and the city's pre-approved plan list says 'Coming soon'. No fact records plan choice, so whether the Hold Harmless Affidavit is required here is unknown until the city clarifies."
     },
     {
       "rule_keys": [
-        "irvine_adu_standard"
+        "plan_review"
       ],
       "source_keys": [
         "IRV-AB2234",
