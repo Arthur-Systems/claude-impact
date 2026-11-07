@@ -63,7 +63,7 @@
         "message": "Demo release uses synthetic, unreviewed data. Do not rely on it for a real permit."
       },
       {
-        "code": "property_not_verified",
+        "code": "selected_area_property_not_verified",
         "message": "Location is a selected area (City of Irvine). No specific property was checked."
       },
       {
