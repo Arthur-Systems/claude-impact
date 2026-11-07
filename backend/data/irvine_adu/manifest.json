@@ -618,7 +618,8 @@
       "assumed_days": null,
       "citations": [
         "04325776-8dc0-4a0b-9ffb-69d7e2167cf6"
-      ]
+      ],
+      "actor": "applicant"
     },
     {
       "key": "submission",
@@ -631,7 +632,8 @@
       "assumed_days": null,
       "citations": [
         "7c78a58c-2819-4aa6-8d3f-efc4920560e6"
-      ]
+      ],
+      "actor": "applicant"
     },
     {
       "key": "completeness_review",
@@ -651,7 +653,8 @@
       "citations": [
         "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c",
         "140720e3-6030-42a5-9050-8a021ad5824d"
-      ]
+      ],
+      "actor": "city"
     },
     {
       "key": "fee_payment_readiness",
@@ -666,7 +669,8 @@
         "ec5b5c8d-42d8-4c7f-bad9-7ebf01e3fa12",
         "83d36f69-ff67-4b09-99cf-1f55351a4c76",
         "527fe83f-5c91-4ee9-a5c9-d4f63e56d028"
-      ]
+      ],
+      "actor": "applicant"
     },
     {
       "key": "plan_review",
@@ -688,7 +692,8 @@
         "9c6433f1-c0f1-4c1e-89c6-f3ea1e869bd3",
         "9908e31f-2631-47cb-a456-8fb5ff00e670",
         "751e530d-4214-49de-9a12-900d87a00a24"
-      ]
+      ],
+      "actor": "city"
     },
     {
       "key": "permit_issuance",
@@ -702,7 +707,8 @@
       "citations": [
         "4014a128-0a7b-4c1c-a3de-b2664bc12209",
         "2f29fe4e-0d0e-4ff6-a8a2-1562bd73d1ec"
-      ]
+      ],
+      "actor": "city"
     }
   ],
   "conflicts": [
