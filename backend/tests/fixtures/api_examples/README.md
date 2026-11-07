@@ -1,13 +1,19 @@
 # API example responses
 
 These files are **example request/response pairs** for the ClearPath lookup routes
-(SPEC.md §7 and §9). They are mocks for the frontend (Person 1), not real data. Every
+(SPEC.md §7 and §9): `GET /api/v1/jurisdictions`, `POST /api/v1/locations/resolve`,
+`POST /api/v1/permit-lookups` and `GET /api/v1/sources/{source_key}`
+(`sources_get.json`). They are mocks for the frontend (Person 1), not real data. Every
 URL, title, excerpt, hash and form name is a placeholder in `<angle brackets>`, and
 numbers such as `floor_area_sqft: 600` are arbitrary test inputs, not Irvine rules. Each
 file holds `{"request", "status_code", "response"}`, and every response carries
 `"example": true`, which the real API will not send. When the real API needs a different
 shape, **update these files first, then the code**, and tell Person 1. Person 5 owns
 the project and timeline examples.
+
+Every permit lookup also has `sources_used`: each cited source exactly once, in the
+order it is first cited, as `{source_key, title, url, publisher, checked_at,
+verification_depth}`. It is `[]` when there is no checklist.
 
 ## Possible values
 
@@ -63,13 +69,19 @@ is implemented. `point` and `address` return `unresolved` / `mode_not_implemente
 - `citation_unresolved`: a citation could not be matched to a source passage.
 - `rule_invalid`: unreadable rules; extra field `rule_keys`.
 - `statutory_clock_unverified`: state time limits not checked; no legal due date.
+- `source_differs_across_releases`: (sources route) two active releases describe the
+  same source differently; the first is shown.
 - `test_only_unreviewed_release`: tests only. Unreviewed data was force-loaded as
   `reviewed_public`. The real API should never send this.
 
-**Error `code`s** (HTTP status): `missing_api_key` (401), `invalid_request`,
-`invalid_location_input`, `invalid_project_type`, `invalid_facts`,
-`project_type_conflict` and fact-validation codes such as `unknown_fact`,
-`invalid_fact_value`, `enum_value_not_allowed` (all 422), `dataset_unavailable` (503).
+**Error `code`s** (HTTP status): `unauthorized` (401, missing or wrong `X-API-Key`),
+`source_not_found` (404), `not_found` (404, unknown route; dev server),
+`validation_error` (422, body failed the request model: unknown field or wrong type;
+`details.fields` lists `{loc, type}`), `invalid_location_input`, `invalid_request`,
+`invalid_project_type`, `invalid_facts`, `project_type_conflict` and fact-validation codes
+such as `unknown_fact`, `invalid_fact_value`, `enum_value_not_allowed` (all 422),
+`internal_error` (500, no details ever), `dataset_unavailable` (503). Every error also
+has an `X-Request-ID` header equal to `request_id`.
 
 ## Projects and timeline (Person 5)
 
