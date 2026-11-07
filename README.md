@@ -1,8 +1,9 @@
-# Claude Impact — Clear it
+# ClearPath — AI-powered permit navigator
 
 Lane 2 team workspace for Claude Impact Lab: UCI × SoCal Affordable Housing.
 
-> How do we turn four years into two?
+Help an Irvine ADU applicant understand permit requirements, prepare documents,
+and track the steps toward approval.
 
 **Team:** To be confirmed
 **Members:** To be confirmed
@@ -14,7 +15,20 @@ Lane 2 team workspace for Claude Impact Lab: UCI × SoCal Affordable Housing.
 This repository contains the official **Lane 2: Clear it** starter materials:
 the lane guide, source list, Orange County city list, timeline, and sample
 scenarios. Shared event guides and the license are included. The specific
-prototype and application stack have not been recorded yet.
+backend design is being specified for **Irvine + ADU**, using Python/FastAPI and
+PostgreSQL with pgvector. Application implementation awaits design approval.
+
+## Backend design
+
+The first slice covers dataset ingestion, permit lookup, and project timelines.
+Frontend development, Claude chat, user document uploads/OCR, and vector search
+follow later.
+
+Read the [ClearPath backend design](docs/superpowers/specs/2026-11-07-clearpath-backend-design.md)
+for the proposed data model, API contracts, source verification, failure behavior,
+and acceptance checks. Its status is **proposed**, pending review before coding.
+
+## Get the repository
 
 ```sh
 git clone https://github.com/Arthur-Systems/claude-impact.git
@@ -38,23 +52,27 @@ Fill in the project sections below as the team builds.
 
 ## The real user
 
-Who is the person? What is hard for them today? Three sentences.
+A first-time applicant preparing an ADU project in Irvine needs to know which
+forms and steps apply, what is missing, and what happens next.
 
-**Before:** how they do it now.
-**After:** what changes with your tool.
+**Before:** piece together municipal pages, forms, and state guidance.
+**After:** follow a sourced checklist and track project milestones, with unknown
+requirements and timeline assumptions shown explicitly.
 
 ## What we built
 
-No application code has been added yet. Replace this section with what the tool
-does, plus a screenshot or short clip, once it is working.
+The repository currently contains Lane 2 source materials and the proposed
+backend specification. No application code has been added yet.
 
 **Demo video:** Not recorded yet.
 **Live demo:** Not deployed yet.
 
 ## How Claude is used
 
-- How we built it with Claude.
-- What Claude does inside the tool when it runs, and what a person checks.
+Planned: Claude can explain retrieved source material and help answer permitting
+questions in a later slice. The first backend's checklists and timeline state
+must work without an AI API key. Record actual Claude contributions here as the
+team builds.
 
 ## Try it
 

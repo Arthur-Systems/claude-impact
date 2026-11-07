@@ -6,6 +6,19 @@ California. This repository is dedicated to **Lane 2: Clear it**. The team is
 working on reducing delays in housing approvals and delivery. Keep the work
 focused on this lane. Some teammates have never used a terminal.
 
+## ClearPath backend scope
+
+The product is **ClearPath**, an AI-powered permit navigator. The user confirmed
+**Irvine + ADU** as the initial demo. Start with the backend: curated dataset
+ingestion, source-backed permit lookup, and project timelines. The selected stack
+is Python/FastAPI and PostgreSQL with pgvector; frontend work comes later.
+
+The proposed design is in
+`docs/superpowers/specs/2026-11-07-clearpath-backend-design.md`. It requires user
+review before implementation. Do not treat proposed engineering defaults as
+approved decisions until that review. The first slice does not include a chat
+assistant, user document uploads/OCR, or embedding/vector-search implementation.
+
 ## The context
 
 Every affordable ownership home has to balance one equation:
