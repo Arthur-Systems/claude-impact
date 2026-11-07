@@ -1,0 +1,409 @@
+{
+  "schema_version": 1,
+  "jurisdiction": "irvine-ca",
+  "project_type": "adu",
+  "subtype": "detached_adu_existing_dwelling",
+  "_status": "DRAFT batch 1 (Person 2) - not reviewed for publication",
+  "sources": [
+    {
+      "key": "IRV-ADU",
+      "url": "https://cityofirvine.gov/building-permits-and-inspections/project-constructing-accessory-dwelling-unit-adu",
+      "title": "Project: Constructing an Accessory Dwelling Unit (ADU) | City of Irvine",
+      "publisher": "City of Irvine",
+      "authority_type": "city_guidance",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "full_text_read",
+      "terms_note": "unknown"
+    },
+    {
+      "key": "IRV-CHECK",
+      "url": "https://cityofirvine.gov/sites/default/files/legacy-documents/civica-35890-67-01.pdf",
+      "title": "Pre-Approved ADU Development Standards Checklist (Form 67-01, Rev 01/25)",
+      "publisher": "City of Irvine",
+      "authority_type": "city_form",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "full_text_read",
+      "terms_note": "unknown"
+    },
+    {
+      "key": "IRV-AB2234",
+      "url": "https://cityofirvine.gov/community-development/building-permit-requirements-under-assembly-bill-ab-2234",
+      "title": "Building Permit Requirements Under Assembly Bill (AB) 2234 | City of Irvine",
+      "publisher": "City of Irvine",
+      "authority_type": "city_guidance",
+      "checked_at": "2026-11-07",
+      "sha256": null,
+      "verification_depth": "full_text_read",
+      "terms_note": "unknown"
+    }
+  ],
+  "passages": [
+    {
+      "id": "04325776-8dc0-4a0b-9ffb-69d7e2167cf6",
+      "source_key": "IRV-ADU",
+      "locator": "intro paragraph (above 'Submittal Requirements')",
+      "excerpt": "A completed Residential Accessory Dwelling Unit (RADU) application and ADU Verification Form are required for all ADU and JADU projects."
+    },
+    {
+      "id": "39bcf507-a9f8-4c3a-9f02-71834f108b0c",
+      "source_key": "IRV-ADU",
+      "locator": "Submittal Requirements, item 1",
+      "excerpt": "ADU Verification Form (contact the Planning Team at planning@cityofirvine.org"
+    },
+    {
+      "id": "a7639e98-aec1-4557-a241-3c752d106586",
+      "source_key": "IRV-ADU",
+      "locator": "Submittal Requirements, item 2",
+      "excerpt": "A completed ADU Permit Application"
+    },
+    {
+      "id": "6eec791d-375c-42a1-a513-875011e3c2ac",
+      "source_key": "IRV-ADU",
+      "locator": "Submittal Requirements, item 3",
+      "excerpt": "Building plans, calculations, and construction documents"
+    },
+    {
+      "id": "40203729-e91b-4d2d-9663-048276007b34",
+      "source_key": "IRV-ADU",
+      "locator": "Submittal Requirements, item 4",
+      "excerpt": "Development Standards Checklist for Site Plan"
+    },
+    {
+      "id": "2ca9023c-809e-4c5b-8552-462d1c5e17e3",
+      "source_key": "IRV-ADU",
+      "locator": "Submittal Requirements, item 6",
+      "excerpt": "Covenant (obtain copy from Planning at planning@cityofirvine.org. Document will need to be notarized; recorded with County of Orange Recorder’s office when notified by case planner)"
+    },
+    {
+      "id": "7c78a58c-2819-4aa6-8d3f-efc4920560e6",
+      "source_key": "IRV-ADU",
+      "locator": "Submittal Instructions",
+      "excerpt": "Your application package must be submitted online using the IrvineReady! Online Permit Submittal Portal."
+    },
+    {
+      "id": "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c",
+      "source_key": "IRV-ADU",
+      "locator": "Next Steps, item 1",
+      "excerpt": "After submitting your plans, City staff will review the information for completeness within approximately two business days. If additional information is needed, you will be notified."
+    },
+    {
+      "id": "ec5b5c8d-42d8-4c7f-bad9-7ebf01e3fa12",
+      "source_key": "IRV-ADU",
+      "locator": "Next Steps, item 2",
+      "excerpt": "You will be emailed a link to pay required fees."
+    },
+    {
+      "id": "527fe83f-5c91-4ee9-a5c9-d4f63e56d028",
+      "source_key": "IRV-ADU",
+      "locator": "Next Steps, item 3",
+      "excerpt": "After payment is received, your project will be processed for review."
+    },
+    {
+      "id": "b2e34363-d31e-41f0-b800-d386db8d20c7",
+      "source_key": "IRV-CHECK",
+      "locator": "page 1, 'Parking' row",
+      "excerpt": "Refer to Government Code section 65852.2 subdivisions (d)(1-5) and j(10) for more information.",
+      "_review_note": "needs_review: copied from PDF text extraction; confirm against the visible PDF page before publishing."
+    },
+    {
+      "id": "324513a4-458c-4f58-b97e-49d170a8c97e",
+      "source_key": "IRV-AB2234",
+      "locator": "intro paragraph",
+      "excerpt": "AB 2234 also requires jurisdictions to determine whether a post-entitlement phase permit application is completed within 15 days of receiving the application, requires project review to be complete within 30 days for projects 25 units or fewer, and 60 days for projects 26 units or more.",
+      "_review_note": "needs_review: confirm wording on the live page; this describes a state law (AB 2234), not an Irvine ADU-specific service target."
+    }
+  ],
+  "pathways": [
+    {
+      "key": "irvine_adu_standard",
+      "title": "City of Irvine ADU permit (standard submittal)",
+      "applies_if": {
+        "all": [
+          {
+            "eq": [
+              "project_type",
+              "adu"
+            ]
+          },
+          {
+            "eq": [
+              "adu_form",
+              "detached"
+            ]
+          },
+          {
+            "eq": [
+              "existing_dwelling",
+              true
+            ]
+          }
+        ]
+      },
+      "citations": [
+        "04325776-8dc0-4a0b-9ffb-69d7e2167cf6",
+        "7c78a58c-2819-4aa6-8d3f-efc4920560e6"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "key": "adu-verification-form",
+      "pathways": [
+        "irvine_adu_standard"
+      ],
+      "kind": "document",
+      "title": "ADU Verification Form",
+      "description": "Form obtained from the City Planning Team. The city says it is required for all ADU and JADU projects.",
+      "applies_if": {
+        "eq": [
+          "project_type",
+          "adu"
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "04325776-8dc0-4a0b-9ffb-69d7e2167cf6",
+        "39bcf507-a9f8-4c3a-9f02-71834f108b0c"
+      ]
+    },
+    {
+      "key": "adu-permit-application",
+      "pathways": [
+        "irvine_adu_standard"
+      ],
+      "kind": "permit",
+      "title": "ADU Permit Application",
+      "description": "Completed ADU permit application. The city's introduction calls it the Residential Accessory Dwelling Unit (RADU) application and says it is required for all ADU and JADU projects.",
+      "applies_if": {
+        "eq": [
+          "project_type",
+          "adu"
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "04325776-8dc0-4a0b-9ffb-69d7e2167cf6",
+        "a7639e98-aec1-4557-a241-3c752d106586"
+      ]
+    },
+    {
+      "key": "building-plans-calcs",
+      "pathways": [
+        "irvine_adu_standard"
+      ],
+      "kind": "document",
+      "title": "Building plans, calculations, and construction documents",
+      "description": "Plan set with calculations and construction documents, listed under the city's submittal requirements.",
+      "applies_if": {
+        "eq": [
+          "project_type",
+          "adu"
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "6eec791d-375c-42a1-a513-875011e3c2ac"
+      ]
+    },
+    {
+      "key": "development-standards-checklist",
+      "pathways": [
+        "irvine_adu_standard"
+      ],
+      "kind": "document",
+      "title": "Development Standards Checklist for Site Plan",
+      "description": "Checklist for the site plan, listed under the city's submittal requirements.",
+      "applies_if": {
+        "eq": [
+          "project_type",
+          "adu"
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "40203729-e91b-4d2d-9663-048276007b34"
+      ]
+    },
+    {
+      "key": "covenant",
+      "pathways": [
+        "irvine_adu_standard"
+      ],
+      "kind": "document",
+      "title": "Covenant",
+      "description": "Copy obtained from Planning. Must be notarized; it is recorded with the County of Orange Recorder's office when the case planner says so.",
+      "applies_if": {
+        "eq": [
+          "project_type",
+          "adu"
+        ]
+      },
+      "required_for_preparation": true,
+      "citations": [
+        "2ca9023c-809e-4c5b-8552-462d1c5e17e3"
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "key": "application_preparation",
+      "title": "Application preparation",
+      "predecessors": [],
+      "requirements": [
+        "adu-verification-form",
+        "adu-permit-application",
+        "building-plans-calcs",
+        "development-standards-checklist",
+        "covenant"
+      ],
+      "published_clock": null,
+      "assumed_days": {
+        "min": null,
+        "max": null,
+        "label": "ASSUMPTION",
+        "rationale": null
+      },
+      "citations": [
+        "04325776-8dc0-4a0b-9ffb-69d7e2167cf6"
+      ]
+    },
+    {
+      "key": "submission",
+      "title": "Submission (IrvineReady! portal)",
+      "predecessors": [
+        "application_preparation"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": null,
+        "max": null,
+        "label": "ASSUMPTION",
+        "rationale": null
+      },
+      "citations": [
+        "7c78a58c-2819-4aa6-8d3f-efc4920560e6"
+      ]
+    },
+    {
+      "key": "completeness_review",
+      "title": "Completeness review",
+      "predecessors": [
+        "submission"
+      ],
+      "requirements": [],
+      "published_clock": {
+        "kind": "city_service_target",
+        "value": 2,
+        "unit": "business_days",
+        "qualifier": "approximately",
+        "scope": "City staff initial completeness review of an ADU submittal; not an approval forecast",
+        "citation": "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c"
+      },
+      "assumed_days": {
+        "min": null,
+        "max": null,
+        "label": "ASSUMPTION",
+        "rationale": null
+      },
+      "citations": [
+        "d780a112-b8c8-4dac-b6ad-7cc3cbe0851c"
+      ]
+    },
+    {
+      "key": "fee_payment_readiness",
+      "title": "Fee payment",
+      "predecessors": [
+        "completeness_review"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": null,
+        "max": null,
+        "label": "ASSUMPTION",
+        "rationale": null
+      },
+      "citations": [
+        "ec5b5c8d-42d8-4c7f-bad9-7ebf01e3fa12",
+        "527fe83f-5c91-4ee9-a5c9-d4f63e56d028"
+      ]
+    },
+    {
+      "key": "plan_review",
+      "title": "Plan review",
+      "predecessors": [
+        "fee_payment_readiness"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": null,
+        "max": null,
+        "label": "ASSUMPTION",
+        "rationale": null
+      },
+      "citations": [
+        "527fe83f-5c91-4ee9-a5c9-d4f63e56d028"
+      ]
+    },
+    {
+      "key": "permit_issuance",
+      "title": "Permit issuance",
+      "predecessors": [
+        "plan_review"
+      ],
+      "requirements": [],
+      "published_clock": null,
+      "assumed_days": {
+        "min": null,
+        "max": null,
+        "label": "ASSUMPTION",
+        "rationale": null
+      },
+      "citations": []
+    }
+  ],
+  "conflicts": [
+    {
+      "rule_keys": [
+        "fee_payment_readiness",
+        "plan_review"
+      ],
+      "sources": [
+        "IRV-ADU",
+        "SPEC-8"
+      ],
+      "summary": "Spec §8 lists plan review before fee/payment readiness. The city's ADU page says fees are paid after the completeness check and the project is processed for review only after payment. This draft orders fee payment before plan review; team to confirm."
+    },
+    {
+      "rule_keys": [
+        "development-standards-checklist"
+      ],
+      "sources": [
+        "IRV-CHECK"
+      ],
+      "summary": "Stale citation: Form 67-01 (Rev 01/25) refers applicants to Government Code section 65852.2 for ADU parking. State ADU law was renumbered to Gov Code 66310-66342 (HCD ADU Handbook). Mapping to the new section is unknown until checked; do not substitute a number."
+    }
+  ],
+  "_gaps": [
+    {
+      "item": "permit_issuance milestone",
+      "note": "No passage found yet on the city page describing permit issuance. Citations empty; needs a source or stays needs_information."
+    },
+    {
+      "item": "Hold Harmless Affidavit",
+      "note": "Listed on IRV-ADU without a condition, but the form itself appears to cover use of pre-approved ADU plans, and the pre-approved plan list says 'coming soon'. There is no fact for 'uses pre-approved plan' among the four facts, so this is a gap, not a rule. Read the PDF in full before deciding."
+    },
+    {
+      "item": "Developer Deposit Case Set-Up, Electronic Signature Disclosure, School Fee, TCA, Address Application",
+      "note": "Listed on IRV-ADU; not yet entered. Next batch."
+    },
+    {
+      "item": "Completeness timing",
+      "note": "City target (approx. 2 business days, IRV-ADU) and AB 2234's 15-day completeness / 30-day review periods (IRV-AB2234) are different kinds of timing (city_service_target vs statutory). HCD cites Gov Code 66317 for completeness/decision timing; leginfo text not yet opened. No due-date arithmetic."
+    }
+  ]
+}
