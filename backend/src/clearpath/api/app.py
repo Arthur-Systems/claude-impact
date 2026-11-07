@@ -1,6 +1,10 @@
+from functools import lru_cache
 from http import HTTPStatus
+from pathlib import Path
 from uuid import uuid4
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +12,19 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.exceptions import ExceptionMiddleware
 
 from clearpath.api.dependencies import require_api_key
 from clearpath.core.config import Settings, get_settings
 from clearpath.db.session import get_engine
 from clearpath.domain.errors import DomainError
 from clearpath.domain.schemas import StrictModel
+
+
+@lru_cache
+def get_alembic_head() -> str | None:
+    config = Config(str(Path(__file__).resolve().parents[3] / "alembic.ini"))
+    return ScriptDirectory.from_config(config).get_current_head()
 
 
 class EchoBody(StrictModel):
@@ -24,14 +35,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     app = FastAPI()
     app.dependency_overrides[get_settings] = lambda: settings
-    if settings.cors_origins:
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=settings.cors_origins,
-            allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-            allow_headers=["X-API-Key", "Content-Type"],
-            expose_headers=["X-Request-ID"],
-        )
 
     def error_response(request, status, code, message, details=None):
         return JSONResponse(
@@ -66,6 +69,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def internal_error(request, exc):
         return error_response(request, 500, "internal_error", "An internal error occurred.")
 
+    # Convert unhandled route errors before CORS adds its response headers.
+    app.add_middleware(ExceptionMiddleware, handlers={Exception: internal_error})
+    if settings.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+            allow_headers=["X-API-Key", "Content-Type"],
+            expose_headers=["X-Request-ID"],
+        )
+
     @app.middleware("http")
     async def request_id(request, call_next):
         request.state.request_id = str(uuid4())
@@ -92,7 +106,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             with get_engine(settings.database_url).connect() as connection:
                 database = connection.execute(text("SELECT 1")).scalar_one() == 1
                 if connection.execute(text("SELECT to_regclass('public.alembic_version')")).scalar():
-                    schema = bool(connection.execute(text("SELECT EXISTS (SELECT 1 FROM alembic_version)")).scalar())
+                    applied_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
+                    schema = applied_revisions == [get_alembic_head()]
                 if connection.execute(text("SELECT to_regclass('public.dataset_releases')")).scalar():
                     kind = "synthetic" if settings.mode == "synthetic" else "reviewed_public"
                     dataset_available = bool(connection.execute(text(

@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[4] / ".env",
-        extra="ignore", populate_by_name=True,
+        extra="ignore", populate_by_name=True, hide_input_in_errors=True,
     )
     database_url: str = "postgresql+psycopg://clearpath:clearpath@127.0.0.1:5432/clearpath"
     api_key: SecretStr = Field(validation_alias="CLEARPATH_API_KEY")
