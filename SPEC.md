@@ -31,7 +31,7 @@ resolution is a separate, honestly reported integration capability.
 
 ### Fit with the affordable-housing challenge
 
-The [Lane 2 brief](../../../lanes/2-clear-it/README.md) explicitly includes
+The [Lane 2 brief](lanes/2-clear-it/README.md) explicitly includes
 nonprofit project managers, builders, ADUs, small subdivisions, and multifamily
 approval pathways. ClearPath addresses the preparation and approval delays that
 can slow housing delivery. Its value must be demonstrated through a sourced next
@@ -81,7 +81,7 @@ dataset, with a visible gap until its sources are curated.
 ## 3. Existing evidence and source limitations
 
 The current repository contains event materials and a separate
-[demo ADU packet builder](../../../clear_path_checklist_build/README.md), but no
+[demo ADU packet builder](clear_path_checklist_build/README.md), but no
 FastAPI permit service or application database. The packet includes a blank PDF
 and a document/field schema and labels itself as an abbreviated testing sample,
 not an official city form. Preserve its stable document/field IDs as possible

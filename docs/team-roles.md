@@ -3,7 +3,7 @@
 Who builds what for the ClearPath Irvine ADU prototype, and how the pieces fit
 together by the 2:30 PM submission.
 
-- **Product spec:** [ClearPath backend design](superpowers/specs/2026-11-07-clearpath-backend-design.md)
+- **Product spec:** [ClearPath backend design](../SPEC.md)
   (cited below as "spec §N"). Its status is still *proposed*: confirm it as a team before coding.
 - **Demo user:** a first-time homeowner adding a detached ADU in Irvine (scenario C01 in
   [`lanes/2-clear-it/scenarios.json`](../lanes/2-clear-it/scenarios.json)).

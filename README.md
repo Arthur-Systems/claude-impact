@@ -28,7 +28,7 @@ checklists/timelines, with a portfolio API for listing and filtering projects.
 Frontend development, Claude chat, user document uploads/OCR, and vector search
 follow later.
 
-Read the [ClearPath backend design](docs/superpowers/specs/2026-11-07-clearpath-backend-design.md)
+Read the [ClearPath backend design](SPEC.md)
 for the proposed data model, API contracts, source verification, failure behavior,
 and acceptance checks. Its status is **proposed**, pending review before coding.
 

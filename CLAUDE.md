@@ -21,7 +21,7 @@ ingestion, source-backed permit lookup, and project timelines. The selected stac
 is Python/FastAPI and PostgreSQL with pgvector; frontend work comes later.
 
 The proposed design is in
-`docs/superpowers/specs/2026-11-07-clearpath-backend-design.md`. It requires user
+`SPEC.md`. It requires user
 review before implementation. Do not treat proposed engineering defaults as
 approved decisions until that review. The first slice does not include a chat
 assistant, user document uploads/OCR, or embedding/vector-search implementation.
