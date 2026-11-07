@@ -354,11 +354,13 @@ def test_max_depth_boundary_is_allowed():
 
 
 def test_nested_error_reports_path_without_values():
+    # Path convention shared with Person 3's importer: the path names the bad NODE
+    # (children as `.all[i]`, `.any[i]`, `.not`), not the operator inside it.
     pred = {"all": [LEAF, {"any": [LEAF, {"lt": ["adu_form", 5]}]}]}
     with pytest.raises(PredicateValidationError) as excinfo:
-        validate_predicate(pred, S)
+        validate_predicate(pred, S, "$")
     assert excinfo.value.code == "non_numeric_comparison"
-    assert excinfo.value.path == "$.all[1].any[1].lt"
+    assert excinfo.value.path == "$.all[1].any[1]"
 
 
 def test_validate_returns_none_for_valid_predicate():
@@ -492,3 +494,231 @@ def test_module_source_has_no_dynamic_execution():
     source = Path(predicates.__file__).read_text()
     for banned in ("eval(", "exec(", "compile(", "__import__", "getattr(", "importlib", "subprocess", "os.system"):
         assert banned not in source, banned
+
+
+# ======================================================================================
+# Compatibility with Person 3's importer (origin/p3-platform)
+#   - fact schema format {fact: {"type": "bool"|"number"|"enum"|"string", "values": [...]}}
+#   - ALLOWED_OPS, PredicateError with .path, validate_predicate(pred, schema, path)
+# ======================================================================================
+
+from dataclasses import dataclass as _dataclass
+from types import SimpleNamespace
+
+from clearpath.permits.predicates import ALLOWED_OPS, PredicateError
+
+# Exact fact_schema from origin/p3-platform:backend/tests/fixtures/irvine_adu_synthetic/manifest.json
+P3_MANIFEST_FACT_SCHEMA = {
+    "adu_form": {"type": "enum", "values": ["detached", "attached", "conversion", "jadu"]},
+    "existing_dwelling": {"type": "bool"},
+    "floor_area_sqft": {"type": "number"},
+}
+# The applies_if predicates in that same manifest (500 is a synthetic test value there too).
+P3_MANIFEST_PREDICATES = [
+    ("pathways[0]", {"eq": ["adu_form", "detached"]}),
+    ("requirements[0]", {"eq": ["adu_form", "detached"]}),
+    ("requirements[1]", {"gt": ["floor_area_sqft", 500]}),
+    ("requirements[2]", {"eq": ["existing_dwelling", True]}),
+]
+
+
+@_dataclass(frozen=True)
+class FakeFactSpec:
+    """Stands in for Person 3's Pydantic FactSpec: an object with .type and .values."""
+
+    type: str
+    values: list | None = None
+
+
+P3_FACTS_AS_OBJECTS = {k: FakeFactSpec(v["type"], v.get("values")) for k, v in P3_MANIFEST_FACT_SCHEMA.items()}
+
+# Person 3's own test schema (origin/p3-platform:backend/tests/unit/test_predicates.py)
+P3_TEST_FACTS = {
+    "flag": {"type": "bool"},
+    "size": {"type": "number"},
+    "form": {"type": "enum", "values": ["detached", "attached"]},
+    "name": {"type": "string"},
+}
+
+
+def test_allowed_ops_exported_and_frozen():
+    assert ALLOWED_OPS == frozenset({"all", "any", "not", "eq", "in", "lt", "lte", "gt", "gte"})
+    assert isinstance(ALLOWED_OPS, frozenset)
+
+
+def test_predicate_error_hierarchy():
+    assert issubclass(PredicateValidationError, PredicateError)
+    assert issubclass(PredicateError, ValueError)
+    with pytest.raises(PredicateError) as excinfo:
+        validate_predicate({"all": []}, S)
+    assert excinfo.value.path == "applies_if"
+    assert excinfo.value.code == "empty_operands"
+
+
+def test_default_path_prefix_is_applies_if():
+    with pytest.raises(PredicateError) as excinfo:
+        validate_predicate({"all": [LEAF, {"not": {"eq": ["adu_form", 5]}}]}, S)
+    assert excinfo.value.path == "applies_if.all[1].not"
+
+
+@pytest.mark.parametrize("schema", [P3_MANIFEST_FACT_SCHEMA, P3_FACTS_AS_OBJECTS], ids=["dicts", "objects"])
+@pytest.mark.parametrize("owner_path, pred", P3_MANIFEST_PREDICATES)
+def test_p3_manifest_predicates_validate(schema, owner_path, pred):
+    assert validate_predicate(pred, schema, f"{owner_path}.applies_if") is None
+
+
+@pytest.mark.parametrize("schema", [P3_MANIFEST_FACT_SCHEMA, P3_FACTS_AS_OBJECTS], ids=["dicts", "objects"])
+def test_p3_schema_evaluates_and_validates_facts(schema):
+    rule = {"all": [{"eq": ["adu_form", "detached"]}, {"gt": ["floor_area_sqft", 500]}]}
+    facts = {"adu_form": "detached", "existing_dwelling": True}
+    result = evaluate_predicate(rule, facts, schema)
+    assert result == PredicateResult(Tri.UNKNOWN, ("floor_area_sqft",))
+    assert to_status(result) == "needs_information"
+    assert evaluate_predicate(rule, {**facts, "floor_area_sqft": 600}, schema).value is Tri.TRUE
+    assert to_status(evaluate_predicate(rule, {"adu_form": "attached"}, schema)) == "not_applicable"
+    assert validate_facts(facts, schema) is None
+
+
+def test_p3_validator_call_pattern():
+    """Mirror of ingestion/validation.py: validate_predicate(owner.applies_if, schema, f'{path}.applies_if')."""
+    owners = [
+        SimpleNamespace(applies_if={"eq": ["adu_form", "detached"]}),
+        SimpleNamespace(applies_if={"all": [{"eq": ["existing_dwelling", 1]}]}),
+        SimpleNamespace(applies_if={"all": []}),
+        SimpleNamespace(applies_if={"lt": ["adu_form", "detached"]}),
+    ]
+    issues = []
+    for i, owner in enumerate(owners):
+        path = f"requirements[{i}]"
+        try:
+            validate_predicate(owner.applies_if, P3_FACTS_AS_OBJECTS, f"{path}.applies_if")
+        except PredicateError as error:
+            issues.append(("invalid_predicate", error.path))
+    assert issues == [
+        ("invalid_predicate", "requirements[1].applies_if.all[0]"),
+        ("invalid_predicate", "requirements[2].applies_if"),
+        ("invalid_predicate", "requirements[3].applies_if"),
+    ]
+
+
+# Ported from Person 3's test_predicates.py so their expectations keep passing.
+@pytest.mark.parametrize(
+    "pred",
+    [
+        {"eq": ["flag", True]},
+        {"gt": ["size", 500]},
+        {"lte": ["size", 1.5]},
+        {"in": ["form", ["detached", "attached"]]},
+        {"eq": ["name", "sample"]},
+        {"all": [{"eq": ["flag", False]}, {"not": {"any": [{"lt": ["size", 0]}]}}]},
+    ],
+)
+def test_p3_valid_predicates(pred):
+    assert validate_predicate(pred, P3_TEST_FACTS) is None
+
+
+@pytest.mark.parametrize(
+    "pred",
+    [
+        {}, [], {"unknown": []}, {"eq": ["flag", True], "not": {}},
+        {"all": []}, {"any": []}, {"not": []}, {"eq": ["flag"]},
+        {"eq": ["unknown", True]}, {"eq": [[], True]}, {"eq": ["flag", 1]},
+        {"eq": ["size", True]}, {"eq": ["size", "500"]}, {"eq": ["name", 1]},
+        {"eq": ["form", "conversion"]}, {"lt": ["form", "detached"]},
+        {"gte": ["flag", True]}, {"in": ["size", []]}, {"in": ["size", 1]},
+        {"in": ["size", [1, False]]}, {"all": "bad"},
+    ],
+)
+def test_p3_invalid_predicates(pred):
+    with pytest.raises(PredicateError) as caught:
+        validate_predicate(pred, P3_TEST_FACTS)
+    assert caught.value.path.startswith("applies_if")
+
+
+def test_p3_nested_path_and_no_value_leak():
+    with pytest.raises(PredicateError) as caught:
+        validate_predicate(
+            {"all": [{"eq": ["flag", "FAKE_SECRET_SENTINEL"]}]}, P3_TEST_FACTS, "requirements[2].applies_if"
+        )
+    assert caught.value.path == "requirements[2].applies_if.all[0]"
+    assert "FAKE_SECRET_SENTINEL" not in str(caught.value)
+    assert "FAKE_SECRET_SENTINEL" not in repr(caught.value)
+
+
+# ---- enum facts ----------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "code, pred",
+    [
+        ("enum_value_not_allowed", {"eq": ["adu_form", "treehouse"]}),
+        ("enum_value_not_allowed", {"in": ["adu_form", ["detached", "treehouse"]]}),
+        ("type_mismatch", {"eq": ["adu_form", 5]}),
+        ("type_mismatch", {"in": ["adu_form", ["detached", None]]}),
+        ("non_numeric_comparison", {"lt": ["adu_form", "detached"]}),
+        ("non_numeric_comparison", {"gte": ["adu_form", 1]}),
+    ],
+)
+def test_enum_predicate_errors(code, pred):
+    with pytest.raises(PredicateValidationError) as excinfo:
+        validate_predicate(pred, P3_MANIFEST_FACT_SCHEMA)
+    assert excinfo.value.code == code
+
+
+def test_enum_in_list_with_allowed_values():
+    pred = {"in": ["adu_form", ["attached", "jadu"]]}
+    assert evaluate_predicate(pred, {"adu_form": "jadu"}, P3_MANIFEST_FACT_SCHEMA).value is Tri.TRUE
+    assert evaluate_predicate(pred, {"adu_form": "detached"}, P3_MANIFEST_FACT_SCHEMA).value is Tri.FALSE
+    assert evaluate_predicate(pred, {}, P3_MANIFEST_FACT_SCHEMA).value is Tri.UNKNOWN
+
+
+@pytest.mark.parametrize(
+    "code, facts",
+    [
+        ("enum_value_not_allowed", {"adu_form": SECRET_VALUE}),
+        ("invalid_fact_value", {"adu_form": 5}),
+        ("invalid_fact_value", {"existing_dwelling": 1}),
+        ("bool_as_number", {"floor_area_sqft": True}),
+    ],
+)
+def test_enum_and_bool_fact_errors(code, facts):
+    with pytest.raises(PredicateValidationError) as excinfo:
+        validate_facts(facts, P3_MANIFEST_FACT_SCHEMA)
+    assert excinfo.value.code == code
+    assert SECRET_VALUE not in str(excinfo.value)
+
+
+def test_bool_alias_equals_boolean():
+    for kind in ("bool", "boolean", FactType.BOOLEAN, {"type": "bool"}, FakeFactSpec("bool")):
+        schema = {"flag": kind}
+        assert evaluate_predicate({"eq": ["flag", True]}, {"flag": True}, schema).value is Tri.TRUE
+
+
+def test_mixed_schema_formats_in_one_schema():
+    schema = {"a": "boolean", "b": {"type": "number"}, "c": FakeFactSpec("enum", ["x", "y"]), "d": FactType.STRING}
+    pred = {"all": [{"eq": ["a", True]}, {"gte": ["b", 1]}, {"in": ["c", ["x"]]}, {"eq": ["d", "z"]}]}
+    assert evaluate_predicate(pred, {"a": True, "b": 2, "c": "x", "d": "z"}, schema).value is Tri.TRUE
+
+
+@pytest.mark.parametrize(
+    "spec",
+    [
+        {"type": "enum"},
+        {"type": "enum", "values": []},
+        {"type": "enum", "values": "detached"},
+        {"type": "enum", "values": ["detached", 5]},
+        {"type": "bool", "values": ["x"]},
+        {"type": "integer"},
+        {"values": ["x"]},
+        {"type": "number", "extra": 1},
+        "enum",
+        FakeFactSpec("enum", None),
+        FakeFactSpec("number", ["x"]),
+        FakeFactSpec("float"),
+        object(),
+    ],
+)
+def test_invalid_new_format_schemas(spec):
+    with pytest.raises(PredicateValidationError) as excinfo:
+        validate_predicate({"eq": ["x", True]}, {"x": spec})
+    assert excinfo.value.code == "invalid_fact_schema"
