@@ -1,54 +1,40 @@
-# ClearPath frontend (starter)
+# ClearPath frontend
 
-## Run it
-1. Install Node 18.17 or newer (check with `node -v`).
-2. In this folder run:
-   npm install
-   npm run dev
-3. Open http://localhost:3000
+A one-page Irvine ADU permit dashboard built with Next.js and React. It brings together document readiness, approval estimates, a journey stepper, path comparison, a MapLibre map, Navigator chat, search and Ask the City. The splash and dashboard share the forest, teal and paper palette defined in `app/globals.css`.
 
-## What works right now
-- Sidebar navigation across all six tabs
-- Overview and Documents pages are fully working
-- Upload files on Documents: each file is matched to a required document by its file name (try site_plan.pdf, floor_plan.pdf, structural.pdf, or vacation.pdf)
-- Unmatched files show up under "Needs your attention"
-- The Overview, the nav badge, and the checklist all update together
-- Overview has a working map: type an address and a pin is placed (OpenStreetMap, no API key)
-- Navigator: chat with suggested questions and a step by step guide that updates from your uploads
-- Search: search sourced Irvine and California entries plus your uploaded file names
-- Timeline: two approval paths, with a dropdown for how long missing documents take
-- Ask the City: opens an email to the Irvine Planning Team and tracks your questions
+## Run locally
 
-## How it is organized
-- app/            One folder per page. app/documents/page.tsx is the /documents page.
-- app/layout.tsx  The frame around every page (sidebar plus content).
-- app/globals.css All colors and styles. Colors are CSS variables at the top.
-- components/     Small reusable pieces: Sidebar, PageHeader, MapPlaceholder.
-- lib/project-context.tsx
-                  The shared state (uploaded files, what is missing).
-                  This is the file to connect to the backend.
+Use Node.js 18.17 or newer. From `frontend/`:
 
-## Where the backend plugs in
-In lib/project-context.tsx, guessMatch() is a mock that looks at file names.
-Replace it with a call to the FastAPI endpoint that runs OCR and Claude,
-and have it return the matched document type and a confidence level.
+```sh
+npm ci
+npm run dev
+```
 
-## Add the Orange County logo
-Save the official logo as public/oc-logo.png. It shows in the sidebar on a
-white plate. Until the file exists, a plain text label shows instead.
+Open http://localhost:3000. For a production build, stop the dev server before using the same build directory:
 
-## Connect the Navigator to the backend (optional)
-Create a file named .env.local with:
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-The Navigator then sends POST /api/navigator with { question, context }
-and expects { answer, sources: [{ label, url }] }. If the backend is off,
-the demo answers in lib/api.ts are used and labeled as demo answers.
+```sh
+npm run build
+npm run start
+```
 
-## Where the numbers come from
-lib/timeline.ts: the 60 day and 15 business day limits are state law
-(California Gov. Code 66317). The 4 day completeness check is an assumption
-based on Irvine saying it takes about two business days. Edit it there.
+Both `predev` and `prebuild` run `scripts/copy-map-worker.mjs`. It copies the installed MapLibre module worker, source map and license into the generated, git-ignored `public/maplibre/` directory. The browser loads this local worker without a CDN request or Next.js minification.
 
-## Still to do
-Real OCR matching, pgvector search in place of lib/knowledge.ts, and
-checking the document checklist against Irvine's official submittal list.
+## Demo behavior and sources
+
+- Document selection records filenames in memory and guesses checklist matches from those names. It does not upload file contents or perform OCR. Matches can be reassigned; readiness and estimates update together.
+- Project state, selected address and question tracking are in memory and reset on reload. There is no production persistence.
+- Search uses local entries in `lib/knowledge.ts`, displays their sources and also searches selected filenames. It is not a live regulatory search.
+- Approval totals are estimates. The chart labels the completeness-check assumption separately from the decision legal limit; use the linked sources to check requirements.
+- Navigator falls back to demo answers when no API is configured or a request fails. These replies visibly say “Demo answer, backend not connected.” All replies remind users to check sources.
+- Ask the City opens a draft through `mailto:` and tracks the email-opening action locally. It does not send email or confirm delivery. Replies go to the user's inbox.
+
+## Optional Navigator API
+
+Set `NEXT_PUBLIC_API_URL` in `.env.local` before starting dev or building. Navigator sends `POST {NEXT_PUBLIC_API_URL}/api/navigator` with `{ question, context }` and expects `{ answer, sources: [{ label, url }] }`. This is an optional integration contract, not evidence of a connected backend.
+
+## Map and navigation
+
+MapLibre renders the map using WebGL. OpenFreeMap styles and tiles and OpenStreetMap Nominatim address lookup require network access; the worker is served locally. Failed map loading shows a location fallback with a Google Maps link, and failed address lookup shows an error.
+
+The dashboard retains reduced-motion handling, keyboard focus styles and accessible control labels. Old routes redirect to the dashboard: `/documents`, `/navigator` and `/timeline` target their sections; `/search` and `/questions` return to `/`.

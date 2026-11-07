@@ -94,12 +94,8 @@ export default function MapCard() {
         if (cancelled || !box.current) return;
         const maplibregl: any = (mod as any).default ?? mod;
         libRef.current = maplibregl;
-        // Next/webpack cannot resolve MapLibre's default worker path; point it at the bundled asset.
-        try {
-          maplibregl.setWorkerUrl?.(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
-        } catch {
-          /* keep the default worker URL */
-        }
+        // Generated from the installed package by predev/prebuild; stays a module worker.
+        maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
         map = new maplibregl.Map({
           container: box.current,
           style: STYLE,
@@ -183,7 +179,7 @@ export default function MapCard() {
       )}
 
       <div className={s.top}>
-        <form onSubmit={onSubmit} className={s.search} role="search">
+        <form onSubmit={onSubmit} className={s.search} role="search" aria-label="Project address search">
           <Search size={18} strokeWidth={2} aria-hidden className={s.searchIcon} />
           <label htmlFor="map-search" className={s.sr}>Project address</label>
           <input

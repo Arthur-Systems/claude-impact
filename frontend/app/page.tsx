@@ -32,7 +32,7 @@ export default function Dashboard() {
   const total = REQUIRED_DOCS.length;
   const missing = missingPriority.length;
   const best = toWeeks(estimate(0).total);
-  const worst = toWeeks(estimate(prepDays).total);
+  const worst = toWeeks(estimate(missing === 0 ? 0 : prepDays).total);
 
   let next: ReactNode;
   if (missing > 0) {
@@ -64,7 +64,8 @@ export default function Dashboard() {
 
   return (
     <div className="dash">
-      <section className="card tile enter" style={{ ["--i" as string]: 0 }} aria-label="Documents">
+      <h1 className="sr-only">ClearPath dashboard</h1>
+      <section className="card tile enter" style={{ ["--i" as string]: 0 }} aria-label="Document readiness">
         <div className="tile-label"><Files {...I} /> Documents</div>
         <div className="tile-body">
           <ReadinessRing ready={readyCount} total={total} size={56} />
@@ -88,7 +89,7 @@ export default function Dashboard() {
         <div className="tile-label"><CalendarClock {...I} /> Approval</div>
         <div className="tile-body tile-stack">
           <span className="tile-value num">{best === worst ? `${best}` : `${best} to ${worst}`} <small>wks</small></span>
-          <span className="tile-caption">Up to, legal limit</span>
+          <span className="tile-caption">Estimated total</span>
         </div>
       </section>
 

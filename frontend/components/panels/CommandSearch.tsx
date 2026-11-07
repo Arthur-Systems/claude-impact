@@ -97,7 +97,7 @@ export default function CommandSearch() {
       <button type="button" className={s.searchToggle} aria-label="Search" onClick={focusField}>
         <Search size={18} strokeWidth={2} aria-hidden="true" />
       </button>
-      <div className={s.field} role="search">
+      <div className={s.field} role="search" aria-label="Rules and documents search">
         <Search size={16} strokeWidth={2} className={s.fieldIcon} aria-hidden="true" />
         <input
           ref={inputRef}
