@@ -240,14 +240,25 @@ Field rules:
 - `passages[].review_status`: `reviewed`, `needs_review` or `failed`. If omitted, a non-empty
   `_review_note` means `needs_review`; otherwise `reviewed`. Explicit status always wins.
   Garbled PDF text stays `needs_review` until a person checks the excerpt.
+- `pathways[].description`: optional text, default `""`.
 - `requirements[].kind`: `permit`, `document` or `review`.
 - `milestones[].assumed_days`: null, or `{"min":int|null,"max":int|null,"label":"ASSUMPTION","rationale":str|null}`;
   `label` must equal `ASSUMPTION`; `min ≤ max` when both set. Rationale may be null/omitted
   only when both bounds are null; any set bound requires a non-empty rationale.
-  `published_clock`: null or `{"text":str,"citations":[uuid]}`, displayed only, never computed.
+- `milestones[].published_clock`: null or a timing object with required `kind`
+  (`city_service_target`, `statutory_clock`, `observed`, or `assumption`), `value`
+  (finite number or null), `unit` (text), and non-empty `scope`. Optional `qualifier`
+  and `verification` are text or null; `citation` is a passage UUID or null;
+  `citations` is a passage UUID list, default `[]`. `city_service_target` and
+  `statutory_clock` require a non-null `citation` or a non-empty `citations` list.
+  Both citation forms must resolve to passages. Preserve the supplied timing JSON
+  without adding omitted optional fields; display only, never compute due dates.
 - `conflicts[]`: `{"rule_keys":[str],"source_keys":[str],"summary":str}`; `sources` aliases
-  `source_keys` (exactly one spelling). References must resolve to pathways/requirements
-  and sources respectively; milestone references are not part of this contract.
+  `source_keys` (exactly one spelling). These are informational records, not foreign keys:
+  rule/source strings and summary must be non-empty, with at least one rule and one source.
+  No slug pattern or reference lookup applies; unentered rules, milestone keys and
+  pseudo-sources such as `SPEC-8` are valid. Preserve strings and source-field spelling
+  in `dataset_releases.conflicts`; diagnostics never echo their contents.
 - Milestone `position` is its index in the `milestones` array.
 
 ### Predicate grammar
@@ -281,7 +292,7 @@ value text in error output). Checks:
 | `unsupported_schema_version` | `schema_version != 1` |
 | `path_outside_bundle` | manifest path resolves outside `backend/data/` or `backend/tests/fixtures/` |
 | `duplicate_key` | duplicate source key, passage id, pathway, requirement or milestone key |
-| `dangling_reference` | passage → unknown source; citation → unknown passage; requirement → unknown pathway; milestone → unknown predecessor or requirement; conflict → unknown rule or source key |
+| `dangling_reference` | passage → unknown source; citation (including both clock forms) → unknown passage; requirement → unknown pathway; milestone → unknown predecessor or requirement. Informational conflicts are not reference-checked |
 | `invalid_predicate` | `validate_predicate` fails |
 | `cyclic_milestones` | milestone predecessor graph has a cycle (Kahn's algorithm) |
 | `missing_citation` | a pathway or requirement in a `reviewed_public` bundle has no citations |
@@ -297,6 +308,8 @@ value text in error output). Checks:
 - Otherwise, in the caller's transaction, insert the release (`status=draft`), sources, passages
   (computing `excerpt_hash`), pathways, requirements, milestones and `citation_links`. Any error
   rolls back the whole release.
+- Milestone citation links are the deduplicated union of direct `citations`,
+  `published_clock.citation` and `published_clock.citations`, all owned by the milestone.
 - `ImportResult`: `release_id`, `no_op`, `counts` per table.
 
 ### 6.3 `publish_release(session, release_id, reviewed: bool, mode) -> DatasetRelease`
@@ -306,7 +319,10 @@ value text in error output). Checks:
 - `kind=synthetic` cannot be published by a CLI running with `mode=public`, and vice versa
   (`release_kind_mismatch`).
 - Any pathway, requirement or milestone citing a passage whose `review_status != reviewed` →
-  `unreviewed_evidence` (lists owner keys).
+  `unreviewed_evidence` (lists exactly the affected owner keys, including clock-only evidence).
+  Nothing becomes active on failure. Person 2 clears this gate by hand-checking each
+  `_review_note` passage against its source, then removing the note or explicitly setting
+  `"review_status": "reviewed"`; reimport the edited manifest as a new draft before publishing.
 - A `reviewed_public` release with zero pathways or zero requirements → `empty_release`, so the
   empty stub can never become the active dataset.
 - Then `SELECT ... FOR UPDATE` the jurisdiction row, set the current active release for the same

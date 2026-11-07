@@ -23,11 +23,17 @@ This is a prototype, not legal, financial, or lending advice.
 - `assumed_days` is null or an object with nullable `min`/`max` and mandatory
   `label: ASSUMPTION`. A non-empty `rationale` is required if either bound is set;
   it may be null or omitted only when both bounds are null.
-- `published_clock` is null or `{"text": "...", "citations": ["passage-uuid"]}`:
-  display only, never a calculated due date. Pathways require `description`.
-- Conflicts accept exactly one of `source_keys` or its alias `sources`; rule and
-  source references must resolve to bundle entries. Conflicts currently reference
-  pathways/requirements, not milestone keys.
+- Pathway `description` is optional and defaults to `""`.
+- `published_clock` is null or a timing object: `kind` (`city_service_target`,
+  `statutory_clock`, `observed`, `assumption`), finite numeric/null `value`, text
+  `unit`, non-empty `scope`, optional nullable `qualifier`/`verification`, and
+  optional passage UUID `citation` and/or UUID list `citations` (default `[]`).
+  City targets and statutory clocks require at least one citation. Both citation
+  forms must resolve and are linked to the milestone. Display only; never calculate due dates.
+- Conflicts accept exactly one of `source_keys` or its alias `sources`, with at
+  least one non-empty rule string, one non-empty source string, and a non-empty
+  summary. These are informational, not checked references: unentered rules,
+  milestone keys and pseudo-sources such as `SPEC-8` are valid. They persist unchanged.
 - The content hash covers the raw parsed JSON, including curator notes, before
   defaults and normalization. Formatting/key ordering alone does not change it.
 
@@ -38,6 +44,12 @@ uv run --project backend clearpath data import --manifest backend/data/irvine_ad
 make seed-irvine
 ```
 
-Dry-run performs file-only validation. Import/publication remain blocked by
-schema/reference errors or unreviewed cited evidence; do not bypass these gates.
+Dry-run performs file-only validation; it does not confirm evidence review. Import
+accepts the curated format, but public publication rejects unreviewed cited evidence
+with `unreviewed_evidence` and the affected pathway/requirement/milestone keys, including
+clock citations. To clear the gate, Person 2 must hand-check **each `_review_note` passage**
+against its source, then remove the note or set `"review_status": "reviewed"`. If an
+explicit `needs_review`/`failed` status remains, change it only after that check.
+Reimport the edited manifest as a new draft, then publish with `--reviewed`.
+Do not bypass the gate or alter source evidence just to make publication succeed.
 `manifest.batch1.json` is an earlier draft and is not a seed target.

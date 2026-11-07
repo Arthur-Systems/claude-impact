@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import create_engine, event, func, select
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 
 from clearpath.db.models import (
@@ -20,6 +21,11 @@ from clearpath.ingestion.validation import ValidatedBundle, validate_bundle, val
 
 REPO = Path(__file__).resolve().parents[3]
 SYNTHETIC = REPO / "backend/tests/fixtures/irvine_adu_synthetic/manifest.json"
+REVIEWED_PUBLIC = REPO / "backend/data/irvine_adu/manifest.json"
+CLOCK = {
+    "kind": "city_service_target", "value": 2, "unit": "business_days",
+    "scope": "SYNTHETIC display-only timing scope",
+}
 CITIES = REPO / "lanes/2-clear-it/data/oc-cities.json"
 CONTENT_MODELS = (
     DatasetRelease, SourceSnapshot, SourcePassage, Pathway, Requirement,
@@ -29,7 +35,8 @@ CONTENT_MODELS = (
 
 @pytest.fixture
 def session(settings):
-    assert settings.database_url.endswith("/clearpath_test")
+    database = make_url(settings.database_url).database
+    assert database is not None and database.startswith("clearpath_test")
     engine = create_engine(settings.database_url)
     with engine.connect() as connection:
         transaction = connection.begin()
@@ -195,16 +202,17 @@ def test_publish_kind_mismatch(session, jurisdiction, bundle, kind, mode):
     assert session.get(DatasetRelease, imported.release_id).status == "draft"
 
 
-@pytest.mark.parametrize("owner_type", ["pathway", "requirement", "milestone", "published_clock"])
+@pytest.mark.parametrize("owner_type", ["pathway", "requirement", "milestone", "clock_citation", "clock_citations"])
 def test_publish_rejects_unreviewed(session, jurisdiction, bundle, owner_type):
     from clearpath.ingestion.service import publish_release
 
     data = bundle.manifest.model_dump(mode="json")
     unreviewed = data["passages"][2]["id"]
-    if owner_type == "published_clock":
+    if owner_type.startswith("clock_"):
         owner = data["milestones"][0]
         owner["citations"] = []
-        owner["published_clock"] = {"text": "SYNTHETIC display-only clock", "citations": [unreviewed, unreviewed]}
+        evidence = {"citation": unreviewed} if owner_type == "clock_citation" else {"citations": [unreviewed, unreviewed]}
+        owner["published_clock"] = {**CLOCK, **evidence}
     else:
         collection = {"pathway": "pathways", "requirement": "requirements", "milestone": "milestones"}[owner_type]
         owner = data[collection][0]
@@ -242,6 +250,59 @@ def test_review_note_status_is_persisted_and_blocks_publication(session, jurisdi
     assert session.get(DatasetRelease, imported.release_id).status == "draft"
 
 
+def test_real_curated_manifest_persists_intact_and_public_publish_lists_exact_unreviewed_owners(session, jurisdiction):
+    from clearpath.ingestion.service import publish_release
+
+    data = json.loads(REVIEWED_PUBLIC.read_text(encoding="utf-8"))
+    imported = import_bundle(session, validate_bundle(REVIEWED_PUBLIC))
+    session.expire_all()  # Read JSON and evidence back from PostgreSQL, not ORM input objects.
+    release = session.get(DatasetRelease, imported.release_id)
+    assert release.kind == "reviewed_public"
+    assert release.conflicts == data["conflicts"]
+    milestones = session.scalars(select(MilestoneTemplate).where(
+        MilestoneTemplate.release_id == release.id,
+    ).order_by(MilestoneTemplate.position)).all()
+    assert {m.key: m.published_clock for m in milestones} == {
+        m["key"]: m["published_clock"] for m in data["milestones"]
+    }
+    noted_ids = {UUID(p["id"]) for p in data["passages"] if p.get("_review_note")}
+    stored_needs_review = set(session.scalars(select(SourcePassage.manifest_passage_id).where(
+        SourcePassage.release_id == release.id, SourcePassage.review_status == "needs_review",
+    )))
+    assert stored_needs_review == noted_ids
+    expected_links = set()
+    for owner_type, collection in (("pathway", "pathways"), ("requirement", "requirements"), ("milestone", "milestones")):
+        for owner in data[collection]:
+            clock = owner.get("published_clock") or {}
+            citations = [*owner["citations"], *clock.get("citations", [])]
+            if clock.get("citation") is not None:
+                citations.append(clock["citation"])
+            expected_links.update((owner_type, owner["key"], UUID(pid)) for pid in citations)
+    actual_links = session.execute(select(
+        CitationLink.owner_type, CitationLink.owner_key, SourcePassage.manifest_passage_id,
+    ).join(SourcePassage, CitationLink.passage_id == SourcePassage.id).where(
+        CitationLink.release_id == release.id, SourcePassage.release_id == release.id,
+    )).all()
+    assert set(actual_links) == expected_links
+    assert len(actual_links) == imported.counts["citation_links"] == len(expected_links)
+    for milestone in data["milestones"]:
+        clock = milestone["published_clock"] or {}
+        if clock.get("citation") is not None:
+            assert ("milestone", milestone["key"], UUID(clock["citation"])) in expected_links
+    expected_owners = sorted({key for _, key, pid in expected_links if pid in noted_ids})
+    assert expected_owners
+    with pytest.raises(DomainError) as error:
+        publish_release(session, release.id, reviewed=True, mode="public")
+    assert error.value.code == "unreviewed_evidence"
+    assert error.value.details == {"path": "citations", "owner_keys": expected_owners}
+    session.expire_all()
+    release = session.get(DatasetRelease, imported.release_id)
+    assert release.status == "draft" and release.published_at is None
+    assert session.scalar(select(func.count()).select_from(DatasetRelease).where(
+        DatasetRelease.status == "active",
+    )) == 0
+
+
 @pytest.mark.parametrize("empty", ["pathways", "requirements"])
 def test_publish_rejects_empty_release(session, jurisdiction, bundle, empty):
     from clearpath.ingestion.service import publish_release
@@ -260,25 +321,29 @@ def test_publish_rejects_empty_release(session, jurisdiction, bundle, empty):
     assert session.get(DatasetRelease, previous.release_id).status == "active"
 
 
-def test_citation_links_match_cited_passages(session, jurisdiction, bundle):
+@pytest.mark.parametrize("source_field", ["source_keys", "sources"])
+def test_citation_links_match_cited_passages(session, jurisdiction, bundle, source_field):
     data = bundle.manifest.model_dump(mode="json")
     first, second = [p["id"] for p in data["passages"][:2]]
     data["pathways"][0]["citations"] = [first, first]
     data["requirements"][0]["citations"] = [first, second, second]
     milestone = data["milestones"][0]
     milestone["citations"] = [first, first]
-    milestone["published_clock"] = {"text": "SYNTHETIC clock", "citations": [first, second, second]}
+    milestone["published_clock"] = {**CLOCK, "citation": second, "citations": [first, second, second]}
     data["milestones"][1]["citations"] = []
-    data["milestones"][1]["published_clock"] = {"text": "SYNTHETIC clock only", "citations": [first]}
+    data["milestones"][1]["published_clock"] = {**CLOCK, "citation": first}
     data["milestones"][2]["assumed_days"] = None
-    data["conflicts"] = [{"rule_keys": [data["pathways"][0]["key"]],
-                          "source_keys": [data["sources"][0]["key"]], "summary": "SYNTHETIC conflict"}]
+    data["conflicts"] = [{"rule_keys": ["SYNTHETIC rule (not entered)", milestone["key"]],
+                          source_field: ["SPEC-8"], "summary": "SYNTHETIC conflict"}]
     changed = changed_bundle(bundle, **data)
     imported = import_bundle(session, changed)
     expected = set()
     for owner_type, collection in (("pathway", "pathways"), ("requirement", "requirements"), ("milestone", "milestones")):
         for owner in data[collection]:
-            citations = owner["citations"] + ((owner.get("published_clock") or {}).get("citations", []))
+            clock = owner.get("published_clock") or {}
+            citations = [*owner["citations"], *clock.get("citations", [])]
+            if clock.get("citation") is not None:
+                citations.append(clock["citation"])
             expected.update((owner_type, owner["key"], UUID(passage)) for passage in citations)
     actual = session.execute(select(CitationLink.owner_type, CitationLink.owner_key, SourcePassage.manifest_passage_id)
                              .join(SourcePassage, CitationLink.passage_id == SourcePassage.id)
@@ -428,7 +493,7 @@ def cli_database(settings, monkeypatch):
     from clearpath.db.session import get_engine
 
     url = make_url(settings.database_url)
-    assert url.database == "clearpath_test"
+    assert url.database is not None and url.database.startswith("clearpath_test")
     name = "clearpath_ingestion_cli_" + uuid4().hex
     admin = create_engine(url.set(database="postgres"), isolation_level="AUTOCOMMIT")
     with admin.connect() as connection:

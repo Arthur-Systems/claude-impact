@@ -124,12 +124,11 @@ def validate_manifest_dict(data: dict) -> list[ValidationIssue]:
                 references(owner.predecessors, keys['milestones'], f'{path}.predecessors')
                 references(owner.requirements, keys['requirements'], f'{path}.requirements')
                 if owner.published_clock is not None:
+                    if owner.published_clock.citation is not None:
+                        reference(owner.published_clock.citation, keys['passages'],
+                                  f'{path}.published_clock.citation')
                     references(owner.published_clock.citations, keys['passages'],
                                f'{path}.published_clock.citations')
-    for i, conflict in enumerate(manifest.conflicts):
-        references(conflict.rule_keys, keys['pathways'] | keys['requirements'],
-                   f'conflicts[{i}].rule_keys')
-        references(conflict.source_keys, keys['sources'], f'conflicts[{i}].source_keys')
 
     # Kahn's algorithm on existing nodes only: dangling edges are reported above,
     # not misclassified as cycles. Sets make repeated edges idempotent.

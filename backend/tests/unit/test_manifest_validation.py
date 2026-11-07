@@ -14,6 +14,10 @@ FIXTURE = BACKEND / 'tests/fixtures/irvine_adu_synthetic/manifest.json'
 REVIEWED_PUBLIC = BACKEND / 'data/irvine_adu/manifest.json'
 PID = '7f9c2b1e-0000-4000-8000-000000000001'
 UNKNOWN = '7f9c2b1e-0000-4000-8000-000000000099'
+CLOCK = {
+    'kind': 'city_service_target', 'value': 2, 'unit': 'business_days',
+    'scope': 'SYNTHETIC display-only timing scope',
+}
 
 
 @pytest.fixture
@@ -74,9 +78,8 @@ def test_duplicate_keys(base, collection):
     (['milestones', 0, 'predecessors'], ['unknown']),
     (['milestones', 0, 'requirements'], ['unknown']),
     (['milestones', 0, 'citations'], [UNKNOWN]),
-    (['milestones', 0, 'published_clock'], {'text': 'Synthetic', 'citations': [UNKNOWN]}),
-    (['conflicts'], [{'rule_keys': ['unknown'], 'source_keys': ['SYN-SOURCE'], 'summary': 'Synthetic'}]),
-    (['conflicts'], [{'rule_keys': ['path'], 'source_keys': ['UNKNOWN'], 'summary': 'Synthetic'}]),
+    (['milestones', 0, 'published_clock'], {**CLOCK, 'citation': UNKNOWN}),
+    (['milestones', 0, 'published_clock'], {**CLOCK, 'citations': [UNKNOWN]}),
 ])
 def test_all_reference_types(base, path, value):
     set_at(base, path, value)
@@ -180,6 +183,14 @@ def test_explicit_invalid_fact_schema_is_not_defaulted(base, value):
     assert 'schema_invalid' in {i.code for i in validate_manifest_dict(base)}
 
 
+def test_pathway_description_defaults_to_empty_without_mutating_input(base):
+    del base['pathways'][0]['description']
+    original = deepcopy(base)
+    assert validate_manifest_dict(base) == []
+    assert Manifest.model_validate(base).pathways[0].description == ''
+    assert base == original
+
+
 def test_optional_manifest_metadata_and_required_profile_key(base):
     del base['kind']
     del base['curator_label']
@@ -195,7 +206,7 @@ def test_optional_manifest_metadata_and_required_profile_key(base):
 
 def test_curator_notes_are_ignored_at_every_level_without_mutating_input(base, tmp_path):
     base['conflicts'] = [{'rule_keys': ['path'], 'source_keys': ['SYN-SOURCE'], 'summary': 'Synthetic'}]
-    base['milestones'][0]['published_clock'] = {'text': 'Synthetic', 'citations': [PID]}
+    base['milestones'][0]['published_clock'] = {**CLOCK, 'citations': [PID]}
     expected = Manifest.model_validate(base).model_dump(mode='json')
     pending = [base]
     while pending:
@@ -267,6 +278,50 @@ def test_invalid_explicit_review_status_is_not_defaulted(base):
     ]
 
 
+@pytest.mark.parametrize('kind', ['city_service_target', 'statutory_clock', 'observed', 'assumption'])
+@pytest.mark.parametrize('evidence', [{'citation': PID}, {'citations': [PID]}, {'citation': PID, 'citations': [PID]}])
+@pytest.mark.parametrize('value', [2, 0.5, None])
+def test_published_clock_accepts_timing_objects(base, kind, evidence, value):
+    clock = {**CLOCK, 'kind': kind, 'value': value, **evidence}
+    base['milestones'][0]['published_clock'] = clock
+    original = deepcopy(base)
+    assert validate_manifest_dict(base) == []
+    parsed = Manifest.model_validate(base).milestones[0].published_clock
+    assert parsed is not None
+    assert parsed.model_dump(mode='json', exclude_unset=True) == clock
+    assert parsed.qualifier is None and parsed.verification is None
+    assert base == original
+
+
+@pytest.mark.parametrize('kind', ['city_service_target', 'statutory_clock'])
+@pytest.mark.parametrize('evidence', [{}, {'citation': None}, {'citations': []}, {'citation': None, 'citations': []}])
+def test_published_guidance_requires_a_clock_citation(base, kind, evidence):
+    base['milestones'][0]['published_clock'] = {**CLOCK, 'kind': kind, **evidence}
+    assert 'schema_invalid' in {issue.code for issue in validate_manifest_dict(base)}
+
+
+@pytest.mark.parametrize('kind', ['observed', 'assumption'])
+def test_other_timing_kinds_allow_unknown_uncited_values(base, kind):
+    base['milestones'][0]['published_clock'] = {**CLOCK, 'kind': kind, 'value': None}
+    assert validate_manifest_dict(base) == []
+    parsed = Manifest.model_validate(base).milestones[0].published_clock
+    assert parsed is not None
+    assert parsed.citation is None and parsed.citations == []
+
+
+@pytest.mark.parametrize(('field', 'value'), [
+    ('value', float('nan')), ('value', float('inf')), ('value', -float('inf')),
+    ('value', True), ('value', '2'), ('scope', ''), ('kind', 'deadline'),
+    ('citation', 'PRIVATE_SENTINEL'), ('citations', ['PRIVATE_SENTINEL']),
+])
+def test_invalid_timing_values_have_safe_schema_diagnostics(base, field, value):
+    base['milestones'][0]['published_clock'] = {**CLOCK, 'citation': PID, field: value}
+    issues = validate_manifest_dict(base)
+    assert issues and {issue.code for issue in issues} == {'schema_invalid'}
+    assert all(issue.path.startswith('milestones[0].published_clock') for issue in issues)
+    assert 'PRIVATE_SENTINEL' not in str(BundleValidationError(issues))
+
+
 @pytest.mark.parametrize('omit_rationale', [False, True])
 def test_unknown_assumed_days_allows_null_or_omitted_rationale(base, omit_rationale):
     days = {'min': None, 'max': None, 'label': 'ASSUMPTION'}
@@ -291,16 +346,35 @@ def test_assumed_days_with_a_bound_requires_rationale(base, minimum, maximum, om
 
 
 @pytest.mark.parametrize('field', ['source_keys', 'sources'])
-def test_conflict_accepts_one_source_key_spelling(base, field):
-    base['conflicts'] = [{'rule_keys': ['path'], field: ['SYN-SOURCE'], 'summary': 'Synthetic'}]
+def test_conflicts_accept_informational_keys_without_resolving_references(base, field):
+    rule_keys = ['hold-harmless-affidavit (not entered)', 'prepare', 'unentered rule']
+    source_keys = ['SPEC-8', 'not a source slug']
+    base['conflicts'] = [{'rule_keys': rule_keys, field: source_keys, 'summary': 'Synthetic'}]
+    original = deepcopy(base)
     assert validate_manifest_dict(base) == []
     assert Manifest.model_validate(base).conflicts[0].model_dump() == {
-        'rule_keys': ['path'], 'source_keys': ['SYN-SOURCE'], 'summary': 'Synthetic',
+        'rule_keys': rule_keys, 'source_keys': source_keys, 'summary': 'Synthetic',
     }
-    base['conflicts'][0][field] = ['UNKNOWN']
-    assert validate_manifest_dict(base) == [
-        ValidationIssue('dangling_reference', 'conflicts[0].source_keys[0]'),
-    ]
+    assert base == original
+    assert Manifest.model_validate(base).conflicts[0].model_dump(mode='json', round_trip=True) == base['conflicts'][0]
+
+
+@pytest.mark.parametrize(('field', 'value'), [
+    ('rule_keys', []), ('rule_keys', ['']), ('rule_keys', [1]),
+    ('source_keys', []), ('source_keys', ['']), ('source_keys', [1]),
+    ('sources', []), ('sources', ['']), ('sources', [1]), ('summary', ''),
+])
+def test_conflicts_require_nonempty_strings_without_echoing_informational_text(base, field, value):
+    source_field = 'sources' if field == 'sources' else 'source_keys'
+    conflict = {'rule_keys': ['PRIVATE_RULE_SENTINEL (not entered)'],
+                source_field: ['PRIVATE_SOURCE_SENTINEL'], 'summary': 'PRIVATE_SUMMARY_SENTINEL'}
+    conflict[field] = value
+    base['conflicts'] = [conflict]
+    issues = validate_manifest_dict(base)
+    assert issues and {issue.code for issue in issues} == {'schema_invalid'}
+    assert all(issue.path.startswith('conflicts[0].') for issue in issues)
+    assert 'SENTINEL' not in str(BundleValidationError(issues))
+    assert 'SENTINEL' not in repr(issues)
 
 
 @pytest.mark.parametrize('fields', [{}, {'sources': ['SYN-SOURCE'], 'source_keys': ['SYN-SOURCE']}])
@@ -583,12 +657,23 @@ def test_seed_bundles():
     assert synthetic.milestones[0].requirements == [r.key for r in synthetic.requirements if r.required_for_preparation]
 
 
-def test_real_reviewed_public_manifest_validates_or_xfails_with_curator_issue_list():
+def test_real_reviewed_public_manifest_validates_with_review_notes_preserved_as_status():
     data = json.loads(REVIEWED_PUBLIC.read_text(encoding='utf-8'))
-    issues = validate_manifest_dict(data)
-    if issues:
-        pytest.xfail('Curated Irvine manifest needs Person 2 corrections: ' + repr(issues))
-    assert validate_bundle(REVIEWED_PUBLIC).manifest.kind == 'reviewed_public'
+    assert validate_manifest_dict(data) == []
+    manifest = validate_bundle(REVIEWED_PUBLIC).manifest
+    assert manifest.kind == 'reviewed_public'
+    assert manifest.profile_key == 'irvine-adu-detached-existing-dwelling'
+    assert (len(manifest.sources), len(manifest.passages), len(manifest.requirements),
+            len(manifest.milestones)) == (9, 29, 10, 6)
+    noted_ids = {p['id'] for p in data['passages'] if p.get('_review_note')}
+    assert noted_ids
+    needs_review = {str(p.id) for p in manifest.passages if p.review_status == 'needs_review'}
+    assert needs_review == noted_ids
+    assert len(needs_review) == sum(bool(p.get('_review_note')) for p in data['passages'])
+    for index in (2, 4):
+        clock = manifest.milestones[index].published_clock
+        assert clock is not None
+        assert clock.model_dump(mode='json', exclude_unset=True) == data['milestones'][index]['published_clock']
 
 
 def test_empty_reviewed_public_stub_is_valid_in_memory(base):

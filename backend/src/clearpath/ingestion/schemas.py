@@ -9,8 +9,9 @@ from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import (
-    AliasChoices, BaseModel, ConfigDict, Field, StrictBool, StrictInt, StringConstraints,
-    field_validator, model_validator,
+    AliasChoices, BaseModel, ConfigDict, Field, ModelWrapValidatorHandler, PrivateAttr,
+    SerializationInfo, SerializerFunctionWrapHandler, StrictBool, StrictFloat, StrictInt,
+    StringConstraints, field_validator, model_serializer, model_validator,
 )
 
 from clearpath.permits.predicates import ADU_FACT_SCHEMA
@@ -86,7 +87,7 @@ class Passage(StrictModel):
 class Pathway(StrictModel):
     key: Slug
     title: str
-    description: str
+    description: str = ''
     applies_if: dict
     citations: list[UUID]
 
@@ -118,8 +119,21 @@ class AssumedDays(StrictModel):
 
 
 class PublishedClock(StrictModel):
-    text: str
-    citations: list[UUID]
+    kind: Literal['city_service_target', 'statutory_clock', 'observed', 'assumption']
+    value: StrictInt | Annotated[StrictFloat, Field(allow_inf_nan=False)] | None
+    unit: str
+    scope: NonEmpty
+    qualifier: str | None = None
+    verification: str | None = None
+    citation: UUID | None = None
+    citations: list[UUID] = Field(default_factory=list)
+
+    @model_validator(mode='after')
+    def guidance_requires_citation(self) -> Self:
+        if (self.kind in ('city_service_target', 'statutory_clock')
+                and self.citation is None and not self.citations):
+            raise ValueError('published guidance requires a citation')
+        return self
 
 
 class Milestone(StrictModel):
@@ -135,11 +149,28 @@ class Milestone(StrictModel):
 class Conflict(StrictModel):
     model_config = ConfigDict(loc_by_alias=False)
 
-    rule_keys: Annotated[list[Slug], Field(min_length=1)]
-    source_keys: Annotated[list[SourceKey], Field(
+    rule_keys: Annotated[list[NonEmpty], Field(min_length=1)]
+    source_keys: Annotated[list[NonEmpty], Field(
         min_length=1, validation_alias=AliasChoices('source_keys', 'sources'),
     )]
-    summary: str
+    summary: NonEmpty
+    _source_field: str = PrivateAttr(default='source_keys')
+
+    @model_validator(mode='wrap')
+    @classmethod
+    def remember_source_field(cls, data: object, handler: ModelWrapValidatorHandler[Self]) -> Self:
+        conflict = handler(data)
+        if isinstance(data, dict) and 'sources' in data:
+            conflict._source_field = 'sources'
+        return conflict
+
+    @model_serializer(mode='wrap')
+    def preserve_source_field(self, handler: SerializerFunctionWrapHandler, info: SerializationInfo) -> dict:
+        payload = handler(self)
+        # Persistence uses round-trip mode; ordinary consumers keep the canonical field.
+        if info.round_trip and self._source_field == 'sources':
+            payload['sources'] = payload.pop('source_keys')
+        return payload
 
 
 class Manifest(StrictModel):

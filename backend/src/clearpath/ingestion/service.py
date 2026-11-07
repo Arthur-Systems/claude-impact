@@ -46,6 +46,8 @@ def _citation_owners(bundle: ValidatedBundle) -> Iterator[tuple[str, str, UUID]]
             published_clock = getattr(owner, "published_clock", None)
             if published_clock is not None:
                 citations.update(published_clock.citations)
+                if published_clock.citation is not None:
+                    citations.add(published_clock.citation)
             for passage_id in sorted(citations, key=str):
                 yield owner_type, owner.key, passage_id
 
@@ -87,7 +89,7 @@ def import_bundle(session: Session, bundle: ValidatedBundle) -> ImportResult:
     if no_op:
         counts = dict.fromkeys(counts, 0)
     else:
-        payload = manifest.model_dump(mode="json")
+        payload = manifest.model_dump(mode="json", round_trip=True)
         release = DatasetRelease(
             jurisdiction_id=jurisdiction.id, project_type=manifest.project_type,
             profile_key=manifest.profile_key, kind=manifest.kind, status="draft",
@@ -138,7 +140,7 @@ def import_bundle(session: Session, bundle: ValidatedBundle) -> ImportResult:
             session.add(MilestoneTemplate(
                 release_id=release.id, key=milestone.key, position=position, title=milestone.title,
                 predecessors=milestone.predecessors, requirement_keys=milestone.requirements,
-                published_clock=(milestone.published_clock.model_dump(mode="json")
+                published_clock=(milestone.published_clock.model_dump(mode="json", exclude_unset=True)
                                  if milestone.published_clock is not None else None),
                 assumed_days=(milestone.assumed_days.model_dump(mode="json")
                               if milestone.assumed_days is not None else None),
