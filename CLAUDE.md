@@ -20,6 +20,11 @@ Start with the backend: curated dataset
 ingestion, source-backed permit lookup, and project timelines. The selected stack
 is Python/FastAPI and PostgreSQL with pgvector; frontend work comes later.
 
+The user confirmed the dataset sequence: **Irvine ADU first; affordable
+multifamily rules next**, while supporting multiple independent projects from the
+first backend. The task plan is
+`docs/superpowers/plans/2026-11-07-clearpath-backend.md`; review it before execution.
+
 The proposed design is in
 `SPEC.md`. It requires user
 review before implementation. Do not treat proposed engineering defaults as

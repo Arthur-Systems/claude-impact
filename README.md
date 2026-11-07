@@ -32,6 +32,10 @@ Read the [ClearPath backend design](SPEC.md)
 for the proposed data model, API contracts, source verification, failure behavior,
 and acceptance checks. Its status is **proposed**, pending review before coding.
 
+The [backend implementation plan](docs/superpowers/plans/2026-11-07-clearpath-backend.md)
+breaks the work into six tested tasks. Confirmed order: **Irvine ADU first,
+affordable multifamily rules next**, with multiple projects supported from the start.
+
 ## Get the repository
 
 ```sh
