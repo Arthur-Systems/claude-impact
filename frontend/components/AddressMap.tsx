@@ -43,21 +43,21 @@ export default function AddressMap() {
 
   return (
     <>
-      <form onSubmit={onSubmit} className="addr-form">
+      <form onSubmit={onSubmit} className="inline-form">
         <div className="grow">
           <label htmlFor="addr">Project address</label>
           <input
             id="addr"
-            className="in full"
+            className="input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Example: 1 Civic Center Plaza, Irvine"
+            placeholder="1 Civic Center Plaza, Irvine"
             aria-describedby={error ? "addr-error" : undefined}
             aria-invalid={error ? true : undefined}
             autoComplete="street-address"
           />
         </div>
-        <button className="btn" type="submit" disabled={busy}>
+        <button className="btn btn-primary" type="submit" disabled={busy}>
           {busy ? "Finding..." : "Find on map"}
         </button>
       </form>
@@ -67,17 +67,12 @@ export default function AddressMap() {
         </p>
       )}
       {outsideIrvine && (
-        <p role="status" className="notice">
+        <p role="status" className="notice notice-warn notice-plain">
           This address looks like it is in {place?.city}. ClearPath currently supports Irvine only.
         </p>
       )}
-      <iframe
-        title={place ? `Map showing ${place.label}` : "Map of Irvine"}
-        src={src}
-        className="map-frame"
-        loading="lazy"
-      />
-      <p className="muted">
+      <iframe title={place ? `Map showing ${place.label}` : "Map of Irvine"} src={src} className="map-frame" loading="lazy" />
+      <p className="muted" style={{ margin: 0 }}>
         {place ? (
           <>
             {place.label}.{" "}
@@ -86,7 +81,7 @@ export default function AddressMap() {
             </a>
           </>
         ) : (
-          "Enter an address to place a pin. Map data from OpenStreetMap."
+          "Map data from OpenStreetMap."
         )}
       </p>
     </>

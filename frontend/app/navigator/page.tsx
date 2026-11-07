@@ -11,16 +11,19 @@ type Msg = { role: "user" | "ai"; text: string; sources?: Source[]; mock?: boole
 const PROMPTS = ["What do I still need before I submit?", "How long will approval take?", "What are the fees?", "Where do I apply?"];
 
 export default function Navigator() {
-  const { missingPriority, unmatched, place, readyCount } = useProject();
+  const { files, missingPriority, unmatched, place, readyCount } = useProject();
   const [msgs, setMsgs] = useState<Msg[]>([
     { role: "ai", text: "Hi, I can help with your Irvine ADU permit. Ask what documents you still need, how long approval takes, where to apply, or what it costs." },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "nearest" });
+    const el = logRef.current;
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
   }, [msgs, busy]);
 
   async function send(question: string) {
@@ -46,78 +49,91 @@ export default function Navigator() {
   const steps = [
     { label: "Confirm your project address", done: !!place, href: "/" },
     { label: `Upload required documents (${readyCount} of ${REQUIRED_DOCS.length} ready)`, done: missingPriority.length === 0, href: "/documents" },
-    { label: "Resolve flagged files", done: unmatched.length === 0, href: "/documents" },
+    { label: "Resolve flagged files", done: files.length > 0 && unmatched.length === 0, href: "/documents" },
     { label: "Submit through the IrvineReady portal", done: false, href: IRVINE_PORTAL, external: true },
   ];
   const nextIdx = steps.findIndex((s) => !s.done);
+  const started = msgs.length > 1;
 
   return (
     <>
-      <PageHeader
-        title="Navigator"
-        status="Ask anything about permits, forms, or fees. Answers link to their sources."
-        next={nextIdx >= 0 ? `${steps[nextIdx].label.toLowerCase()}.` : "you are ready to submit."}
-      />
+      <PageHeader title="Navigator" subtitle="Ask about permits, forms, or fees. Answers cite sources." />
 
       <div className="grid">
-        <section className="card chat">
-          <h2>Chat with the Navigator</h2>
-          <div className="log" role="log" aria-live="polite" aria-label="Conversation">
+        <section className="card chat col-8">
+          <h2 className="sr-only">Chat with the Navigator</h2>
+          <div className="log" ref={logRef} role="log" aria-live="polite" aria-label="Conversation">
             {msgs.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "u" : "a"}>
+              <div key={i} className={`bubble ${m.role === "user" ? "u" : "a"}`}>
                 {m.text}
                 {m.sources && m.sources.length > 0 && (
                   <div className="src">
                     {m.sources.map((s) => (
-                      <div key={s.url + s.label}>
-                        <a href={s.url} target="_blank" rel="noopener noreferrer">
-                          Source: {s.label}
-                        </a>
-                      </div>
+                      <a key={s.url + s.label} href={s.url} target="_blank" rel="noopener noreferrer">
+                        Source: {s.label}
+                      </a>
                     ))}
                   </div>
                 )}
                 {m.role === "ai" && i > 0 && (
-                  <div className="muted">{m.mock ? "Demo answer, backend not connected. " : ""}AI can make mistakes. Check the source or ask the city.</div>
+                  <div className="note">{m.mock ? "Demo answer, backend not connected. " : ""}AI can make mistakes. Check the source or ask the city.</div>
                 )}
               </div>
             ))}
-            {busy && <div className="a muted">Thinking...</div>}
-            <div ref={endRef} />
+            {busy && (
+              <div className="bubble a" aria-label="Navigator is typing">
+                <span className="typing" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="sr-only">Navigator is typing</span>
+              </div>
+            )}
           </div>
-          <div className="actions">
-            {PROMPTS.map((p) => (
-              <button key={p} className="btn2" onClick={() => send(p)} disabled={busy}>
-                {p}
-              </button>
-            ))}
-          </div>
-          <form onSubmit={onSubmit} className="addr-form">
-            <div className="grow">
-              <label htmlFor="q">Your question</label>
-              <input id="q" className="in full" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about permits, forms, fees" />
+          {!started && (
+            <div className="chips" aria-label="Suggested questions">
+              {PROMPTS.map((p) => (
+                <button key={p} className="btn btn-secondary chip" onClick={() => send(p)} disabled={busy}>
+                  {p}
+                </button>
+              ))}
             </div>
-            <button className="btn" type="submit" disabled={busy || !input.trim()}>
+          )}
+          <form onSubmit={onSubmit} className="inline-form composer">
+            <div className="grow">
+              <label htmlFor="q" className="sr-only">
+                Your question
+              </label>
+              <input id="q" className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about permits, forms, fees" />
+            </div>
+            <button className="btn btn-primary" type="submit" disabled={busy || !input.trim()}>
               Send
             </button>
           </form>
         </section>
 
-        <section className="card">
-          <h2>Your step by step guide</h2>
+        <section className="card col-4 guide">
+          <h2>Step by step</h2>
           <ol className="steps">
             {steps.map((s, i) => (
               <li key={s.label}>
                 <span>
-                  {s.external ? (
-                    <a href={s.href} target="_blank" rel="noopener noreferrer">
-                      {s.label}
-                    </a>
+                  {i === nextIdx ? (
+                    s.external ? (
+                      <a className="btn btn-ghost" href={s.href} target="_blank" rel="noopener noreferrer">
+                        {s.label}
+                      </a>
+                    ) : (
+                      <Link className="btn btn-ghost" href={s.href}>
+                        {s.label}
+                      </Link>
+                    )
                   ) : (
-                    <Link href={s.href}>{s.label}</Link>
+                    s.label
                   )}
                 </span>
-                {s.done ? <span className="chip ok">Done</span> : i === nextIdx ? <span className="chip miss">Do this next</span> : <span className="chip todo">To do</span>}
+                {s.done ? <span className="badge badge-done">Done</span> : i === nextIdx ? <span className="badge badge-next">Do this next</span> : <span className="badge">To do</span>}
               </li>
             ))}
           </ol>

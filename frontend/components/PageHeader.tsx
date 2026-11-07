@@ -1,27 +1,12 @@
 import { ReactNode } from "react";
 
-// Every page answers: what is happening, what can I do, what should I do next.
-export default function PageHeader({
-  title,
-  status,
-  next,
-  action,
-}: {
-  title: string;
-  status: string;
-  next: string;
-  action?: ReactNode;
-}) {
+// Title plus one short subtitle. Pages add at most one notice themselves.
+export default function PageHeader({ title, subtitle, children }: { title: string; subtitle: string; children?: ReactNode }) {
   return (
-    <>
+    <header className="page-head">
       <h1>{title}</h1>
-      <p className="status">{status}</p>
-      <div className="next">
-        <div>
-          <b>Next step:</b> {next}
-        </div>
-        {action}
-      </div>
-    </>
+      <p>{subtitle}</p>
+      {children}
+    </header>
   );
 }

@@ -24,9 +24,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ProjectProvider>
           <div className="shell">
             <Sidebar />
-            <main>
-              {children}
-              <footer className="site-footer">Prototype. Not legal advice. Confirm with the City of Irvine or a professional.</footer>
+            <main className="main">
+              <div className="main-inner">
+                {children}
+                <footer className="site-footer">Prototype. Not legal advice. Confirm with the City of Irvine or a professional.</footer>
+              </div>
             </main>
           </div>
         </ProjectProvider>
