@@ -1,12 +1,29 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PageHeader from "@/components/PageHeader";
+import { DataBanner, SourceChip } from "@/components/LiveData";
+import { PermitLookup, backendConfigured, permitLookup } from "@/lib/backend";
 import { DocId, REQUIRED_DOCS, useProject } from "@/lib/project-context";
+
+function StatusChip({ status }: { status: string }) {
+  if (status === "applies") return <span className="chip ok">Applies</span>;
+  if (status === "not_applicable") return <span className="chip todo">Not applicable</span>;
+  return <span className="chip miss">Unknown (needs information)</span>;
+}
 
 export default function Documents() {
   const { files, addFiles, reassign, removeFile, isReady, missingPriority, unmatched } = useProject();
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
+  const [live, setLive] = useState<PermitLookup | null>(null);
+  const [loading, setLoading] = useState(backendConfigured());
+  useEffect(() => {
+    if (!backendConfigured()) return;
+    permitLookup().then((r) => {
+      setLive(r && r.requirements?.length ? r : null);
+      setLoading(false);
+    });
+  }, []);
   const matched = files.filter((f) => f.matchedTo !== null);
 
   function handleFiles(list: FileList | null) {
@@ -35,9 +52,14 @@ export default function Documents() {
         }
       />
 
+      <DataBanner live={live !== null} loading={loading} />
+
       <section className="card block">
         <h2>Upload documents</h2>
         <p className="muted">PDF, JPG, or PNG. Scanned files are fine.</p>
+        <p className="muted">
+          <b>Demo feature:</b> file matching below uses the file name only (mock). Files are not read or sent anywhere.
+        </p>
         <input
           ref={inputRef}
           id="file-input"
@@ -127,8 +149,54 @@ export default function Documents() {
           ))}
         </section>
 
+        {live && (
+          <section className="card span-all">
+            <h2>Irvine checklist from the ClearPath API</h2>
+            <p className="muted">
+              Detached ADU on a lot with an existing house, City of Irvine (selected area, no specific property checked). {live.notice}
+            </p>
+            {live.requirements.map((req) => (
+              <div className="row" key={req.key}>
+                <span>
+                  <b>{req.title}</b> <span className="muted">({req.kind})</span>
+                  <br />
+                  <span className="muted">{req.description}</span>
+                  {req.status === "needs_information" && (
+                    <>
+                      <br />
+                      <span className="muted">
+                        Unknown:{" "}
+                        {req.missing_fact_keys.length
+                          ? `missing ${req.missing_fact_keys.join(", ")}`
+                          : req.conflict_ids.length
+                          ? "official sources disagree"
+                          : "more information needed"}
+                        .
+                      </span>
+                    </>
+                  )}
+                  {req.citations.map((c, i) => (
+                    <SourceChip key={i} c={c} />
+                  ))}
+                </span>
+                <StatusChip status={req.status} />
+              </div>
+            ))}
+            {live.conflicts?.length > 0 && (
+              <>
+                <h2>Source conflicts</h2>
+                {live.conflicts.map((c) => (
+                  <p className="muted" key={c.id}>
+                    {c.summary} <b>{c.effect}</b>
+                  </p>
+                ))}
+              </>
+            )}
+          </section>
+        )}
+
         <section className="card span-all">
-          <h2>Required checklist</h2>
+          <h2>{live ? "Upload checklist (demo, matched by file name)" : "Required checklist"}</h2>
           {REQUIRED_DOCS.map((d) => (
             <div className="row" key={d.id}>
               <span>{d.label}</span>

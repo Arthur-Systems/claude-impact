@@ -120,3 +120,8 @@ label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
 .tl { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: #ecebe5; margin: 8px 0 12px; }
 .tl i { display: block; height: 12px; }
 @media (max-width: 800px) { .addr-form { flex-wrap: wrap; } }
+.notice.live { background: var(--mint); color: var(--teal-dark); }
+.source { margin-top: 6px; }
+.source summary { cursor: pointer; list-style: none; }
+.source blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--teal); font-size: 14px; }
+.site-footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ecebe5; }
