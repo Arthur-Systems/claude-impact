@@ -656,22 +656,33 @@ def test_real_irvine_manifest_c01_reviewed_public():
     assert result["dataset_mode"] == "reviewed_public"
     assert result["profile_key"] == PROFILE
 
-    # C01 meets the pathway's rule, but Person 2 attached 3 source conflicts to the
-    # pathway, so it is not a definite answer (SPEC.md section 7): source_conflict.
+    # C01 meets the pathway's rule and no conflict names the pathway, so it applies.
     pathway_row = next(pw for pw in manifest["pathways"] if pw["key"] == "irvine_adu_standard")
     c01_facts = {"project_type": "adu", "adu_form": "detached", "existing_dwelling": True}
     assert evaluate_predicate(pathway_row["applies_if"], c01_facts, r.fact_schema).value is Tri.TRUE
     pathways = {pw["key"]: pw for pw in result["pathways"]}
     pw = pathways["irvine_adu_standard"]
-    assert pw["status"] == "needs_information"
-    assert pw["status_reason"] == "source_conflict"
+    assert pw["status"] == "applies"
+    assert pw["status_reason"] == "facts_met"
     assert pw["missing_fact_keys"] == []
-    pathway_conflicts = [c for c in result["conflicts"] if "irvine_adu_standard" in c["rule_keys"]]
-    assert len(pathway_conflicts) == sum("irvine_adu_standard" in c["rule_keys"] for c in manifest["conflicts"]) >= 1
-    assert all(c["effect"].startswith("Not a definitive answer") for c in pathway_conflicts)
-    # Requirements combine their own rule with the pathway's RULE (true here), not its status.
+    assert not any("irvine_adu_standard" in c["rule_keys"] for c in result["conflicts"])
+    # Conflicts naming only milestones pass through unchanged and change no checklist item.
+    requirement_keys = {r_["key"] for r_ in result["requirements"]}
+    milestone_keys = {m["key"] for m in manifest["milestones"]}
+    for out, src in zip(result["conflicts"], manifest["conflicts"]):
+        assert out["rule_keys"] == src["rule_keys"]
+        assert out["source_keys"] == src["source_keys"]
+        assert out["summary"] == src["summary"]
+        if set(src["rule_keys"]) <= milestone_keys:
+            assert out["effect"].startswith("Does not change any checklist item")
+            assert all(out["id"] not in r_["conflict_ids"] for r_ in result["requirements"])
+            assert not set(src["rule_keys"]) & requirement_keys
+    assert any(set(c["rule_keys"]) <= milestone_keys for c in manifest["conflicts"])
     statuses = {r_["key"]: r_["status"] for r_ in result["requirements"]}
-    assert all(v == "applies" for k, v in statuses.items() if k != "development-standards-checklist"), statuses
+    assert all(v == "applies" for k, v in statuses.items() if k not in {"development-standards-checklist", "signed-affidavit-esig"}), statuses
+    affidavit = by_key(result)["signed-affidavit-esig"]
+    assert (affidavit["status"], affidavit["status_reason"]) == ("needs_information", "source_conflict")
+    assert affidavit["conflict_ids"]
     assert result["requirements"]
     for r_ in result["requirements"]:
         assert len(r_["citations"]) >= 1, r_["key"]
