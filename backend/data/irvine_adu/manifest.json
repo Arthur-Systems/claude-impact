@@ -1,5 +1,7 @@
 {
   "schema_version": 1,
+  "profile_key": "irvine-adu-detached-existing-dwelling",
+  "kind": "reviewed_public",
   "jurisdiction": "irvine-ca",
   "project_type": "adu",
   "subtype": "detached_adu_existing_dwelling",

@@ -100,8 +100,7 @@ def test_reimport_is_noop(session, jurisdiction, bundle):
     assert release.status == "draft" and release.published_at is None
     assert release.jurisdiction_id == jurisdiction.id
     assert release.kind == bundle.manifest.kind
-    assert release.fact_schema == {key: value.model_dump(mode="json")
-                                   for key, value in bundle.manifest.fact_schema.items()}
+    assert release.fact_schema == bundle.manifest.fact_schema
     snapshot = session.scalars(select(SourceSnapshot)).one()
     assert snapshot.checked_at == datetime(2026, 11, 7, tzinfo=timezone.utc)
     passages = session.scalars(select(SourcePassage)).all()
@@ -219,6 +218,30 @@ def test_publish_rejects_unreviewed(session, jurisdiction, bundle, owner_type):
     assert release.status == "draft" and release.published_at is None
 
 
+def test_review_note_status_is_persisted_and_blocks_publication(session, jurisdiction, bundle):
+    from clearpath.ingestion.service import publish_release
+
+    data = bundle.manifest.model_dump(mode="json")
+    passage = data["passages"][0]
+    del passage["review_status"]
+    passage["_review_note"] = "SYNTHETIC: requires hand check"
+    reviewed_public = changed_bundle(bundle, **{**data, "kind": "reviewed_public"})
+    imported = import_bundle(session, reviewed_public)
+    stored = session.scalar(select(SourcePassage).where(
+        SourcePassage.release_id == imported.release_id,
+        SourcePassage.manifest_passage_id == UUID(passage["id"]),
+    ))
+    assert stored.review_status == "needs_review"
+    expected_owners = sorted(owner["key"]
+                             for collection in ("pathways", "requirements", "milestones")
+                             for owner in data[collection] if passage["id"] in owner["citations"])
+    with pytest.raises(DomainError) as error:
+        publish_release(session, imported.release_id, reviewed=True, mode="public")
+    assert error.value.code == "unreviewed_evidence"
+    assert error.value.details["owner_keys"] == expected_owners
+    assert session.get(DatasetRelease, imported.release_id).status == "draft"
+
+
 @pytest.mark.parametrize("empty", ["pathways", "requirements"])
 def test_publish_rejects_empty_release(session, jurisdiction, bundle, empty):
     from clearpath.ingestion.service import publish_release
@@ -296,26 +319,33 @@ def test_import_cities_idempotent(session):
     before = [(row.id, row.slug, row.name, row.state, row.timezone,
                row.permit_page_url, row.adu_checklist_url, row.fee_schedule_url, row.checked_at) for row in rows]
     assert all(row.state == "CA" and row.timezone == "America/Los_Angeles" for row in rows)
-    assert all(row.permit_page_url is None and row.adu_checklist_url is None
-               and row.fee_schedule_url is None and row.checked_at is None for row in rows)
+    registry = {city["name"]: city for city in json.loads(CITIES.read_text())["cities"]}
+    for row in rows:
+        city = registry[row.name]
+        assert (row.permit_page_url, row.adu_checklist_url, row.fee_schedule_url) == (
+            city["permit_page"], city["adu_checklist"], city["fee_schedule"],
+        )
+        expected_checked = (datetime.fromisoformat(city["checked"]).replace(tzinfo=timezone.utc)
+                            if city["checked"] is not None else None)
+        assert row.checked_at == expected_checked
     assert import_cities(session, CITIES) == 34
     session.expire_all()
     after = [(row.id, row.slug, row.name, row.state, row.timezone,
               row.permit_page_url, row.adu_checklist_url, row.fee_schedule_url, row.checked_at)
              for row in session.scalars(select(Jurisdiction).order_by(Jurisdiction.slug))]
     assert after == before
-    irvine = session.scalar(select(Jurisdiction).where(Jurisdiction.slug == "irvine-ca"))
-    irvine.permit_page_url = "https://example.org/synthetic-checked"
-    irvine.adu_checklist_url = "https://example.org/synthetic-checklist"
-    irvine.fee_schedule_url = "https://example.org/synthetic-fees"
-    irvine.checked_at = datetime(2026, 11, 7, tzinfo=timezone.utc)
+    unchecked = next(row for row in rows if row.checked_at is None)
+    unchecked.permit_page_url = "https://example.org/synthetic-checked"
+    unchecked.adu_checklist_url = "https://example.org/synthetic-checklist"
+    unchecked.fee_schedule_url = "https://example.org/synthetic-fees"
+    unchecked.checked_at = datetime(2026, 11, 7, tzinfo=timezone.utc)
     session.flush()
     assert import_cities(session, CITIES) == 34
-    session.refresh(irvine)
-    assert irvine.permit_page_url == "https://example.org/synthetic-checked"
-    assert irvine.adu_checklist_url == "https://example.org/synthetic-checklist"
-    assert irvine.fee_schedule_url == "https://example.org/synthetic-fees"
-    assert irvine.checked_at == datetime(2026, 11, 7, tzinfo=timezone.utc)
+    session.refresh(unchecked)
+    assert unchecked.permit_page_url == "https://example.org/synthetic-checked"
+    assert unchecked.adu_checklist_url == "https://example.org/synthetic-checklist"
+    assert unchecked.fee_schedule_url == "https://example.org/synthetic-fees"
+    assert unchecked.checked_at == datetime(2026, 11, 7, tzinfo=timezone.utc)
     assert commits == []
 
 

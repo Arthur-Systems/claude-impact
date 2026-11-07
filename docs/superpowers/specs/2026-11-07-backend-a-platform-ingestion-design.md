@@ -148,9 +148,10 @@ source or passage rows. Only `dataset_releases.status` and `published_at` change
 No owner, applicant, contact or upload columns exist. Person 5 may add columns in a later
 migration `0002_*`; they do not edit `0001`.
 
-## 5. Manifest contract (frozen at 11:45 with Person 2)
+## 5. Manifest contract (curated-manifest compatibility)
 
-Pydantic models in `ingestion/schemas.py`, all `extra="forbid"`. Example (values are
+Pydantic models in `ingestion/schemas.py` reject unknown non-note fields. Underscore
+curator notes are accepted and stripped before persistence. Example (values are
 placeholders, not facts):
 
 ```json
@@ -162,9 +163,10 @@ placeholders, not facts):
   "profile_key": "irvine-adu-detached-existing-dwelling",
   "curator_label": "Person 2, checked 2026-11-07",
   "fact_schema": {
-    "adu_form": {"type": "enum", "values": ["detached", "attached", "conversion", "jadu"]},
-    "existing_dwelling": {"type": "bool"},
-    "floor_area_sqft": {"type": "number"}
+    "project_type": "string",
+    "adu_form": "string",
+    "existing_dwelling": "boolean",
+    "floor_area_sqft": "number"
   },
   "sources": [{
     "key": "IRV-ADU",
@@ -216,8 +218,10 @@ placeholders, not facts):
 
 Field rules:
 
-- `kind`: `synthetic` or `reviewed_public`. `jurisdiction`, `profile_key`, and pathway,
-  requirement and milestone keys: lowercase slug `^[a-z0-9][a-z0-9_-]{0,79}$`.
+- `kind`: optional `synthetic` or `reviewed_public` (default `reviewed_public`);
+  `curator_label` defaults to `""`; `subtype` is optional text. `profile_key` is required,
+  never derived. `jurisdiction`, `profile_key`, and pathway, requirement and milestone
+  keys: lowercase slug `^[a-z0-9][a-z0-9_-]{0,79}$`.
   **Source keys are uppercase** `^[A-Z0-9][A-Z0-9_-]{0,79}$` (e.g. `IRV-ADU`), matching the
   team's existing source IDs. `jurisdiction` must match a seeded `jurisdictions.slug`; this is
   checked by `import_bundle` against the database (code `unknown_jurisdiction`), not by the
@@ -225,17 +229,25 @@ Field rules:
 - Diagnostics never contain submitted text: unknown field names are masked as `*`, and each
   issue carries a static `reason` (Pydantic error type or predicate reason) to help the curator.
 - `NaN`/`Infinity` are rejected anywhere in the manifest (PostgreSQL JSONB cannot store them).
-- `fact_schema` types: `bool`, `number` (int or float), `enum` (with `values`), `string`.
+- `fact_schema` maps fact names to `string`, `boolean`, or `number`, as used by Person 4's
+  `permits/predicates.py`. Omitted for ADU, it defaults to the shared `ADU_FACT_SCHEMA`
+  as plain strings; other project types require an explicit schema. No enum/FactSpec format.
+- Any object key starting with `_` is accepted at any depth and ignored for persistence;
+  note keys/values never appear in diagnostics. Hashing still covers the raw parsed JSON.
 - `sources[].verification_depth`: `full_text_read`, `title_only` or `blocked`. `sha256`: null or
   64 lowercase hex characters (null means "not hashed", shown as such in provenance).
   `url` must be `https://` with no credentials.
-- `passages[].review_status`: `reviewed`, `needs_review` or `failed`. Garbled PDF text is
-  `needs_review` until a person types a checked excerpt.
+- `passages[].review_status`: `reviewed`, `needs_review` or `failed`. If omitted, a non-empty
+  `_review_note` means `needs_review`; otherwise `reviewed`. Explicit status always wins.
+  Garbled PDF text stays `needs_review` until a person checks the excerpt.
 - `requirements[].kind`: `permit`, `document` or `review`.
-- `milestones[].assumed_days`: null, or `{"min":int|null,"max":int|null,"label":"ASSUMPTION","rationale":str}`;
-  `label` must equal `ASSUMPTION`; `min ≤ max` when both set.
+- `milestones[].assumed_days`: null, or `{"min":int|null,"max":int|null,"label":"ASSUMPTION","rationale":str|null}`;
+  `label` must equal `ASSUMPTION`; `min ≤ max` when both set. Rationale may be null/omitted
+  only when both bounds are null; any set bound requires a non-empty rationale.
   `published_clock`: null or `{"text":str,"citations":[uuid]}`, displayed only, never computed.
-- `conflicts[]`: `{"rule_keys":[str],"source_keys":[str],"summary":str}`.
+- `conflicts[]`: `{"rule_keys":[str],"source_keys":[str],"summary":str}`; `sources` aliases
+  `source_keys` (exactly one spelling). References must resolve to pathways/requirements
+  and sources respectively; milestone references are not part of this contract.
 - Milestone `position` is its index in the `milestones` array.
 
 ### Predicate grammar
@@ -249,10 +261,12 @@ A predicate is a JSON object with exactly one key:
 | `eq`, `lt`, `lte`, `gt`, `gte` | `[fact_name, literal]` |
 | `in` | `[fact_name, [literal, ...]]` |
 
-`permits/predicates.py` exports `ALLOWED_OPS` and `validate_predicate(pred, fact_schema)`.
-Validation checks shape, that `fact_name` exists in `fact_schema`, and that literals match the
-fact's type (enum literals must be in `values`; `lt/lte/gt/gte` only on `number`). Evaluation
-(three-valued logic) is Person 4's `evaluate_predicate` in the same module. Nothing is `eval`'d.
+`permits/predicates.py` is Person 4's shared validator/evaluator.
+`validate_predicate(pred, fact_schema)` checks shape, declared facts, scalar literal types,
+number-only ordering, and nesting up to `MAX_DEPTH=20`. `PredicateValidationError` maps
+to `invalid_predicate`, with the owning `applies_if` prefix replacing `$` in its path
+and its static `code` as the issue reason; messages are not echoed. `validate_facts` and
+three-valued `evaluate_predicate` use the same schema. Nothing is `eval`'d.
 
 ## 6. Validation, import and publish (plan Task 2)
 

@@ -11,7 +11,7 @@ from typing import NoReturn, get_args, get_origin
 from pydantic import BaseModel, ValidationError
 
 from clearpath.ingestion.schemas import Manifest
-from clearpath.permits.predicates import PredicateError, validate_predicate
+from clearpath.permits.predicates import PredicateValidationError, validate_predicate
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 ALLOWED_ROOTS = (BACKEND_DIR / 'data', BACKEND_DIR / 'tests' / 'fixtures')
@@ -114,9 +114,10 @@ def validate_manifest_dict(data: dict) -> list[ValidationIssue]:
                 if manifest.kind == 'reviewed_public' and not owner.citations:
                     issues.append(ValidationIssue('missing_citation', f'{path}.citations'))
                 try:
-                    validate_predicate(owner.applies_if, manifest.fact_schema, f'{path}.applies_if')
-                except PredicateError as error:
-                    issues.append(ValidationIssue('invalid_predicate', error.path, error.reason))
+                    validate_predicate(owner.applies_if, manifest.fact_schema)
+                except PredicateValidationError as error:
+                    predicate_path = f'{path}.applies_if' + error.path.removeprefix('$')
+                    issues.append(ValidationIssue('invalid_predicate', predicate_path, error.code))
             if name == 'requirements':
                 references(owner.pathways, keys['pathways'], f'{path}.pathways')
             if name == 'milestones':

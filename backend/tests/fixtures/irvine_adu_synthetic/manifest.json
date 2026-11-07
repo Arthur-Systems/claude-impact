@@ -6,21 +6,10 @@
   "profile_key": "irvine-adu-detached-existing-dwelling",
   "curator_label": "SYNTHETIC TEST DATA, not real Irvine rules",
   "fact_schema": {
-    "adu_form": {
-      "type": "enum",
-      "values": [
-        "detached",
-        "attached",
-        "conversion",
-        "jadu"
-      ]
-    },
-    "existing_dwelling": {
-      "type": "bool"
-    },
-    "floor_area_sqft": {
-      "type": "number"
-    }
+    "adu_form": "string",
+    "existing_dwelling": "boolean",
+    "floor_area_sqft": "number",
+    "project_type": "string"
   },
   "sources": [
     {
