@@ -39,6 +39,11 @@ def test_expected_files_exist():
         "permit_lookup_needs_information.json",
         "permit_lookup_rule_coverage_unavailable.json",
         "error_envelope.json",
+        # Person 5: projects and timeline
+        "project_created.json",
+        "requirement_patch.json",
+        "timeline.json",
+        "milestone_event_conflict_409.json",
     }
 
 
@@ -56,7 +61,7 @@ def test_no_real_urls(path):
         assert "http://" not in s and "https://" not in s, s
 
 
-@pytest.mark.parametrize("path", [p for p in FILES if p.name != "error_envelope.json"], ids=lambda p: p.name)
+@pytest.mark.parametrize("path", [p for p in FILES if load(p)["status_code"] < 400], ids=lambda p: p.name)
 def test_success_files_are_marked_synthetic(path):
     response = load(path)["response"]
     assert response["dataset_mode"] == "synthetic"
