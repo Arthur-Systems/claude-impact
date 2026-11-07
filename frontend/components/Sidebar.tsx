@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useProject } from "@/lib/project-context";
 import OcLogo from "./OcLogo";
+import Mark from "./Mark";
 
 const NAV = [
   { href: "/", label: "Overview" },
@@ -19,7 +20,10 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <p className="brand">ClearPath</p>
+      <p className="brand">
+        <Mark size={28} />
+        ClearPath
+      </p>
       <nav aria-label="Main">
         {NAV.map((item) => (
           <Link
