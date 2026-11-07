@@ -4,18 +4,29 @@ A predicate is plain JSON-like data, for example::
 
     {"all": [{"eq": ["adu_form", "detached"]}, {"lt": ["floor_area_sqft", 1200]}]}
 
-Supported operators: ``all``, ``any``, ``not``, ``eq``, ``in``, ``lt``, ``lte``, ``gt``,
-``gte``. The left operand of a comparison is always a fact key from the fact schema; the
-right operand is always a literal. Predicates are interpreted by a fixed dispatch over
-known operator names. Nothing in the input is ever run as code or turned into a query.
+Supported operators (``ALLOWED_OPS``): ``all``, ``any``, ``not``, ``eq``, ``in``, ``lt``,
+``lte``, ``gt``, ``gte``. The left operand of a comparison is always a fact key from the
+fact schema; the right operand is always a literal. Predicates are interpreted by a fixed
+dispatch over known operator names. Nothing in the input is ever run as code or turned
+into a query.
 
 Evaluation has three values. A fact that is absent or ``None`` is UNKNOWN, never false,
 so a missing fact can produce ``needs_information`` but never ``not_applicable``.
 
-Error messages name operators, fact keys, paths and type names. They never include a
-fact value or a literal value. Persons 3 (importer) and 5 (projects) may import
-``validate_predicate`` and ``validate_facts``; this module has no side effects and uses
-only the standard library.
+Fact schemas may be written in any of these forms, mixed freely:
+
+* ``{"floor_area_sqft": "number"}`` or ``FactType.NUMBER``; types ``string``,
+  ``boolean`` (alias ``bool``) and ``number``
+* the manifest form ``{"adu_form": {"type": "enum", "values": ["detached", ...]}}`` with
+  types ``bool``, ``number``, ``string`` or ``enum``
+* objects with ``.type`` and ``.values`` attributes, such as the importer's Pydantic
+  ``FactSpec``
+
+Error paths follow the importer's convention: they name the bad node, e.g.
+``requirements[2].applies_if.all[0]``. Error messages and paths contain operators, fact
+keys, indexes and type names, never a fact value or a literal value. This module is a
+drop-in replacement for the importer's validator: ``except PredicateError`` catches every
+error raised here. It has no side effects and uses only the standard library.
 """
 
 from __future__ import annotations
@@ -28,8 +39,10 @@ from typing import Any, Mapping
 
 __all__ = [
     "ADU_FACT_SCHEMA",
+    "ALLOWED_OPS",
     "MAX_DEPTH",
     "FactType",
+    "PredicateError",
     "PredicateResult",
     "PredicateValidationError",
     "Tri",
@@ -42,13 +55,27 @@ __all__ = [
 MAX_DEPTH = 20
 """Deepest allowed predicate nesting. The root node is level 1."""
 
+DEFAULT_PATH = "applies_if"
+
+ALLOWED_OPS = frozenset({"all", "any", "not", "eq", "in", "lt", "lte", "gt", "gte"})
+
 
 class FactType(str, Enum):
-    """Type of a rule fact. String values match what a manifest's fact schema uses."""
+    """Type of a rule fact."""
 
     STRING = "string"
     BOOLEAN = "boolean"
     NUMBER = "number"
+    ENUM = "enum"
+
+
+_TYPE_NAMES = {
+    "string": FactType.STRING,
+    "boolean": FactType.BOOLEAN,
+    "bool": FactType.BOOLEAN,
+    "number": FactType.NUMBER,
+    "enum": FactType.ENUM,
+}
 
 
 ADU_FACT_SCHEMA: Mapping[str, FactType] = MappingProxyType(
@@ -75,27 +102,32 @@ class PredicateResult:
     """Sorted fact keys whose absence keeps the result UNKNOWN. Empty when decided."""
 
 
-class PredicateValidationError(ValueError):
-    """A predicate, fact set or fact schema is malformed.
+class PredicateError(ValueError):
+    """Base error for an invalid predicate, fact set or fact schema.
 
-    ``code`` is a short machine-readable reason. ``path`` locates the bad node, e.g.
-    ``$.all[1].lt``. Neither the message nor the path contains user-supplied values.
+    ``path`` locates the bad node (e.g. ``requirements[2].applies_if.all[0]``), ``code``
+    is a short machine-readable reason. Neither contains user-supplied values.
     """
 
-    def __init__(self, code: str, message: str, path: str = "$") -> None:
+    def __init__(self, path: str = DEFAULT_PATH, code: str = "invalid_predicate", message: str = "invalid predicate"):
         super().__init__(f"{code}: {message} (at {path})")
+        self.path = path
         self.code = code
         self.message = message
-        self.path = path
 
     def __repr__(self) -> str:
-        return f"PredicateValidationError(code={self.code!r}, path={self.path!r})"
+        return f"{type(self).__name__}(code={self.code!r}, path={self.path!r})"
+
+
+class PredicateValidationError(PredicateError):
+    """The error raised by this module. Signature: ``(code, message, path)``."""
+
+    def __init__(self, code: str, message: str, path: str = DEFAULT_PATH) -> None:
+        super().__init__(path=path, code=code, message=message)
 
 
 _BOOLEAN_OPS = ("all", "any")
-_COMPARISON_OPS = ("eq", "in", "lt", "lte", "gt", "gte")
 _ORDERING_OPS = ("lt", "lte", "gt", "gte")
-_OPERATORS = frozenset(_BOOLEAN_OPS + ("not",) + _COMPARISON_OPS)
 
 _STATUS = {
     Tri.TRUE: "applies",
@@ -105,35 +137,75 @@ _STATUS = {
 
 
 # --------------------------------------------------------------------------------------
-# Schema and value type checks
+# Fact schema normalization
 # --------------------------------------------------------------------------------------
 
 
-def _normalize_schema(fact_schema: Any) -> dict[str, FactType]:
+@dataclass(frozen=True)
+class _Spec:
+    kind: FactType
+    values: frozenset[str] | None = None
+
+
+def _schema_error(message: str) -> PredicateValidationError:
+    return PredicateValidationError("invalid_fact_schema", message, "fact_schema")
+
+
+def _spec_parts(key: str, spec: Any) -> tuple[Any, Any]:
+    """Return (type, values) from a type name, a mapping, or a FactSpec-like object."""
+    if isinstance(spec, str):  # includes FactType
+        return spec, None
+    if isinstance(spec, Mapping):
+        if "type" not in spec or not set(spec) <= {"type", "values"}:
+            raise _schema_error(f"fact {key!r} needs 'type' and only 'type'/'values'")
+        return spec["type"], spec.get("values")
+    try:
+        return spec.type, spec.values
+    except AttributeError:
+        raise _schema_error(f"fact {key!r} has an unsupported spec") from None
+
+
+def _normalize_spec(key: str, spec: Any) -> _Spec:
+    raw_type, values = _spec_parts(key, spec)
+    kind = raw_type if isinstance(raw_type, FactType) else _TYPE_NAMES.get(raw_type) if isinstance(raw_type, str) else None
+    if kind is None:
+        raise _schema_error(f"fact {key!r} must have type 'string', 'bool', 'number' or 'enum'")
+    if kind is FactType.ENUM:
+        if (
+            not isinstance(values, (list, tuple))
+            or not values
+            or not all(isinstance(v, str) for v in values)
+        ):
+            raise _schema_error(f"enum fact {key!r} needs a non-empty list of string values")
+        return _Spec(kind, frozenset(values))
+    if values is not None:
+        raise _schema_error(f"fact {key!r}: values are only allowed for enum facts")
+    return _Spec(kind)
+
+
+def _normalize_schema(fact_schema: Any) -> dict[str, _Spec]:
     if not isinstance(fact_schema, Mapping):
-        raise PredicateValidationError("invalid_fact_schema", "fact schema must be a mapping")
-    normalized: dict[str, FactType] = {}
-    for key, kind in fact_schema.items():
+        raise _schema_error("fact schema must be a mapping")
+    normalized: dict[str, _Spec] = {}
+    for key, spec in fact_schema.items():
         if not isinstance(key, str) or not key:
-            raise PredicateValidationError("invalid_fact_schema", "fact keys must be non-empty strings")
-        if isinstance(kind, FactType):
-            normalized[key] = kind
-            continue
-        if not isinstance(kind, str) or kind not in {t.value for t in FactType}:
-            raise PredicateValidationError(
-                "invalid_fact_schema",
-                f"fact {key!r} must have type 'string', 'boolean' or 'number'",
-            )
-        normalized[key] = FactType(kind)
+            raise _schema_error("fact keys must be non-empty strings")
+        normalized[key] = _normalize_spec(key, spec)
     return normalized
+
+
+# --------------------------------------------------------------------------------------
+# Value type checks
+# --------------------------------------------------------------------------------------
 
 
 def _type_name(value: Any) -> str:
     return type(value).__name__
 
 
-def _check_value(value: Any, kind: FactType, *, bad_type_code: str, what: str, path: str) -> None:
-    """Raise unless ``value`` (never None here) matches ``kind``. Messages omit the value."""
+def _check_value(value: Any, spec: _Spec, *, bad_type_code: str, what: str, path: str) -> None:
+    """Raise unless ``value`` (never None here) matches ``spec``. Messages omit the value."""
+    kind = spec.kind
     if kind is FactType.NUMBER:
         if isinstance(value, bool):
             raise PredicateValidationError("bool_as_number", f"{what} must be a number, not a boolean", path)
@@ -144,9 +216,11 @@ def _check_value(value: Any, kind: FactType, *, bad_type_code: str, what: str, p
     elif kind is FactType.BOOLEAN:
         if not isinstance(value, bool):
             raise PredicateValidationError(bad_type_code, f"{what} must be a boolean, got {_type_name(value)}", path)
-    elif kind is FactType.STRING:
+    else:  # STRING or ENUM
         if not isinstance(value, str):
             raise PredicateValidationError(bad_type_code, f"{what} must be a string, got {_type_name(value)}", path)
+        if kind is FactType.ENUM and value not in spec.values:
+            raise PredicateValidationError("enum_value_not_allowed", f"{what} is not one of the allowed values", path)
 
 
 # --------------------------------------------------------------------------------------
@@ -160,24 +234,23 @@ def _operator_of(node: Any, path: str) -> tuple[str, Any]:
     if len(node) != 1:
         raise PredicateValidationError("multiple_operators", "a predicate node must have exactly one operator", path)
     ((op, operand),) = node.items()
-    if not isinstance(op, str) or op not in _OPERATORS:
+    if not isinstance(op, str) or op not in ALLOWED_OPS:
         raise PredicateValidationError("unknown_operator", "unsupported operator", path)
     return op, operand
 
 
-def _validate_node(node: Any, schema: dict[str, FactType], path: str, depth: int) -> None:
+def _validate_node(node: Any, schema: dict[str, _Spec], path: str, depth: int) -> None:
     if depth > MAX_DEPTH:
         raise PredicateValidationError("max_depth_exceeded", f"predicate nesting exceeds {MAX_DEPTH} levels", path)
     op, operand = _operator_of(node, path)
-    here = f"{path}.{op}"
 
     if op in _BOOLEAN_OPS:
         if not isinstance(operand, list):
-            raise PredicateValidationError("invalid_operands", f"'{op}' takes a list of predicates", here)
+            raise PredicateValidationError("invalid_operands", f"'{op}' takes a list of predicates", path)
         if not operand:
-            raise PredicateValidationError("empty_operands", f"'{op}' needs at least one predicate", here)
+            raise PredicateValidationError("empty_operands", f"'{op}' needs at least one predicate", path)
         for index, child in enumerate(operand):
-            child_path = f"{here}[{index}]"
+            child_path = f"{path}.{op}[{index}]"
             if not isinstance(child, dict):
                 raise PredicateValidationError("invalid_operands", f"'{op}' items must be predicate objects", child_path)
             _validate_node(child, schema, child_path, depth + 1)
@@ -185,46 +258,49 @@ def _validate_node(node: Any, schema: dict[str, FactType], path: str, depth: int
 
     if op == "not":
         if not isinstance(operand, dict):
-            raise PredicateValidationError("invalid_operands", "'not' takes a single predicate object", here)
-        _validate_node(operand, schema, here, depth + 1)
+            raise PredicateValidationError("invalid_operands", "'not' takes a single predicate object", path)
+        _validate_node(operand, schema, f"{path}.not", depth + 1)
         return
 
     # Comparison: [fact_key, literal]
     if not isinstance(operand, list) or len(operand) != 2:
-        raise PredicateValidationError("invalid_operands", f"'{op}' takes [fact_key, value]", here)
+        raise PredicateValidationError("invalid_operands", f"'{op}' takes [fact_key, value]", path)
     key, literal = operand
     if not isinstance(key, str):
-        raise PredicateValidationError("invalid_fact_reference", f"'{op}' left operand must be a fact key string", here)
+        raise PredicateValidationError("invalid_fact_reference", f"'{op}' left operand must be a fact key string", path)
     if key not in schema:
-        raise PredicateValidationError("unknown_fact", "fact key is not declared in the fact schema", here)
-    kind = schema[key]
+        raise PredicateValidationError("unknown_fact", "fact key is not declared in the fact schema", path)
+    spec = schema[key]
     what = f"'{op}' value for fact {key!r}"
 
     if op in _ORDERING_OPS:
-        if kind is not FactType.NUMBER:
+        if spec.kind is not FactType.NUMBER:
             raise PredicateValidationError(
-                "non_numeric_comparison", f"'{op}' needs a number fact; {key!r} is {kind.value}", here
+                "non_numeric_comparison", f"'{op}' needs a number fact; {key!r} is {spec.kind.value}", path
             )
-        _check_value(literal, kind, bad_type_code="type_mismatch", what=what, path=here)
+        _check_value(literal, spec, bad_type_code="type_mismatch", what=what, path=path)
     elif op == "in":
         if not isinstance(literal, list):
-            raise PredicateValidationError("invalid_in_list", "'in' right operand must be a list", here)
+            raise PredicateValidationError("invalid_in_list", "'in' right operand must be a list", path)
         if not literal:
-            raise PredicateValidationError("empty_in_list", "'in' list must not be empty", here)
-        for index, item in enumerate(literal):
+            raise PredicateValidationError("empty_in_list", "'in' list must not be empty", path)
+        for item in literal:
             if item is None:
-                raise PredicateValidationError("type_mismatch", f"{what} must not be null", f"{here}[{index}]")
-            _check_value(item, kind, bad_type_code="type_mismatch", what=what, path=f"{here}[{index}]")
+                raise PredicateValidationError("type_mismatch", f"{what} must not be null", path)
+            _check_value(item, spec, bad_type_code="type_mismatch", what=what, path=path)
     else:  # eq
         if literal is None:
-            raise PredicateValidationError("type_mismatch", f"{what} must not be null", here)
-        _check_value(literal, kind, bad_type_code="type_mismatch", what=what, path=here)
+            raise PredicateValidationError("type_mismatch", f"{what} must not be null", path)
+        _check_value(literal, spec, bad_type_code="type_mismatch", what=what, path=path)
 
 
-def validate_predicate(predicate: Any, fact_schema: Mapping[str, Any]) -> None:
-    """Raise PredicateValidationError if ``predicate`` is not valid for ``fact_schema``."""
+def validate_predicate(predicate: Any, fact_schema: Mapping[str, Any], path: str = DEFAULT_PATH) -> None:
+    """Raise PredicateValidationError if ``predicate`` is not valid for ``fact_schema``.
+
+    ``path`` prefixes error paths, e.g. ``f"requirements[{i}].applies_if"``.
+    """
     schema = _normalize_schema(fact_schema)
-    _validate_node(predicate, schema, "$", 1)
+    _validate_node(predicate, schema, path, 1)
 
 
 # --------------------------------------------------------------------------------------
@@ -232,7 +308,7 @@ def validate_predicate(predicate: Any, fact_schema: Mapping[str, Any]) -> None:
 # --------------------------------------------------------------------------------------
 
 
-def _validate_facts(facts: Any, schema: dict[str, FactType]) -> None:
+def _validate_facts(facts: Any, schema: dict[str, _Spec]) -> None:
     if not isinstance(facts, Mapping):
         raise PredicateValidationError("invalid_facts", "facts must be an object of fact_key: value", "facts")
     for key, value in facts.items():
@@ -309,7 +385,7 @@ def _evaluate_node(node: dict, facts: Mapping[str, Any]) -> tuple[Tri, frozenset
 
 
 def evaluate_predicate(
-    predicate: Any, facts: Mapping[str, Any], fact_schema: Mapping[str, Any]
+    predicate: Any, facts: Mapping[str, Any], fact_schema: Mapping[str, Any], path: str = DEFAULT_PATH
 ) -> PredicateResult:
     """Evaluate ``predicate`` against ``facts`` with true/false/unknown logic.
 
@@ -317,7 +393,7 @@ def evaluate_predicate(
     PredicateValidationError on any problem. Absent or ``None`` facts are UNKNOWN.
     """
     schema = _normalize_schema(fact_schema)
-    _validate_node(predicate, schema, "$", 1)
+    _validate_node(predicate, schema, path, 1)
     _validate_facts(facts, schema)
     value, missing = _evaluate_node(predicate, facts)
     if value is not Tri.UNKNOWN:

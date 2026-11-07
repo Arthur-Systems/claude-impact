@@ -1,0 +1,38 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/projects/c1ea0001-0000-4000-8000-000000000001/milestone-events",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": {
+      "milestone_key": "plan_review",
+      "kind": "complete",
+      "occurred_at": "2026-11-07T18:00:00Z",
+      "expected_revision": 10
+    }
+  },
+  "status_code": 409,
+  "response": {
+    "example": true,
+    "error": {
+      "code": "milestone_transition_conflict",
+      "message": "Plan review can't be completed yet. It hasn't started, and completeness review isn't complete.",
+      "details": {
+        "project_id": "c1ea0001-0000-4000-8000-000000000001",
+        "milestone_key": "plan_review",
+        "event_kind": "complete",
+        "current_state": "not_started",
+        "allowed_prior_states": [
+          "in_progress"
+        ],
+        "unmet_predecessor_keys": [
+          "completeness_review"
+        ],
+        "unready_requirement_keys": [],
+        "current_revision": 10
+      }
+    },
+    "request_id": "00000000-0000-4000-8000-000000000123"
+  }
+}

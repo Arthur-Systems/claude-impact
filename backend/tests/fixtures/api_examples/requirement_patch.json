@@ -1,0 +1,309 @@
+{
+  "request": {
+    "method": "PATCH",
+    "path": "/api/v1/projects/c1ea0001-0000-4000-8000-000000000001/requirements/developer_deposit_case_setup",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": {
+      "status": "ready",
+      "expected_revision": 9
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "event": {
+      "id": "c1ea0005-0000-4000-8000-000000000010",
+      "event_type": "requirement_status_changed",
+      "revision": 10,
+      "occurred_at": "2026-11-07T18:12:00Z",
+      "recorded_at": "2026-11-07T18:12:00Z",
+      "payload": {
+        "requirement_key": "developer_deposit_case_setup",
+        "from_status": "in_progress",
+        "to_status": "ready"
+      }
+    },
+    "project": {
+      "id": "c1ea0001-0000-4000-8000-000000000001",
+      "project_label": "Backyard ADU demo",
+      "project_type": "adu",
+      "subtype": "detached_adu_existing_dwelling",
+      "jurisdiction": "irvine-ca",
+      "state": "active",
+      "coverage_status": "configured",
+      "coverage_reason": null,
+      "release": {
+        "id": "c1ea0002-0000-4000-8000-000000000001",
+        "jurisdiction": "irvine-ca",
+        "project_type": "adu",
+        "profile_key": "irvine-adu-detached-existing-dwelling",
+        "content_hash": "sha256:b672c666f11da25800f24680ecb40b199b95e16c89af0be8da594288ef1b016b",
+        "schema_version": "1",
+        "dataset_mode": "synthetic",
+        "published_at": "2026-11-07T15:00:00Z"
+      },
+      "pathway": {
+        "key": "irvine_adu_standard",
+        "title": "Irvine ADU building permit (standard plan check)",
+        "citation_ids": [
+          "c1ea0004-0000-4000-8000-000000000001"
+        ]
+      },
+      "declared_location": {
+        "mode": "selected_area",
+        "area_key": "irvine-ca-citywide",
+        "resolution_status": "selected_area"
+      },
+      "proposed_unit_count": 1,
+      "affordability_goal": "unspecified",
+      "affordable_unit_count_goal": null,
+      "affordability_verification": "not_assessed",
+      "rule_facts": {
+        "adu_form": "detached",
+        "existing_dwelling": true
+      },
+      "missing_fact_keys": [
+        "floor_area_sqft"
+      ],
+      "checklist": [
+        {
+          "key": "building_permit_application",
+          "kind": "document",
+          "title": "Building Permit Application (ADU)",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-21T17:10:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "adu_development_standards_checklist",
+          "kind": "document",
+          "title": "ADU Development Standards Checklist (Site Plan)",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-23T18:00:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "adu_verification_form",
+          "kind": "document",
+          "title": "ADU Verification Form",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-24T16:30:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "ocfa_residential_plan_submittal_criteria",
+          "kind": "document",
+          "title": "Fire Authority Plan Submittal Criteria (Residential)",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-27T19:05:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "owner_acknowledgments",
+          "kind": "document",
+          "title": "Owner Acknowledgments",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-28T17:45:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "architectural_structural_plan_set",
+          "kind": "document",
+          "title": "Architectural / structural plan set with City Standard Title Sheet",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-30T21:00:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "site_plan",
+          "kind": "document",
+          "title": "Site plan (property lines, setbacks, easements, parking, utilities)",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-30T21:05:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "title24_energy_calculations",
+          "kind": "document",
+          "title": "Title 24 energy calculations",
+          "milestone_keys": [
+            "application_preparation"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-10-31T18:20:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "fee_determinations_school_transportation",
+          "kind": "document",
+          "title": "Fee Determinations: School Facilities and Transportation Corridor",
+          "milestone_keys": [
+            "fee_payment_readiness"
+          ],
+          "applicability": "needs_information",
+          "missing_fact_keys": [
+            "floor_area_sqft"
+          ],
+          "required_for_preparation": true,
+          "status": "not_started",
+          "updated_at": "2026-11-03T16:00:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ]
+        },
+        {
+          "key": "developer_deposit_case_setup",
+          "kind": "document",
+          "title": "Developer Deposit Case Set-Up form",
+          "milestone_keys": [
+            "fee_payment_readiness"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "ready",
+          "updated_at": "2026-11-07T18:12:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ]
+        },
+        {
+          "key": "residential_takeoff_sheet",
+          "kind": "document",
+          "title": "Residential Take-Off Sheet (fixture counts)",
+          "milestone_keys": [
+            "fee_payment_readiness"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "in_progress",
+          "updated_at": "2026-11-05T20:40:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ]
+        },
+        {
+          "key": "adu_covenant",
+          "kind": "document",
+          "title": "ADU covenant (notarized; recorded later with County Recorder)",
+          "milestone_keys": [
+            "permit_issuance"
+          ],
+          "applicability": "applies",
+          "missing_fact_keys": [],
+          "required_for_preparation": true,
+          "status": "not_started",
+          "updated_at": "2026-11-03T16:00:00Z",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        }
+      ],
+      "progress": {
+        "completed": 2,
+        "total": 6,
+        "percent": 33.3
+      },
+      "revision": 10,
+      "created_at": "2026-10-20T15:30:00Z",
+      "updated_at": "2026-11-07T18:12:00Z",
+      "warnings": [
+        {
+          "code": "synthetic_dataset",
+          "message": "Demo release uses synthetic, unreviewed data. Do not rely on it for a real permit."
+        },
+        {
+          "code": "property_not_verified",
+          "message": "Location is a selected area (City of Irvine). No specific property was checked."
+        },
+        {
+          "code": "self_reported_status",
+          "message": "Ready means you marked it prepared. It does not mean the city accepted it."
+        }
+      ]
+    },
+    "warnings": [
+      {
+        "code": "synthetic_dataset",
+        "message": "Demo release uses synthetic, unreviewed data. Do not rely on it for a real permit."
+      },
+      {
+        "code": "property_not_verified",
+        "message": "Location is a selected area (City of Irvine). No specific property was checked."
+      },
+      {
+        "code": "self_reported_status",
+        "message": "Ready means you marked it prepared. It does not mean the city accepted it."
+      },
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      }
+    ]
+  }
+}

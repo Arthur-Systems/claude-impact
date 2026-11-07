@@ -50,6 +50,8 @@ class DatasetRelease(UUIDPrimaryKey, Base):
     curator_label: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, server_default=text("now()"))
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Normalized manifest JSON (SPEC section 5) read by the lookup service; NULL for older imports.
+    manifest: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
 
 class ReleaseContent:

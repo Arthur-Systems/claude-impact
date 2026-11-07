@@ -251,6 +251,32 @@
         "effect": "Not a definitive answer until a person resolves the conflict."
       }
     ],
+    "sources_used": [
+      {
+        "source_key": "IRV-ADU",
+        "title": "<source title from manifest>",
+        "url": "<official URL from manifest>",
+        "publisher": "<publisher from manifest>",
+        "checked_at": "2026-11-07",
+        "verification_depth": "title_only"
+      },
+      {
+        "source_key": "IRV-APP",
+        "title": "<source title from manifest>",
+        "url": "<official URL from manifest>",
+        "publisher": "<publisher from manifest>",
+        "checked_at": "2026-11-07",
+        "verification_depth": "title_only"
+      },
+      {
+        "source_key": "HCD-ADU",
+        "title": "<source title from manifest>",
+        "url": "<official URL from manifest>",
+        "publisher": "<publisher from manifest>",
+        "checked_at": "2026-11-07",
+        "verification_depth": "title_only"
+      }
+    ],
     "warnings": [
       {
         "code": "example_data",
@@ -258,7 +284,7 @@
       },
       {
         "code": "synthetic_dataset",
-        "message": "This checklist comes from a synthetic test dataset, not the reviewed Irvine sources."
+        "message": "This checklist comes from a synthetic test dataset, not the reviewed city sources."
       },
       {
         "code": "selected_area_property_not_verified",
@@ -266,7 +292,7 @@
       },
       {
         "code": "unreviewed_extraction",
-        "message": "Part of the application package text has not been checked by a person yet. Items citing it may change.",
+        "message": "Some cited text has not been checked by a person yet. Items citing it may change.",
         "source_keys": [
           "IRV-APP"
         ]

@@ -95,8 +95,14 @@ def test_missing_citation_only_public(base, owner):
 
 
 @pytest.mark.parametrize(('path', 'value'), [
-    (['fact_schema', 'form'], {'type': 'enum', 'values': ['detached']}),
-    (['fact_schema', 'flag'], 'bool'),
+    (['fact_schema', 'form'], {'type': 'enum'}),
+    (['fact_schema', 'form'], {'type': 'enum', 'values': []}),
+    (['fact_schema', 'form'], {'type': 'enum', 'values': [1]}),
+    (['fact_schema', 'form'], 'enum'),
+    (['fact_schema', 'flag'], {'type': 'bool', 'values': ['x']}),
+    (['fact_schema', 'flag'], {'type': 'bool', 'extra': 1}),
+    (['fact_schema', 'flag'], {'values': ['x']}),
+    (['fact_schema', 'flag'], 1),
     (['fact_schema', 'size'], 'invalid'),
     (['sources', 0, 'url'], 'http://example.org'),
     (['sources', 0, 'url'], 'https://user:password@example.org'),
@@ -131,15 +137,16 @@ def test_collects_all_issues_and_nested_path(base):
     base['passages'][0]['source_key'] = 'UNKNOWN'
     issues = validate_manifest_dict(base)
     assert {i.code for i in issues} == {'invalid_predicate', 'dangling_reference'}
-    assert any(i.path == 'requirements[0].applies_if.all[0].eq'
+    # The shared predicate module names the bad node, not the operator inside it.
+    assert any(i.path == 'requirements[0].applies_if.all[0]'
                and i.reason == 'type_mismatch' for i in issues)
 
 
 @pytest.mark.parametrize(('predicate', 'suffix', 'reason'), [
-    ({'eq': ['flag', 'SENTINEL\nX']}, '.eq', 'type_mismatch'),
+    ({'eq': ['flag', 'SENTINEL\nX']}, '', 'type_mismatch'),
     ({'SENTINEL\nX': []}, '', 'unknown_operator'),
-    ({'not': []}, '.not', 'invalid_operands'),
-    ({'eq': ['SENTINEL\nX', True]}, '.eq', 'unknown_fact'),
+    ({'not': []}, '', 'invalid_operands'),
+    ({'eq': ['SENTINEL\nX', True]}, '', 'unknown_fact'),
 ])
 def test_manifest_propagates_predicate_path_and_static_reason(base, tmp_path, predicate, suffix, reason):
     base['requirements'].append(deepcopy(base['requirements'][0]))
@@ -177,7 +184,7 @@ def test_non_adu_requires_explicit_fact_schema(base, project_type):
     assert validate_manifest_dict(base) == [ValidationIssue('schema_invalid', 'fact_schema', 'missing')]
 
 
-@pytest.mark.parametrize('value', [None, {'flag': {'type': 'bool'}}])
+@pytest.mark.parametrize('value', [None, {'flag': {'type': 'enum'}}])
 def test_explicit_invalid_fact_schema_is_not_defaulted(base, value):
     base['fact_schema'] = value
     assert 'schema_invalid' in {i.code for i in validate_manifest_dict(base)}
@@ -557,7 +564,7 @@ def test_in_memory_non_finite_predicate_has_static_reason(base):
     base['requirements'][0]['applies_if'] = {'eq': ['size', float('nan')]}
     issues = validate_manifest_dict(base)
     assert [(i.code, i.path, i.reason) for i in issues] == [
-        ('invalid_predicate', 'requirements[0].applies_if.eq', 'non_finite_number'),
+        ('invalid_predicate', 'requirements[0].applies_if', 'non_finite_number'),
     ]
 
 
@@ -657,7 +664,7 @@ def test_seed_bundles():
     assert synthetic.milestones[0].requirements == [r.key for r in synthetic.requirements if r.required_for_preparation]
 
 
-def test_real_reviewed_public_manifest_validates_with_review_notes_preserved_as_status():
+def test_real_reviewed_public_manifest_validates_in_the_curated_shapes():
     data = json.loads(REVIEWED_PUBLIC.read_text(encoding='utf-8'))
     assert validate_manifest_dict(data) == []
     manifest = validate_bundle(REVIEWED_PUBLIC).manifest
@@ -665,15 +672,71 @@ def test_real_reviewed_public_manifest_validates_with_review_notes_preserved_as_
     assert manifest.profile_key == 'irvine-adu-detached-existing-dwelling'
     assert (len(manifest.sources), len(manifest.passages), len(manifest.requirements),
             len(manifest.milestones)) == (9, 29, 10, 6)
-    noted_ids = {p['id'] for p in data['passages'] if p.get('_review_note')}
-    assert noted_ids
-    needs_review = {str(p.id) for p in manifest.passages if p.review_status == 'needs_review'}
-    assert needs_review == noted_ids
-    assert len(needs_review) == sum(bool(p.get('_review_note')) for p in data['passages'])
-    for index in (2, 4):
-        clock = manifest.milestones[index].published_clock
-        assert clock is not None
-        assert clock.model_dump(mode='json', exclude_unset=True) == data['milestones'][index]['published_clock']
+    assert all(p.review_status == 'reviewed' for p in manifest.passages)
+    # Object fact specs are kept exactly as curated (no normalization on persist).
+    assert manifest.model_dump(mode='json', round_trip=True)['fact_schema'] == data['fact_schema']
+    clocks = [(m.published_clock, raw['published_clock'])
+              for m, raw in zip(manifest.milestones, data['milestones'], strict=True)
+              if raw['published_clock'] is not None]
+    assert clocks
+    for clock, raw in clocks:
+        assert clock.model_dump(mode='json', exclude_unset=True) == raw
+
+
+@pytest.mark.parametrize('spec', [
+    'string', 'boolean', 'bool', 'number', {'type': 'string'}, {'type': 'bool'},
+    {'type': 'number'}, {'type': 'enum', 'values': ['detached', 'attached']},
+])
+def test_fact_schema_accepts_plain_types_and_objects(base, spec):
+    base['fact_schema']['form'] = spec
+    original = deepcopy(base)
+    assert validate_manifest_dict(base) == []
+    manifest = Manifest.model_validate(base)
+    assert manifest.model_dump(mode='json', round_trip=True)['fact_schema']['form'] == spec
+    assert base == original
+
+
+def test_enum_fact_values_are_checked_in_predicates(base):
+    base['fact_schema']['form'] = {'type': 'enum', 'values': ['detached']}
+    base['requirements'][0]['applies_if'] = {'eq': ['form', 'detached']}
+    assert validate_manifest_dict(base) == []
+    base['requirements'][0]['applies_if'] = {'eq': ['form', 'SENTINEL']}
+    issues = validate_manifest_dict(base)
+    assert [(i.code, i.path, i.reason) for i in issues] == [
+        ('invalid_predicate', 'requirements[0].applies_if', 'enum_value_not_allowed'),
+    ]
+    assert 'SENTINEL' not in repr(issues)
+
+
+@pytest.mark.parametrize('citations', [[], [PID]])
+def test_published_clock_accepts_original_text_shape(base, citations):
+    clock = {'text': 'SYNTHETIC published guidance text', 'citations': citations}
+    base['milestones'][0]['published_clock'] = clock
+    assert validate_manifest_dict(base) == []
+    parsed = Manifest.model_validate(base).milestones[0].published_clock
+    assert parsed.model_dump(mode='json', exclude_unset=True) == clock
+
+
+@pytest.mark.parametrize('clock', [
+    {'text': 'SYNTHETIC'},
+    {'text': '', 'citations': []},
+    {'text': None, 'citations': []},
+    {'text': 'SYNTHETIC', 'citations': [], 'kind': 'observed'},
+    {'text': 'SYNTHETIC', 'citations': [], **CLOCK},
+    {'citations': [PID]},
+    {},
+])
+def test_published_clock_rejects_mixed_or_incomplete_shapes(base, clock):
+    base['milestones'][0]['published_clock'] = clock
+    issues = validate_manifest_dict(base)
+    assert issues and {issue.code for issue in issues} == {'schema_invalid'}
+    assert all(issue.path.startswith('milestones[0].published_clock') for issue in issues)
+
+
+def test_text_clock_citations_are_reference_checked(base):
+    base['milestones'][0]['published_clock'] = {'text': 'SYNTHETIC', 'citations': [UNKNOWN]}
+    assert ValidationIssue('dangling_reference', 'milestones[0].published_clock.citations[0]') in (
+        validate_manifest_dict(base))
 
 
 def test_empty_reviewed_public_stub_is_valid_in_memory(base):

@@ -108,10 +108,10 @@ print("smoke: /health/ready 200 (dataset_available=true)")
 
 status, body, headers = request("/api/v1/_ping")
 assert status == 401 and body["error"] == {
-    "code": "missing_api_key", "message": "The X-API-Key header is missing or wrong.", "details": {},
+    "code": "unauthorized", "message": "A valid API key is required.", "details": {},
 }
 assert body["request_id"] == request_id(headers)
-print("smoke: /api/v1/_ping without key 401 (missing_api_key)")
+print("smoke: /api/v1/_ping without key 401 (unauthorized)")
 
 status, body, headers = request("/api/v1/_ping", {"X-API-Key": os.environ["CLEARPATH_API_KEY"]})
 assert status == 200 and body == {"ok": True}

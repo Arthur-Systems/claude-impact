@@ -1,0 +1,75 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/projects",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": {
+      "project_label": "Backyard ADU demo",
+      "project_type": "adu",
+      "subtype": "detached_adu_existing_dwelling",
+      "jurisdiction": "irvine-ca",
+      "declared_location": {
+        "mode": "selected_area",
+        "area_key": "irvine-ca-citywide"
+      },
+      "proposed_unit_count": 1,
+      "affordability_goal": "unspecified",
+      "rule_facts": {
+        "adu_form": "detached",
+        "existing_dwelling": true
+      }
+    }
+  },
+  "status_code": 201,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "id": "c1ea0001-0000-4000-8000-000000000001",
+    "project_label": "Backyard ADU demo",
+    "project_type": "adu",
+    "subtype": "detached_adu_existing_dwelling",
+    "jurisdiction": "irvine-ca",
+    "state": "draft",
+    "coverage_status": "unconfigured",
+    "coverage_reason": "activation_required",
+    "release": null,
+    "pathway": null,
+    "declared_location": {
+      "mode": "selected_area",
+      "area_key": "irvine-ca-citywide",
+      "resolution_status": "selected_area"
+    },
+    "proposed_unit_count": 1,
+    "affordability_goal": "unspecified",
+    "affordable_unit_count_goal": null,
+    "affordability_verification": "not_assessed",
+    "rule_facts": {
+      "adu_form": "detached",
+      "existing_dwelling": true
+    },
+    "missing_fact_keys": [
+      "floor_area_sqft"
+    ],
+    "checklist": [],
+    "progress": null,
+    "revision": 1,
+    "created_at": "2026-10-20T15:30:00Z",
+    "updated_at": "2026-10-20T15:30:00Z",
+    "warnings": [
+      {
+        "code": "synthetic_dataset",
+        "message": "Demo release uses synthetic, unreviewed data. Do not rely on it for a real permit."
+      },
+      {
+        "code": "property_not_verified",
+        "message": "Location is a selected area (City of Irvine). No specific property was checked."
+      },
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      }
+    ]
+  }
+}

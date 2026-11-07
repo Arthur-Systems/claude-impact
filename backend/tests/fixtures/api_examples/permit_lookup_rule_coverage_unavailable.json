@@ -1,0 +1,65 @@
+{
+  "example_note": "A multifamily project in Irvine. Only ADU rules are curated, so no checklist is shown and ADU rules are never used instead.",
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/permit-lookups",
+    "headers": {
+      "X-API-Key": "<CLEARPATH_API_KEY from env>"
+    },
+    "body": {
+      "location": {
+        "selected_area": {
+          "jurisdiction": "irvine-ca"
+        }
+      },
+      "project_type": "multifamily",
+      "facts": {}
+    }
+  },
+  "status_code": 200,
+  "response": {
+    "example": true,
+    "dataset_mode": "synthetic",
+    "request_id": "00000000-0000-4000-8000-000000000907",
+    "status": "rule_coverage_unavailable",
+    "notice": "Prototype. Not legal advice. Confirm with the City of Irvine or a professional.",
+    "location": {
+      "mode": "selected_area",
+      "status": "selected_area",
+      "status_reason": null,
+      "property_verified": false,
+      "jurisdiction": {
+        "slug": "irvine-ca",
+        "name": "Irvine"
+      },
+      "candidates": [],
+      "boundary_evidence": null
+    },
+    "release": null,
+    "profile_key": null,
+    "facts_used": {},
+    "pathways": [],
+    "requirements": [],
+    "missing_fact_keys": [],
+    "conflicts": [],
+    "sources_used": [],
+    "warnings": [
+      {
+        "code": "example_data",
+        "message": "Example response for frontend mocks. Not real data."
+      },
+      {
+        "code": "synthetic_dataset",
+        "message": "This checklist comes from a synthetic test dataset, not the reviewed city sources."
+      },
+      {
+        "code": "selected_area_property_not_verified",
+        "message": "You chose the Irvine area. No specific property was checked, so results are area-level only."
+      },
+      {
+        "code": "rule_coverage_unavailable",
+        "message": "ClearPath has no curated rules for this project type in Irvine yet. No checklist is shown, and rules for other housing types are never used instead."
+      }
+    ]
+  }
+}

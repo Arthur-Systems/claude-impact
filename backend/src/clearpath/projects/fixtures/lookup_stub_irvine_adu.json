@@ -1,0 +1,373 @@
+{
+  "_notice": "SYNTHETIC lookup stub fixture for Person 5 (projects/timeline). Copied from backend/tests/fixtures/api_examples (review_status synthetic_demo). Not reviewed Irvine rules; durations are ASSUMPTION values that only exercise the forecast. Replace with Person 4's lookup service.",
+  "dataset_mode": "synthetic",
+  "profiles": [
+    {
+      "profile_key": "irvine-adu-detached-existing-dwelling",
+      "jurisdiction": "irvine-ca",
+      "project_type": "adu",
+      "subtype": "detached_adu_existing_dwelling",
+      "scope": {
+        "adu_form": "detached",
+        "existing_dwelling": true
+      },
+      "fact_keys": [
+        "adu_form",
+        "existing_dwelling",
+        "floor_area_sqft"
+      ],
+      "area_keys": [
+        "irvine-ca-citywide"
+      ],
+      "release": {
+        "id": "c1ea0002-0000-4000-8000-000000000001",
+        "jurisdiction": "irvine-ca",
+        "project_type": "adu",
+        "profile_key": "irvine-adu-detached-existing-dwelling",
+        "content_hash": "sha256:b672c666f11da25800f24680ecb40b199b95e16c89af0be8da594288ef1b016b",
+        "schema_version": "1",
+        "dataset_mode": "synthetic",
+        "published_at": "2026-11-07T15:00:00Z"
+      },
+      "pathways": [
+        {
+          "key": "irvine_adu_standard",
+          "title": "Irvine ADU building permit (standard plan check)",
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000001"
+          ],
+          "requires_facts": [
+            "adu_form",
+            "existing_dwelling"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "key": "building_permit_application",
+          "kind": "document",
+          "title": "Building Permit Application (ADU)",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "adu_development_standards_checklist",
+          "kind": "document",
+          "title": "ADU Development Standards Checklist (Site Plan)",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "adu_verification_form",
+          "kind": "document",
+          "title": "ADU Verification Form",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "ocfa_residential_plan_submittal_criteria",
+          "kind": "document",
+          "title": "Fire Authority Plan Submittal Criteria (Residential)",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "owner_acknowledgments",
+          "kind": "document",
+          "title": "Owner Acknowledgments",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "architectural_structural_plan_set",
+          "kind": "document",
+          "title": "Architectural / structural plan set with City Standard Title Sheet",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "site_plan",
+          "kind": "document",
+          "title": "Site plan (property lines, setbacks, easements, parking, utilities)",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "title24_energy_calculations",
+          "kind": "document",
+          "title": "Title 24 energy calculations",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "fee_determinations_school_transportation",
+          "kind": "document",
+          "title": "Fee Determinations: School Facilities and Transportation Corridor",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ],
+          "unknown_without": [
+            "floor_area_sqft"
+          ]
+        },
+        {
+          "key": "developer_deposit_case_setup",
+          "kind": "document",
+          "title": "Developer Deposit Case Set-Up form",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "residential_takeoff_sheet",
+          "kind": "document",
+          "title": "Residential Take-Off Sheet (fixture counts)",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ],
+          "unknown_without": []
+        },
+        {
+          "key": "adu_covenant",
+          "kind": "document",
+          "title": "ADU covenant (notarized; recorded later with County Recorder)",
+          "required_for_preparation": true,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ],
+          "unknown_without": []
+        }
+      ],
+      "milestones": [
+        {
+          "key": "application_preparation",
+          "title": "Application preparation",
+          "predecessor_keys": [],
+          "requirement_keys": [
+            "building_permit_application",
+            "adu_development_standards_checklist",
+            "adu_verification_form",
+            "ocfa_residential_plan_submittal_criteria",
+            "owner_acknowledgments",
+            "architectural_structural_plan_set",
+            "site_plan",
+            "title24_energy_calculations"
+          ],
+          "actor": "applicant",
+          "assumed_days": {
+            "min": 7,
+            "max": 30,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          },
+          "action_titles": {
+            "start": "Start preparing the application documents",
+            "complete": "Mark the application package prepared"
+          },
+          "city_service_target": null,
+          "statutory_clock": null,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "submission",
+          "title": "Submission",
+          "predecessor_keys": [
+            "application_preparation"
+          ],
+          "requirement_keys": [],
+          "actor": "applicant",
+          "assumed_days": {
+            "min": 1,
+            "max": 3,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          },
+          "action_titles": {
+            "start": "Start submitting the application to the city",
+            "complete": "Record that the application was submitted"
+          },
+          "city_service_target": null,
+          "statutory_clock": null,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000002"
+          ]
+        },
+        {
+          "key": "completeness_review",
+          "title": "Completeness review",
+          "predecessor_keys": [
+            "submission"
+          ],
+          "requirement_keys": [],
+          "actor": "city",
+          "assumed_days": {
+            "min": 10,
+            "max": 30,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          },
+          "action_titles": {
+            "start": "Record when the city starts its completeness review",
+            "complete": "Record when the city finds the application complete"
+          },
+          "city_service_target": null,
+          "statutory_clock": null,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000001"
+          ]
+        },
+        {
+          "key": "plan_review",
+          "title": "Plan review",
+          "predecessor_keys": [
+            "completeness_review"
+          ],
+          "requirement_keys": [],
+          "actor": "city",
+          "assumed_days": {
+            "min": 30,
+            "max": 60,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          },
+          "action_titles": {
+            "start": "Record when the city starts plan review",
+            "complete": "Record when plan review is approved"
+          },
+          "city_service_target": null,
+          "statutory_clock": null,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000001"
+          ]
+        },
+        {
+          "key": "fee_payment_readiness",
+          "title": "Fee / payment readiness",
+          "predecessor_keys": [
+            "submission"
+          ],
+          "requirement_keys": [
+            "fee_determinations_school_transportation",
+            "developer_deposit_case_setup",
+            "residential_takeoff_sheet"
+          ],
+          "actor": "applicant",
+          "assumed_days": {
+            "min": 3,
+            "max": 14,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          },
+          "action_titles": {
+            "start": "Start getting fee and payment items ready",
+            "complete": "Mark fee and payment items ready"
+          },
+          "city_service_target": null,
+          "statutory_clock": null,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000003"
+          ]
+        },
+        {
+          "key": "permit_issuance",
+          "title": "Permit issuance",
+          "predecessor_keys": [
+            "plan_review",
+            "fee_payment_readiness"
+          ],
+          "requirement_keys": [
+            "adu_covenant"
+          ],
+          "actor": "city",
+          "assumed_days": {
+            "min": 1,
+            "max": 7,
+            "label": "ASSUMPTION",
+            "rationale": "Synthetic demo estimate to exercise the forecast calculation; not a city target, observed figure, or legal deadline."
+          },
+          "action_titles": {
+            "start": "Record when permit issuance begins",
+            "complete": "Record that the permit was issued"
+          },
+          "city_service_target": null,
+          "statutory_clock": null,
+          "citation_ids": [
+            "c1ea0004-0000-4000-8000-000000000001"
+          ]
+        }
+      ],
+      "conflicts": [],
+      "citations": [
+        {
+          "id": "c1ea0004-0000-4000-8000-000000000001",
+          "snapshot_id": "c1ea0003-0000-4000-8000-000000000001",
+          "source_key": "IRV-ADU",
+          "url": "<irvine-adu-page-url>",
+          "title": "Project: Constructing an Accessory Dwelling Unit (ADU)",
+          "publisher": "City of Irvine",
+          "authority_type": "city_guidance",
+          "locator": "#adu-overview",
+          "snapshot_sha256": "70fae903ca098462f17b61f42cad4e393ba509c2f27b5acb199ce73a6225aa5f",
+          "checked_at": "2026-11-07",
+          "review_status": "synthetic_demo"
+        },
+        {
+          "id": "c1ea0004-0000-4000-8000-000000000002",
+          "snapshot_id": "c1ea0003-0000-4000-8000-000000000001",
+          "source_key": "IRV-ADU",
+          "url": "<irvine-adu-page-url>",
+          "title": "Project: Constructing an Accessory Dwelling Unit (ADU)",
+          "publisher": "City of Irvine",
+          "authority_type": "city_guidance",
+          "locator": "#submittal-requirements",
+          "snapshot_sha256": "70fae903ca098462f17b61f42cad4e393ba509c2f27b5acb199ce73a6225aa5f",
+          "checked_at": "2026-11-07",
+          "review_status": "synthetic_demo"
+        },
+        {
+          "id": "c1ea0004-0000-4000-8000-000000000003",
+          "snapshot_id": "c1ea0003-0000-4000-8000-000000000001",
+          "source_key": "IRV-ADU",
+          "url": "<irvine-adu-page-url>",
+          "title": "Project: Constructing an Accessory Dwelling Unit (ADU)",
+          "publisher": "City of Irvine",
+          "authority_type": "city_guidance",
+          "locator": "#fees",
+          "snapshot_sha256": "70fae903ca098462f17b61f42cad4e393ba509c2f27b5acb199ce73a6225aa5f",
+          "checked_at": "2026-11-07",
+          "review_status": "synthetic_demo"
+        }
+      ]
+    }
+  ]
+}

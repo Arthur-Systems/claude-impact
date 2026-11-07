@@ -31,9 +31,9 @@ def test_api_key_required(client):
                           / "fixtures/api_examples/error_envelope.json").read_text())
     for headers in ({}, {"X-API-Key": "wrong"}):
         response = client.get("/api/v1/_ping", headers=headers)
-        assert_envelope(response, 401, "missing_api_key")
+        assert_envelope(response, 401, "unauthorized")
         assert response.json()["error"] == example["response"]["error"]
-        assert response.json()["error"]["message"] == "The X-API-Key header is missing or wrong."
+        assert response.json()["error"]["message"] == "A valid API key is required."
     response = client.get("/api/v1/_ping", headers={"X-API-Key": "test-key"})
     assert response.status_code == 200
     assert response.json() == {"ok": True}

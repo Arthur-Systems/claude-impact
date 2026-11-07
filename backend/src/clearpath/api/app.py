@@ -19,9 +19,15 @@ from starlette.middleware.exceptions import ExceptionMiddleware
 
 from clearpath.api.dependencies import require_api_key
 from clearpath.core.config import Settings, get_settings
-from clearpath.db.session import get_engine
+from clearpath.db.session import get_engine, get_session
 from clearpath.domain.errors import DomainError
 from clearpath.domain.schemas import StrictModel
+from clearpath.api.project_lookup import ProjectLookupAdapter
+from clearpath.locations.service import load_registry
+from clearpath.permits.db_provider import DatabaseReleaseProvider
+from clearpath.permits.routes import build_lookup_router
+from clearpath.projects import routes as project_routes
+from clearpath.timelines.model import DomainConflict
 
 
 @lru_cache
@@ -92,6 +98,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(DomainError)
     async def domain_error(request, exc):
+        return error_response(request, exc.http_status, exc.code, exc.message, exc.details)
+
+    # Person 5's projects/timeline rule violations share the platform error envelope.
+    @app.exception_handler(DomainConflict)
+    async def domain_conflict(request, exc):
         return error_response(request, exc.http_status, exc.code, exc.message, exc.details)
 
     @app.exception_handler(RequestValidationError)
@@ -180,4 +191,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return body
 
     app.include_router(router)
+
+    # Person 5's projects + timeline routes (prefix /api/v1/projects) on platform seams.
+    app.include_router(project_routes.router)
+    app.dependency_overrides[project_routes.get_session] = get_session
+    app.dependency_overrides[project_routes.require_api_key] = require_api_key
+    app.dependency_overrides[project_routes.get_dataset_mode] = lambda: settings.mode
+
+    # Person 4's lookup routes over the active releases of this deployment's mode.
+    provider = DatabaseReleaseProvider(settings.database_url, settings.mode)
+    registry = load_registry()
+    app.include_router(build_lookup_router(provider, registry), prefix="/api/v1",
+                       dependencies=[Depends(require_api_key)])
+    lookup_adapter = ProjectLookupAdapter(provider, registry)
+    app.dependency_overrides[project_routes.get_lookup_provider] = lambda: lookup_adapter
     return app
