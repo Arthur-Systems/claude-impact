@@ -1,5 +1,7 @@
 # ClearPath: cited permit checklists and timelines for housing projects
 
+> **Archived hackathon prototype, retired November 8, 2026.** The hosted demo has been taken offline. Source, cited datasets, and fictional demo packets remain available for reference and local use. See [ARCHIVED.md](ARCHIVED.md) for the retirement record.
+
 > For a nonprofit project manager or first-time ADU builder in Orange County: ClearPath turns a city's scattered ADU guidance into one checklist and approval timeline per project, with every requirement linked to the exact source passage, and says "unknown" instead of guessing.
 
 **Team:** ClearPath
